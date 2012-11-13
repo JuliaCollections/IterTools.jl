@@ -1,0 +1,1 @@
+Common functional iterator patterns.
