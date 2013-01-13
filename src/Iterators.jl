@@ -1,4 +1,3 @@
-
 module Iterators
 using Base
 
@@ -224,7 +223,7 @@ end
 done(it::Product, state) = state[2] === nothing
 
 
-# Filter out reoccuring elements.
+# Filter out reccuring elements.
 
 type Distinct
     xs::Any
