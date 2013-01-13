@@ -13,7 +13,8 @@ export
     cycle,
     repeat,
     chain,
-    product
+    product,
+    distinct
 
 
 # Infinite counting
@@ -221,6 +222,47 @@ function next(it::Product, state)
 end
 
 done(it::Product, state) = state[2] === nothing
+
+
+# Filter out reoccuring elements.
+
+type Distinct
+    xs::Any
+
+    # Map elements to the index at which it was first seen, so given an iterator
+    # state (index) we can test if an element has previously been observed.
+    seen::Dict{Any, Int}
+
+    Distinct(xs) = new(xs, Dict{Any, Int}())
+end
+
+distinct(xs) = Distinct(xs)
+
+function start(it::Distinct)
+    start(it.xs), 1
+end
+
+function next(it::Distinct, state)
+    s, i = state
+    x, s = next(it.xs, s)
+    it.seen[x] = i
+    i += 1
+
+    while !done(it.xs, s)
+        y, t = next(it.xs, s)
+        if !has(it.seen, y) || it.seen[y] >= i
+            break
+        end
+        s = t
+        i += 1
+    end
+
+    x, (s, i)
+end
+
+done(it::Distinct, state) = done(it.xs, state[1])
+
+
 
 end # module Iterators
 
