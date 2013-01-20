@@ -13,7 +13,8 @@ export
     repeat,
     chain,
     product,
-    distinct
+    distinct,
+    partition
 
 
 # Infinite counting
@@ -262,6 +263,75 @@ end
 done(it::Distinct, state) = done(it.xs, state[1])
 
 
+# Group output from at iterator into tuples.
+# E.g.,
+#   partition(count(), 2) = (1,2), (3,4), (5,6) ...
+#   partition(count(), 2, 1) = (1,2), (2,3), (4,5) ...
+#   partition(count(), 2, 3) = (1,2), (4,5), (7,8) ...
+
+type Partition
+    xs
+    n::Int
+    step::Int
+end
+
+function partition(xs, n::Int)
+    Partition(xs, n, n)
+end
+
+function partition(xs, n::Int, step::Int)
+    if step < 1
+        error("Partition step must be at least 1.")
+    end
+
+    Partition(xs, n, step)
+end
+
+function start(it::Partition)
+    p = Array(Any, it.n - 1)
+    s = start(it.xs)
+    for i in 1:(it.n - 1)
+        if done(it.xs, s)
+            break
+        end
+        (x, s) = next(it.xs, s)
+        p[i] = x
+    end
+    (s, p)
+end
+
+function next(it::Partition, state)
+    (s, p0) = state
+    (x, s) = next(it.xs, s)
+    ans = tuple(p0..., x)
+
+    p = Array(Any, it.n - 1)
+    overlap = max(0, it.n - it.step)
+    for i in 1:overlap
+        p[i] = ans[it.step + 1]
+    end
+
+    # when step > n, skip over some elements
+    for i in 1:max(0, it.step - it.n)
+        if done(it.xs, s)
+            break
+        end
+        (x, s) = next(it.xs, s)
+    end
+
+    for i in (overlap + 1):(it.n - 1)
+        if done(it.xs, s)
+            break
+        end
+
+        (x, s) = next(it.xs, s)
+        p[i] = x
+    end
+
+    (ans, (s, p))
+end
+
+done(it::Partition, state) = done(it.xs, state[1])
 
 end # module Iterators
 
