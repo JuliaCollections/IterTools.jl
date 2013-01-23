@@ -308,7 +308,7 @@ function next(it::Partition, state)
     p = Array(Any, it.n - 1)
     overlap = max(0, it.n - it.step)
     for i in 1:overlap
-        p[i] = ans[it.step + 1]
+        p[i] = ans[it.step + i]
     end
 
     # when step > n, skip over some elements
