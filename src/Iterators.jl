@@ -19,9 +19,9 @@ export
 
 # Infinite counting
 
-type Count
-    start::Any
-    step::Any
+immutable Count{S<:Number,T<:Number}
+    start::S
+    step::T
 end
 
 count(start, step) = Count(start, step)
@@ -35,8 +35,8 @@ done(it::Count, state) = false
 
 # Iterate through the first n elements
 
-type Take
-    xs::Any
+immutable Take{I}
+    xs::I
     n::Int
 end
 
@@ -58,8 +58,8 @@ end
 
 # Iterator through all but the first n elements
 
-type Drop
-    xs::Any
+immutable Drop{I}
+    xs::I
     n::Int
 end
 
@@ -83,8 +83,8 @@ done(it::Drop, state) = done(it.xs, state)
 
 # Cycle an iterator forever
 
-type Cycle
-    xs::Any
+immutable Cycle{I}
+    xs::I
 end
 
 cycle(xs) = Cycle(xs)
@@ -108,8 +108,8 @@ done(it::Cycle, state) = state[2]
 
 # Repeat an object n (or infinitely many) times.
 
-type Repeat
-    x
+immutable Repeat{O}
+    x::O
     n::Int
 end
 
@@ -120,8 +120,8 @@ next(it::Repeat, state) = (it.x, state - 1)
 done(it::Repeat, state) = state <= 0
 
 
-type RepeatForever
-    x
+immutable RepeatForever{O}
+    x::O
 end
 
 repeat(x) = RepeatForever(x)
@@ -134,7 +134,7 @@ done(it::RepeatForever, state) = false
 
 # Concatenate the output of n iterators
 
-type Chain
+immutable Chain
     xss::Vector{Any}
     function Chain(xss...)
         new({xss...})
@@ -174,7 +174,7 @@ done(it::Chain, state) = state[1] > length(it.xss)
 
 # Cartesian product as a sequence of tuples
 
-type Product
+immutable Product
     xss::Vector{Any}
     function Product(xss...)
         new({xss...})
@@ -226,8 +226,8 @@ done(it::Product, state) = state[2] === nothing
 
 # Filter out reccuring elements.
 
-type Distinct
-    xs::Any
+immutable Distinct{I}
+    xs::I
 
     # Map elements to the index at which it was first seen, so given an iterator
     # state (index) we can test if an element has previously been observed.
@@ -269,8 +269,8 @@ done(it::Distinct, state) = done(it.xs, state[1])
 #   partition(count(), 2, 1) = (1,2), (2,3), (4,5) ...
 #   partition(count(), 2, 3) = (1,2), (4,5), (7,8) ...
 
-type Partition
-    xs
+immutable Partition{I}
+    xs::I
     n::Int
     step::Int
 end
@@ -288,14 +288,13 @@ function partition(xs, n::Int, step::Int)
 end
 
 function start(it::Partition)
-    p = Array(Any, it.n - 1)
+    p = Array(eltype(it.xs), it.n)
     s = start(it.xs)
     for i in 1:(it.n - 1)
         if done(it.xs, s)
             break
         end
-        (x, s) = next(it.xs, s)
-        p[i] = x
+        (p[i], s) = next(it.xs, s)
     end
     (s, p)
 end
@@ -303,9 +302,9 @@ end
 function next(it::Partition, state)
     (s, p0) = state
     (x, s) = next(it.xs, s)
-    ans = tuple(p0..., x)
+    ans = p0; ans[end] = x
 
-    p = Array(Any, it.n - 1)
+    p = similar(p0)
     overlap = max(0, it.n - it.step)
     for i in 1:overlap
         p[i] = ans[it.step + i]
