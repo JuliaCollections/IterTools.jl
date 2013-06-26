@@ -250,7 +250,7 @@ function next(it::Distinct, state)
 
     while !done(it.xs, s)
         y, t = next(it.xs, s)
-        if !has(it.seen, y) || it.seen[y] >= i
+        if !haskey(it.seen, y) || it.seen[y] >= i
             break
         end
         s = t
