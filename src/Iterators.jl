@@ -236,7 +236,7 @@ immutable Distinct{I}
     Distinct(xs) = new(xs, Dict{Any, Int}())
 end
 
-distinct(xs) = Distinct(xs)
+distinct{I}(xs::I) = Distinct{I}(xs)
 
 function start(it::Distinct)
     start(it.xs), 1
