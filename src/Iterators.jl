@@ -15,7 +15,8 @@ export
     product,
     distinct,
     partition,
-    groupby
+    groupby,
+    imap
 
 
 # Infinite counting
@@ -354,8 +355,8 @@ end
 
 function start(it::GroupBy)
     s = start(it.xs)
-    prev_value = None
-    prev_key = None
+    prev_value = nothing
+    prev_key = nothing
     return (s, (prev_key, prev_value))
 end
 
@@ -363,15 +364,15 @@ function next(it::GroupBy, state)
     (s, (prev_key, prev_value)) = state
     values = Array(eltype(it.xs), 0)
     # We had a left over value from the last time the key changed.
-    if prev_value != None || prev_key != None
+    if prev_value != nothing || prev_key != nothing
         push!(values, prev_value)
     end
-    prev_value = None
+    prev_value = nothing
     while !done(it.xs, s)
         (x, s) = next(it.xs, s) 
         key = it.keyfunc(x)
         # Did the key change?
-        if prev_key != None && key != prev_key
+        if prev_key != nothing && key != prev_key
             prev_key = key
             prev_value = x
             break
@@ -386,7 +387,44 @@ function next(it::GroupBy, state)
 end
 
 function done(it::GroupBy, state)
-  return state[2][2] == None && done(it.xs, state[1])
+    return state[2][2] == nothing && done(it.xs, state[1])
+end
+
+# Like map, except returns the output as an iterator.  The iterator
+# is done when any of the input iterators have been exhausted.
+# E.g.,
+#   imap(+, count(), [1, 2, 3]) = 1, 3, 5 ...
+immutable IMap
+    mapfunc::Function
+    xs::Vector{Any}
+end
+
+function imap(mapfunc, iterables...)
+    IMap(mapfunc, collect(iterables))    
+end 
+
+function start(it::IMap)
+    return map(it.xs) do xs
+        start(xs)
+    end
+end
+
+function next(it::IMap, state)
+    next_result = map(it.xs, state) do x, s
+        next(x, s)
+    end
+    return (
+        it.mapfunc(map(x -> x[1], next_result)...),
+        map(x -> x[2], next_result)
+    )
+end
+
+function done(it::IMap, state)
+    return length(it.xs) == 0 || any(
+        map(it.xs, state) do x, s
+            done(x, s)
+        end
+    )
 end
 
 end # module Iterators
