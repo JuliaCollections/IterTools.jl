@@ -263,9 +263,9 @@ done(it::Distinct, state) = done(it.xs, state[1])
 
 # Group output from at iterator into tuples.
 # E.g.,
-#   partition(count(), 2) = (1,2), (3,4), (5,6) ...
-#   partition(count(), 2, 1) = (1,2), (2,3), (4,5) ...
-#   partition(count(), 2, 3) = (1,2), (4,5), (7,8) ...
+#   partition(count(1), 2) = (1,2), (3,4), (5,6) ...
+#   partition(count(1), 2, 1) = (1,2), (2,3), (3,4) ...
+#   partition(count(1), 2, 3) = (1,2), (4,5), (7,8) ...
 
 immutable Partition{I}
     xs::I
@@ -325,7 +325,7 @@ function next(it::Partition, state)
         p[i] = x
     end
 
-    (ans, (s, p))
+    (tuple(ans...), (s, p))
 end
 
 done(it::Partition, state) = done(it.xs, state[1])
