@@ -1,16 +1,14 @@
 module Iterators
 using Base
 
-import Base.start, Base.next, Base.done
-
-global count, take, repeat
+import Base: start, next, done, count, take
 
 export
     count,
     take,
     drop,
     cycle,
-    repeat,
+    repeated,
     chain,
     product,
     distinct,
@@ -24,9 +22,9 @@ immutable Count{S<:Number,T<:Number}
     step::T
 end
 
-count(start, step) = Count(start, step)
-count(start)       = Count(start, one(start))
-count()            = Count(0, 1)
+count(start::Number, step::Number) = Count(start, step)
+count(start::Number)               = Count(start, one(start))
+count()                            = Count(0, 1)
 
 start(it::Count) = it.start
 next(it::Count, state) = (state, state + it.step)
@@ -40,7 +38,7 @@ immutable Take{I}
     n::Int
 end
 
-take(xs, n) = Take(xs, n)
+take(xs, n::Int) = Take(xs, n)
 
 start(it::Take) = (it.n, start(it.xs))
 
@@ -63,7 +61,7 @@ immutable Drop{I}
     n::Int
 end
 
-drop(xs, n) = Drop(xs, n)
+drop(xs, n::Int) = Drop(xs, n)
 
 function start(it::Drop)
     xs_state = start(it.xs)
@@ -113,7 +111,7 @@ immutable Repeat{O}
     n::Int
 end
 
-repeat(x, n) = Repeat(x, n)
+repeated(x, n) = Repeat(x, n)
 
 start(it::Repeat) = it.n
 next(it::Repeat, state) = (it.x, state - 1)
@@ -124,7 +122,7 @@ immutable RepeatForever{O}
     x::O
 end
 
-repeat(x) = RepeatForever(x)
+repeated(x) = RepeatForever(x)
 
 start(it::RepeatForever) = nothing
 next(it::RepeatForever, state) = (it.x, nothing)
