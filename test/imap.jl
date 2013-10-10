@@ -7,14 +7,9 @@ function test_imap(expected, input...)
 end
 
 
-# No arguments
-test_imap(
-  {},
-  []
-)
-
 # Empty arrays
 test_imap(
+  {},
   []
 )
 

@@ -395,24 +395,20 @@ end
 # E.g.,
 #   imap(+, count(), [1, 2, 3]) = 1, 3, 5 ...
 immutable IMap
-    mapfunc::Function
+    mapfunc::Base.Callable
     xs::Vector{Any}
 end
 
-function imap(mapfunc, iterables...)
-    IMap(mapfunc, collect(iterables))    
+function imap(mapfunc, it1, its...)
+    IMap(mapfunc, {it1, its...})    
 end 
 
 function start(it::IMap)
-    return map(it.xs) do xs
-        start(xs)
-    end
+    map(start, it.xs)
 end
 
 function next(it::IMap, state)
-    next_result = map(it.xs, state) do x, s
-        next(x, s)
-    end
+    next_result = map(next, it.xs, state)
     return (
         it.mapfunc(map(x -> x[1], next_result)...),
         map(x -> x[2], next_result)
@@ -420,11 +416,7 @@ function next(it::IMap, state)
 end
 
 function done(it::IMap, state)
-    return length(it.xs) == 0 || any(
-        map(it.xs, state) do x, s
-            done(x, s)
-        end
-    )
+    any(map(done, it.xs, state))
 end
 
 end # module Iterators
