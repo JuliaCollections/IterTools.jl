@@ -14,7 +14,8 @@ export
     distinct,
     partition,
     groupby,
-    imap
+    imap,
+    subsets
 
 
 # Infinite counting
@@ -420,6 +421,48 @@ end
 function done(it::IMap, state)
     any(map(done, it.xs, state))
 end
+
+
+# Iterate over all subsets of a collection
+
+immutable Subsets
+    xs
+end
+
+function subsets(xs)
+    Subsets(xs)
+end
+
+function start(it::Subsets)
+    # one extra bit to indicated that we are at the end
+    BitVector(length(it.xs) + 1)
+end
+
+function next(it::Subsets, state)
+    ss = Array(eltype(it.xs), 0)
+    for i = 1:length(it.xs)
+        if state[i]
+            push!(ss, it.xs[i])
+        end
+    end
+
+    state = copy(state)
+    state[1] = !state[1]
+    for i in 2:length(state)
+        if !state[i-1]
+            state[i] = !state[i]
+        else
+            break
+        end
+    end
+
+    (ss, state)
+end
+
+function done(it::Subsets, state)
+    state[end]
+end
+
 
 end # module Iterators
 

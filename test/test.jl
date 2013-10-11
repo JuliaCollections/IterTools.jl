@@ -169,3 +169,15 @@ test_groupby(
   {["face", "foo"], ["xxx"], ["bar", "book", "baz"]}
 )
 
+
+# subsets
+
+@test collect(subsets({})) == {{}}
+
+@test collect(subsets([:a])) == {Symbol[], Symbol[:a]}
+
+@test collect(subsets([:a, :b, :c])) ==
+      {Symbol[], Symbol[:a], Symbol[:b], Symbol[:a, :b], Symbol[:c],
+       Symbol[:a, :c], Symbol[:b, :c], Symbol[:a, :b, :c]}
+
+
