@@ -12,7 +12,9 @@ export
     chain,
     product,
     distinct,
-    partition
+    partition,
+    groupby,
+    imap
 
 
 # Infinite counting
@@ -333,6 +335,91 @@ function next(it::Partition, state)
 end
 
 done(it::Partition, state) = done(it.xs, state[1])
+
+# Group output from an iterator based on a key function.
+# Consecutive entries from the iterator with the same 
+# key value will be returned in a single array.
+# Inspired by itertools.groupby in python.
+# E.g.,
+#   x = ["face", "foo", "bar", "book", "baz", "zzz"]
+#   groupby(x, z -> z[1]) =
+#       ["face", "foo"]
+#       ["bar", "book", "baz"]
+#       ["zzz"]
+immutable GroupBy{I}
+    xs::I
+    keyfunc::Function
+end
+
+function groupby(xs, keyfunc)
+    GroupBy(xs, keyfunc)
+end
+
+function start(it::GroupBy)
+    s = start(it.xs)
+    prev_value = nothing
+    prev_key = nothing
+    return (s, (prev_key, prev_value))
+end
+
+function next(it::GroupBy, state)
+    (s, (prev_key, prev_value)) = state
+    values = Array(eltype(it.xs), 0)
+    # We had a left over value from the last time the key changed.
+    if prev_value != nothing || prev_key != nothing
+        push!(values, prev_value)
+    end
+    prev_value = nothing
+    while !done(it.xs, s)
+        (x, s) = next(it.xs, s) 
+        key = it.keyfunc(x)
+        # Did the key change?
+        if prev_key != nothing && key != prev_key
+            prev_key = key
+            prev_value = x
+            break
+        else
+            push!(values, x) 
+        end
+        prev_key = key
+    end
+    # We either reached the end of the input or the key changed,
+    # either way emit what we have so far.
+    return (values, (s, (prev_key, prev_value)))
+end
+
+function done(it::GroupBy, state)
+    return state[2][2] == nothing && done(it.xs, state[1])
+end
+
+# Like map, except returns the output as an iterator.  The iterator
+# is done when any of the input iterators have been exhausted.
+# E.g.,
+#   imap(+, count(), [1, 2, 3]) = 1, 3, 5 ...
+immutable IMap
+    mapfunc::Base.Callable
+    xs::Vector{Any}
+end
+
+function imap(mapfunc, it1, its...)
+    IMap(mapfunc, {it1, its...})    
+end 
+
+function start(it::IMap)
+    map(start, it.xs)
+end
+
+function next(it::IMap, state)
+    next_result = map(next, it.xs, state)
+    return (
+        it.mapfunc(map(x -> x[1], next_result)...),
+        map(x -> x[2], next_result)
+    )
+end
+
+function done(it::IMap, state)
+    any(map(done, it.xs, state))
+end
 
 end # module Iterators
 
