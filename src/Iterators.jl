@@ -472,7 +472,7 @@ immutable Iterate{T}
     seed::T
 end
 
-iterate{T}(f, seed) = Iterate(seed, f)
+iterate(f, seed) = Iterate(f, seed)
 start(it::Iterate) = it.seed
 next(it::Iterate, state) = (state, it.f(state))
 done(it::Iterate, state) = (state==None)
