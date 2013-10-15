@@ -15,7 +15,8 @@ export
     partition,
     groupby,
     imap,
-    subsets
+    subsets,
+    iterate
 
 
 # Infinite counting
@@ -463,6 +464,18 @@ function done(it::Subsets, state)
     state[end]
 end
 
+# Unfolding (anamorphism)
+# Outputs the stream: seed, f(seed), f(f(seed)), ...
+
+immutable Iterate{T}
+    f::Function
+    seed::T
+end
+
+iterate{T}(f, seed) = Iterate(seed, f)
+start(it::Iterate) = it.seed
+next(it::Iterate, state) = (state, it.f(state))
+done(it::Iterate, state) = (state==None)
 
 end # module Iterators
 
