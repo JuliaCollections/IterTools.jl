@@ -1,7 +1,7 @@
 module Iterators
 using Base
 
-import Base: start, next, done, count, take
+import Base: start, next, done, count, take, eltype, length
 
 export
     count,
@@ -26,6 +26,8 @@ immutable Count{S<:Number,T<:Number}
     step::T
 end
 
+eltype{S,T}(it::Count{S,T}) = promote_type(S,T)
+
 count(start::Number, step::Number) = Count(start, step)
 count(start::Number)               = Count(start, one(start))
 count()                            = Count(0, 1)
@@ -41,6 +43,9 @@ immutable Take{I}
     xs::I
     n::Int
 end
+
+eltype(it::Take) = eltype(it.xs)
+length(it::Take) = it.n
 
 take(xs, n::Int) = Take(xs, n)
 
@@ -64,6 +69,8 @@ immutable Drop{I}
     xs::I
     n::Int
 end
+
+eltype(it::Drop) = eltype(it.xs)
 
 drop(xs, n::Int) = Drop(xs, n)
 
@@ -89,6 +96,8 @@ immutable Cycle{I}
     xs::I
 end
 
+eltype(it::Cycle) = eltype(it.xs)
+
 cycle(xs) = Cycle(xs)
 
 function start(it::Cycle)
@@ -107,13 +116,15 @@ end
 
 done(it::Cycle, state) = state[2]
 
-
 # Repeat an object n (or infinitely many) times.
 
 immutable Repeat{O}
     x::O
     n::Int
 end
+
+eltype{O}(it::Repeat{O}) = O
+length(it::Repeat) = it.n
 
 repeated(x, n) = Repeat(x, n)
 
@@ -127,6 +138,8 @@ done(it::Repeat, state) = state <= 0
 immutable RepeatForever{O}
     x::O
 end
+
+eltype{O}(r::RepeatForever{O}) = O
 
 repeated(x) = RepeatForever(x)
 
@@ -146,6 +159,8 @@ immutable Chain
         new({xss...})
     end
 end
+
+eltype(it::Chain) = promote_type([eltype(xs) for xs in it.xss]...)
 
 chain(xss...) = Chain(xss...)
 
@@ -186,6 +201,9 @@ immutable Product
         new({xss...})
     end
 end
+
+eltype(p::Product) = tuple(map(eltype, p.xss)...)
+length(p::Product) = prod(map(length, p.xss))
 
 product(xss...) = Product(xss...)
 
@@ -242,6 +260,8 @@ immutable Distinct{I}
     Distinct(xs) = new(xs, Dict{Any, Int}())
 end
 
+eltype(it::Distinct) = eltype(it.xs)
+
 distinct{I}(xs::I) = Distinct{I}(xs)
 
 function start(it::Distinct)
@@ -280,6 +300,8 @@ immutable Partition{I}
     n::Int
     step::Int
 end
+
+eltype(it::Partition) = tuple(fill(eltype(it.xs),it.n)...)
 
 function partition(xs, n::Int)
     Partition(xs, n, n)
@@ -352,6 +374,8 @@ immutable GroupBy{I}
     xs::I
     keyfunc::Function
 end
+
+eltype{I}(it::GroupBy{I}) = I
 
 function groupby(xs, keyfunc)
     GroupBy(xs, keyfunc)
@@ -429,6 +453,9 @@ end
 immutable Subsets
     xs
 end
+
+eltype(it::Subsets) = Array{eltype(it.xs),1}
+length(it::Subsets) = 1 << length(it.xs)
 
 function subsets(xs)
     Subsets(xs)
