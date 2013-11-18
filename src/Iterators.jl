@@ -21,14 +21,14 @@ export
 
 # Infinite counting
 
-immutable Count{S<:Number,T<:Number}
+immutable Count{S<:Number}
     start::S
-    step::T
+    step::S
 end
 
-eltype{S,T}(it::Count{S,T}) = promote_type(S,T)
+eltype{S}(it::Count{S}) = S
 
-count(start::Number, step::Number) = Count(start, step)
+count(start::Number, step::Number) = Count(promote(start, step)...)
 count(start::Number)               = Count(start, one(start))
 count()                            = Count(0, 1)
 
@@ -160,7 +160,13 @@ immutable Chain
     end
 end
 
-eltype(it::Chain) = promote_type([eltype(xs) for xs in it.xss]...)
+function eltype(it::Chain)
+    try
+        typejoin([eltype(xs) for xs in it.xss]...)
+    catch
+        Any
+    end
+end
 
 chain(xss...) = Chain(xss...)
 
