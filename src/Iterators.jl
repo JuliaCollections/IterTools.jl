@@ -226,7 +226,8 @@ function start(it::Product)
 end
 
 function next(it::Product, state)
-    js, vs = state
+    js = copy(state[1])
+    vs = copy(state[2])
     ans = tuple(vs...)
 
     n = length(it.xss)
