@@ -9,7 +9,7 @@ export
     drop,
     cycle,
     repeated,
-	repeatedly,
+    repeatedly,
     chain,
     product,
     distinct,
