@@ -180,4 +180,10 @@ test_groupby(
       {Symbol[], Symbol[:a], Symbol[:b], Symbol[:a, :b], Symbol[:c],
        Symbol[:a, :c], Symbol[:b, :c], Symbol[:a, :b, :c]}
 
+# every n'th element
+@test collect(everynth([], 10)) == []
+@test_throws ArgumentError everynth([], 0)
+@test collect(everynth(10:20, 3)) == [12,15,18]
+@test collect(everynth(10:20, 1)) == [10:20]
+
 

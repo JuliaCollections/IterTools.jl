@@ -39,7 +39,7 @@ Common functional iterator patterns.
     i => 2
     i => 3
     i => 4
-    i => 4
+    i => 5
     ```
 
 - **drop**(xs, n)
@@ -59,6 +59,22 @@ Common functional iterator patterns.
     i => 8
     i => 9
     i => 10
+    ```
+
+- **everynth**(xs, n)
+    
+    Iterate through every n'th element of `xs`
+
+    Example:
+    ```julia
+    collect(everynth(5:15,3))
+    ```
+
+    ```
+    3-element Array{Int32,1}:
+      7
+     10
+     13
     ```
 
 - **cycle**(xs)
