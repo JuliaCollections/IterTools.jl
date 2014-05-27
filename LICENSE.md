@@ -1,4 +1,4 @@
-Cairo.jl is licensed under the MIT License:
+Iterators.jl is licensed under the MIT License:
 
 > Copyright (c) 2012-2013: Daniel Jones, Stefan Karpinski, Simon Kornblith,
 > Kevin Squire, Jeff Bezanson, Tim Holy, Jonathan Malmaud, and other contributors.
