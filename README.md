@@ -2,6 +2,12 @@
 
 Common functional iterator patterns.
 
+## Installation
+
+Install this package with `Pkg.add("Iterators")`
+
+## Usage
+
 -----------
 
 - **count**([start, [step]])
