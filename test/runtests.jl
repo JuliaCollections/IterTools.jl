@@ -13,8 +13,12 @@ end
 # take
 # ----
 
+t = take(0:2:8, 10)
+
+@test length(collect(t)) == 5
+
 i = 0
-for j = take(0:2:8, 10)
+for j = t
 	@test j == i*2
 	i += 1
 end

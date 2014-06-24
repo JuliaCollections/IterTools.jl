@@ -45,7 +45,6 @@ immutable Take{I}
 end
 
 eltype(it::Take) = eltype(it.xs)
-length(it::Take) = it.n
 
 take(xs, n::Int) = Take(xs, n)
 
