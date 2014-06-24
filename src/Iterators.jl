@@ -368,7 +368,7 @@ end
 done(it::Partition, state) = done(it.xs, state[1])
 
 # Group output from an iterator based on a key function.
-# Consecutive entries from the iterator with the same 
+# Consecutive entries from the iterator with the same
 # key value will be returned in a single array.
 # Inspired by itertools.groupby in python.
 # E.g.,
@@ -404,7 +404,7 @@ function next(it::GroupBy, state)
     end
     prev_value = nothing
     while !done(it.xs, s)
-        (x, s) = next(it.xs, s) 
+        (x, s) = next(it.xs, s)
         key = it.keyfunc(x)
         # Did the key change?
         if prev_key != nothing && key != prev_key
@@ -412,7 +412,7 @@ function next(it::GroupBy, state)
             prev_value = x
             break
         else
-            push!(values, x) 
+            push!(values, x)
         end
         prev_key = key
     end
@@ -435,8 +435,8 @@ immutable IMap
 end
 
 function imap(mapfunc, it1, its...)
-    IMap(mapfunc, {it1, its...})    
-end 
+    IMap(mapfunc, {it1, its...})
+end
 
 function start(it::IMap)
     map(start, it.xs)
