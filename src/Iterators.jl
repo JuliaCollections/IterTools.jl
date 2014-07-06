@@ -6,6 +6,7 @@ import Base: start, next, done, count, take, eltype, length
 export
     count,
     take,
+    takestrict,
     drop,
     cycle,
     repeated,
@@ -59,6 +60,42 @@ end
 function done(it::Take, state)
     n, xs_state = state
     return n <= 0 || done(it.xs, xs_state)
+end
+
+
+# Iterate through the first n elements, throwing an exception if
+# fewer than n items ar encountered.
+
+immutable TakeStrict{I}
+    xs::I
+    n::Int
+end
+
+eltype(it::TakeStrict) = eltype(it.xs)
+
+takestrict(xs, n::Int) = TakeStrict(xs, n)
+
+start(it::TakeStrict) = (it.n, start(it.xs))
+
+function next(it::TakeStrict, state)
+    n, xs_state = state
+    v, xs_state = next(it.xs, xs_state)
+    return v, (n - 1, xs_state)
+end
+
+function done(it::TakeStrict, state)
+    n, xs_state = state
+    if n <= 0
+        return true
+    elseif done(it.xs, xs_state)
+        error("In takestrict(xs, n), xs had fewer than n items to take.")
+    else
+        return false
+    end
+end
+
+function length(it::TakeStrict)
+    return it.n
 end
 
 
