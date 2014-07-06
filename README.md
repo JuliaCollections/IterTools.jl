@@ -224,13 +224,13 @@ Install this package with `Pkg.add("Iterators")`
     i = (7,8,9)
     ```
 
-- **groupby**(xs, f)
+- **groupby**(f, xs)
 
     Group consecutive values that share the same result of applying `f`.
 
     Example:
     ```julia
-    for i in groupby(["face", "foo", "bar", "book", "baz", "zzz"], x -> x[1])
+    for i in groupby(x -> x[1], ["face", "foo", "bar", "book", "baz", "zzz"])
         @show i
     end
     ```

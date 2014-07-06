@@ -147,7 +147,7 @@ test_imap(
 # -------
 
 function test_groupby(input, expected)
-  result = collect(groupby(input, x -> x[1]))
+  result = collect(groupby(x -> x[1], input))
   @test result == expected
 end
 
