@@ -48,6 +48,11 @@ Install this package with `Pkg.add("Iterators")`
     i => 4
     ```
 
+- **takestrict**(xs, n)
+
+  Equivalent to `take`, but will throw an exception if fewer than `n` items
+  are encountered in `xs`.
+
 - **drop**(xs, n)
 
     Iterate through all but the first n elements of `xs`
