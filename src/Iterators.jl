@@ -419,6 +419,7 @@ immutable GroupBy{I}
 end
 
 eltype{I}(it::GroupBy{I}) = I
+eltype{I<:Ranges}(it::GroupBy{I}) = Array{eltype(it.xs),}
 
 function groupby(xs, keyfunc)
     GroupBy(xs, keyfunc)

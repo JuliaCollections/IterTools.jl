@@ -67,7 +67,7 @@ function Base.run{Itr<:GroupBy}(p::Collect{Itr}, n::Int, state)
 end
 
 Base.start(::Collect{GroupBy1}, n::Int) = (["abc"[[rand(1:3), rand(1:3)]] for i = 1:n], x->x[1])
-Base.start(::Collect{GroupBy2}, n::Int) = ([1:n], iseven)
+Base.start(::Collect{GroupBy2}, n::Int) = (1:n, x->div(x,2))
 
 ############
 
