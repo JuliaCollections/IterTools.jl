@@ -278,3 +278,6 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
 
+## Related projects
+
+[MacroUtils](https://github.com/carlobaldassi/MacroUtils.jl#macroiterators) has more-performant macro versions of a few iterators.
