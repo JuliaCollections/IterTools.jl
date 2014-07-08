@@ -17,8 +17,8 @@ export
     groupby,
     imap,
     subsets,
-    iterate
-
+    iterate,
+    @itr
 
 # Infinite counting
 
@@ -548,5 +548,182 @@ start(it::Iterate) = it.seed
 next(it::Iterate, state) = (state, it.f(state))
 done(it::Iterate, state) = (state==None)
 
-end # module Iterators
+## @itr macro for auto-inlining in for loops
+#
+# it dispatches on macros defined below
 
+macro itr(ex)
+    ex.head == :for || error("@itr macro expects a for loop")
+    ex.args[1].head == :(=) || error("malformed or unsupported for loop in @itr macro")
+    ex.args[1].args[2].head == :call || error("@itr macro expects an iterator call, e.g. @itr for (x,y) = zip(a,b)")
+    iterator = ex.args[1].args[2].args[1]
+    ex.args[1].args[2] = Expr(:tuple, ex.args[1].args[2].args[2:end]...)
+    if iterator == :zip
+        rex = :(@zip($(esc(ex))))
+    elseif iterator == :enumerate
+        rex = :(@enumerate($(esc(ex))))
+    elseif iterator == :take
+        rex = :(@take($(esc(ex))))
+    elseif iterator == :takestrict
+        rex = :(@takestrict($(esc(ex))))
+    elseif iterator == :drop
+        rex = :(@drop($(esc(ex))))
+    elseif iterator == :chain
+        rex = :(@chain($(esc(ex))))
+    else
+        error("unknown or unsupported iterator $iterator in @itr macro")
+    end
+    return rex
+end
+
+macro zip(ex)
+    @assert ex.head == :for
+    @assert ex.args[1].head == :(=)
+    ex.args[1].args[1].head == :tuple || error("@zip macro needs explicit tuple arguments")
+    ex.args[1].args[2].head == :tuple || error("@zip macro needs explicit tuple arguments")
+    n = length(ex.args[1].args[1].args)
+    length(ex.args[1].args[2].args) == n || error("unequal tuple sizes in @zip macro")
+    body = esc(ex.args[2])
+    vars = map(esc, ex.args[1].args[1].args)
+    iters = map(esc, ex.args[1].args[2].args)
+    states = [gensym("s") for i=1:n]
+    as = {Expr(:call, :(Base.start), iters[i]) for i=1:n}
+    startex = Expr(:(=), Expr(:tuple, states...), Expr(:tuple, as...))
+    ad = {Expr(:call, :(Base.done), iters[i], states[i]) for i = 1:n}
+    notdoneex = Expr(:call, :(!), Expr(:||, ad...))
+    nextex = Expr(:(=), Expr(:tuple, {Expr(:tuple, vars[i], states[i]) for i=1:n}...),
+                        Expr(:tuple, {Expr(:call, :(Base.next), iters[i], states[i]) for i=1:n}...))
+    Expr(:let, Expr(:block,
+        startex,
+        Expr(:while, notdoneex, Expr(:block,
+            nextex,
+            body))),
+        states...)
+end
+
+macro enumerate(ex)
+    @assert ex.head == :for
+    @assert ex.args[1].head == :(=)
+    ex.args[1].args[1].head == :tuple || error("@enumerate macro needs an explicit tuple argument")
+    length(ex.args[1].args[1].args) == 2 || error("lentgh of tuple must be 2 in @enumerate macro")
+    body = esc(ex.args[2])
+    vars = map(esc, ex.args[1].args[1].args)
+    if ex.args[1].args[2].head == :tuple && length(ex.args[1].args[2].args) == 1
+        ex.args[1].args[2] = ex.args[1].args[2].args[1]
+    end
+    iter = esc(ex.args[1].args[2])
+    ind = gensym("i")
+    startex = Expr(:(=), ind, 0)
+    forex = Expr(:(=), vars[2], iter)
+    index = Expr(:(=), vars[1], ind)
+    increx = Expr(:(=), ind, Expr(:call, :(+), ind, 1))
+    Expr(:let, Expr(:block,
+        startex,
+        Expr(:for, forex, Expr(:block,
+            increx,
+            index,
+            body))),
+        ind)
+end
+
+# both @take and @takestrict use @_take
+
+macro _take(ex, strict)
+    mname = strict ? "takestrict" : "take"
+    @assert ex.head == :for
+    @assert ex.args[1].head == :(=)
+    ex.args[1].args[2].head == :tuple || error("@$(mname) macro needs an explicit tuple argument")
+    length(ex.args[1].args[2].args) == 2 || error("length of tuple must be 2 in @$(mname) macro")
+    body = esc(ex.args[2])
+    var = esc(ex.args[1].args[1])
+    iter = esc(ex.args[1].args[2].args[1])
+    n = esc(ex.args[1].args[2].args[2])
+    ind = gensym("i")
+    state = gensym("s")
+    startex = Expr(:block,
+        Expr(:(=), ind, 0),
+        Expr(:(=), state, Expr(:call, :(Base.start), iter)))
+    notdoneex = Expr(:call, :(!), Expr(:||,
+        Expr(:call, :(>=), ind, n),
+        Expr(:call, :(Base.done), iter, state)))
+    nextex = Expr(:block,
+        Expr(:(=), Expr(:tuple, var, state),
+                   Expr(:call, :(Base.next), iter, state)),
+        Expr(:(=), ind, Expr(:call, :(+), ind, 1)))
+    if strict
+        checkex = Expr(:if, Expr(:call, :(<), ind, n),
+            Expr(:call, :error, "in takestrict(xs, n), xs had fewer than n items to take."))
+    else
+        checkex = :nothing
+    end
+
+    Expr(:let, Expr(:block,
+        startex,
+        Expr(:while, notdoneex, Expr(:block,
+            nextex,
+            body)),
+        checkex),
+        ind, state)
+end
+
+macro take(ex)
+    :(@_take($(esc(ex)), false))
+end
+
+macro takestrict(ex)
+    :(@_take($(esc(ex)), true))
+end
+
+macro drop(ex)
+    @assert ex.head == :for
+    @assert ex.args[1].head == :(=)
+    ex.args[1].args[2].head == :tuple || error("@drop macro needs an explicit tuple argument")
+    length(ex.args[1].args[2].args) == 2 || error("length of tuple must be 2 in @drop macro")
+    body = esc(ex.args[2])
+    var = esc(ex.args[1].args[1])
+    iter = esc(ex.args[1].args[2].args[1])
+    n = esc(ex.args[1].args[2].args[2])
+    ind = gensym("i")
+    state = gensym("s")
+    startex = Expr(:block,
+        Expr(:(=), ind, 0),
+        Expr(:(=), state, Expr(:call, :(Base.start), iter)))
+    notdoneex1 = Expr(:call, :(!), Expr(:||,
+        Expr(:call, :(>=), ind, n),
+        Expr(:call, :(Base.done), iter, state)))
+    nextex1 = Expr(:block,
+        Expr(:(=), Expr(:tuple, var, state),
+                   Expr(:call, :(Base.next), iter, state)),
+        Expr(:(=), ind, Expr(:call, :(+), ind, 1)))
+    notdoneex2 = Expr(:call, :(!), Expr(:call, :(Base.done), iter, state))
+    nextex2 = Expr(:(=), Expr(:tuple, var, state), Expr(:call, :(Base.next), iter, state))
+
+    Expr(:let, Expr(:block,
+        startex,
+        Expr(:while, notdoneex1, nextex1),
+        Expr(:while, notdoneex2, Expr(:block,
+            nextex2,
+            body))),
+        ind, state)
+end
+
+macro chain(ex)
+    @assert ex.head == :for
+    @assert ex.args[1].head == :(=)
+    ex.args[1].args[2].head == :tuple || error("@chain macro needs explicit tuple arguments")
+    n = length(ex.args[1].args[2].args)
+    body = esc(ex.args[2])
+    var = esc(ex.args[1].args[1])
+    iters = map(esc, ex.args[1].args[2].args)
+    states = [gensym("s") for i=1:n]
+
+    cycleex = [Expr(:block,
+        Expr(:(=), states[i], Expr(:call, :(Base.start), iters[i])),
+        Expr(:while, Expr(:call, :(!), Expr(:call, :(Base.done), iters[i], states[i])), Expr(:block,
+            Expr(:(=), Expr(:tuple, var, states[i]), Expr(:call, :(Base.next), iters[i], states[i])),
+            body))) for i = 1:n]
+
+    Expr(:let, Expr(:block, cycleex...), states...)
+end
+
+end # module Iterators

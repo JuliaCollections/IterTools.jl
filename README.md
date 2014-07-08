@@ -235,7 +235,6 @@ Install this package with `Pkg.add("Iterators")`
     i => 9
     ```
 
-
 - **subsets**(xs)
 
     Iterate over every subset of a collection `xs`.
@@ -277,7 +276,39 @@ Install this package with `Pkg.add("Iterators")`
     i => 16
     ```
 
+## The `@itr` macro for automatic inlining in `for` loops
 
-## Related projects
+Using functional iterators is powerful and concise, but may incur in some
+overhead, and manually inlining the operations can typically improve
+performance in critical parts of the code. The `@itr` macro is provided to do
+that automatically in some cases. Its usage is trivial: for example, given this code:
+```
+for (x,y) in zip(a,b)
+    @show x,y
+end
+```
+the automatically inlined version can be obtained by simply doing:
+```
+@itr for (x,y) in zip(a,b)
+    @show x,y
+end
+```
+This typically results in faster code, but its applicability has limitations:
 
-[MacroUtils](https://github.com/carlobaldassi/MacroUtils.jl#macroiterators) has more-performant macro versions of a few iterators.
+* it only works with `for` loops;
+* if multiple nested iterators are used, only the outermost is affected by the
+  transformation;
+* explicit expressions are required (i.e. when a `Tuple` is expected, an
+  explicit tuple must be provided, a tuple variable won't be accepted);
+* splicing is not supported;
+* multidimensional loops (i.e. expressions such as `for x in a, y in b`) are
+  not supported
+
+The `@itr` macro can be used with the following supported iterators:
+
+* zip
+* enumerate
+* take
+* takestrict
+* drop
+* chain
