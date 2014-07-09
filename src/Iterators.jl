@@ -548,14 +548,16 @@ start(it::Iterate) = it.seed
 next(it::Iterate, state) = (state, it.f(state))
 done(it::Iterate, state) = (state==None)
 
+using Base.Meta
+
 ## @itr macro for auto-inlining in for loops
 #
 # it dispatches on macros defined below
 
 macro itr(ex)
-    ex.head == :for || error("@itr macro expects a for loop")
-    ex.args[1].head == :(=) || error("malformed or unsupported for loop in @itr macro")
-    ex.args[1].args[2].head == :call || error("@itr macro expects an iterator call, e.g. @itr for (x,y) = zip(a,b)")
+    isexpr(ex, :for) || error("@itr macro expects a for loop")
+    isexpr(ex.args[1], :(=)) || error("malformed or unsupported for loop in @itr macro")
+    isexpr(ex.args[1].args[2], :call) || error("@itr macro expects an iterator call, e.g. @itr for (x,y) = zip(a,b)")
     iterator = ex.args[1].args[2].args[1]
     ex.args[1].args[2] = Expr(:tuple, ex.args[1].args[2].args[2:end]...)
     if iterator == :zip
@@ -579,8 +581,8 @@ end
 macro zip(ex)
     @assert ex.head == :for
     @assert ex.args[1].head == :(=)
-    ex.args[1].args[1].head == :tuple || error("@zip macro needs explicit tuple arguments")
-    ex.args[1].args[2].head == :tuple || error("@zip macro needs explicit tuple arguments")
+    isexpr(ex.args[1].args[1], :tuple) || error("@zip macro needs explicit tuple arguments")
+    isexpr(ex.args[1].args[2], :tuple) || error("@zip macro needs explicit tuple arguments")
     n = length(ex.args[1].args[1].args)
     length(ex.args[1].args[2].args) == n || error("unequal tuple sizes in @zip macro")
     body = esc(ex.args[2])
@@ -604,11 +606,11 @@ end
 macro enumerate(ex)
     @assert ex.head == :for
     @assert ex.args[1].head == :(=)
-    ex.args[1].args[1].head == :tuple || error("@enumerate macro needs an explicit tuple argument")
+    isexpr(ex.args[1].args[1], :tuple) || error("@enumerate macro needs an explicit tuple argument")
     length(ex.args[1].args[1].args) == 2 || error("lentgh of tuple must be 2 in @enumerate macro")
     body = esc(ex.args[2])
     vars = map(esc, ex.args[1].args[1].args)
-    if ex.args[1].args[2].head == :tuple && length(ex.args[1].args[2].args) == 1
+    if isexpr(ex.args[1].args[2], :tuple) && length(ex.args[1].args[2].args) == 1
         ex.args[1].args[2] = ex.args[1].args[2].args[1]
     end
     iter = esc(ex.args[1].args[2])
@@ -632,7 +634,7 @@ macro _take(ex, strict)
     mname = strict ? "takestrict" : "take"
     @assert ex.head == :for
     @assert ex.args[1].head == :(=)
-    ex.args[1].args[2].head == :tuple || error("@$(mname) macro needs an explicit tuple argument")
+    isexpr(ex.args[1].args[2], :tuple) || error("@$(mname) macro needs an explicit tuple argument")
     length(ex.args[1].args[2].args) == 2 || error("length of tuple must be 2 in @$(mname) macro")
     body = esc(ex.args[2])
     var = esc(ex.args[1].args[1])
@@ -677,7 +679,7 @@ end
 macro drop(ex)
     @assert ex.head == :for
     @assert ex.args[1].head == :(=)
-    ex.args[1].args[2].head == :tuple || error("@drop macro needs an explicit tuple argument")
+    isexpr(ex.args[1].args[2], :tuple) || error("@drop macro needs an explicit tuple argument")
     length(ex.args[1].args[2].args) == 2 || error("length of tuple must be 2 in @drop macro")
     body = esc(ex.args[2])
     var = esc(ex.args[1].args[1])
@@ -710,7 +712,7 @@ end
 macro chain(ex)
     @assert ex.head == :for
     @assert ex.args[1].head == :(=)
-    ex.args[1].args[2].head == :tuple || error("@chain macro needs explicit tuple arguments")
+    isexpr(ex.args[1].args[2], :tuple) || error("@chain macro needs explicit tuple arguments")
     n = length(ex.args[1].args[2].args)
     body = esc(ex.args[2])
     var = esc(ex.args[1].args[1])
