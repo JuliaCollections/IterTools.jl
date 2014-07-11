@@ -164,8 +164,6 @@ length(it::Repeat) = it.n
 
 repeated(x, n) = Repeat(x, n)
 
-@deprecate repeat(x, n) repeated(x, n)
-
 start(it::Repeat) = it.n
 next(it::Repeat, state) = (it.x, state - 1)
 done(it::Repeat, state) = state <= 0
@@ -178,8 +176,6 @@ end
 eltype{O}(r::RepeatForever{O}) = O
 
 repeated(x) = RepeatForever(x)
-
-@deprecate repeat(x) repeated(x)
 
 start(it::RepeatForever) = nothing
 next(it::RepeatForever, state) = (it.x, nothing)
