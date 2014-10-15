@@ -188,7 +188,7 @@ done(it::RepeatForever, state) = false
 immutable Chain
     xss::Vector{Any}
     function Chain(xss...)
-        new({xss...})
+        new(Any[xss...])
     end
 end
 
@@ -236,7 +236,7 @@ done(it::Chain, state) = state[1] > length(it.xss)
 immutable Product
     xss::Vector{Any}
     function Product(xss...)
-        new({xss...})
+        new(Any[xss...])
     end
 end
 
@@ -247,7 +247,7 @@ product(xss...) = Product(xss...)
 
 function start(it::Product)
     n = length(it.xss)
-    js = {start(xs) for xs in it.xss}
+    js = Any[start(xs) for xs in it.xss]
     if n == 0
         return js, nothing
     end
@@ -468,7 +468,7 @@ immutable IMap
 end
 
 function imap(mapfunc, it1, its...)
-    IMap(mapfunc, {it1, its...})
+    IMap(mapfunc, Any[it1, its...])
 end
 
 function start(it::IMap)
@@ -585,12 +585,12 @@ macro zip(ex)
     vars = map(esc, ex.args[1].args[1].args)
     iters = map(esc, ex.args[1].args[2].args)
     states = [gensym("s") for i=1:n]
-    as = {Expr(:call, :(Base.start), iters[i]) for i=1:n}
+    as = Any[Expr(:call, :(Base.start), iters[i]) for i=1:n]
     startex = Expr(:(=), Expr(:tuple, states...), Expr(:tuple, as...))
-    ad = {Expr(:call, :(Base.done), iters[i], states[i]) for i = 1:n}
+    ad = Any[Expr(:call, :(Base.done), iters[i], states[i]) for i = 1:n]
     notdoneex = Expr(:call, :(!), Expr(:||, ad...))
-    nextex = Expr(:(=), Expr(:tuple, {Expr(:tuple, vars[i], states[i]) for i=1:n}...),
-                        Expr(:tuple, {Expr(:call, :(Base.next), iters[i], states[i]) for i=1:n}...))
+    nextex = Expr(:(=), Expr(:tuple, Any[Expr(:tuple, vars[i], states[i]) for i=1:n]...),
+                        Expr(:tuple, Any[Expr(:call, :(Base.next), iters[i], states[i]) for i=1:n]...))
     Expr(:let, Expr(:block,
         startex,
         Expr(:while, notdoneex, Expr(:block,

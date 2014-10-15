@@ -103,26 +103,26 @@ end
 
 # Empty arrays
 test_imap(
-  {},
-  []
+  Any[],
+  Union()[]
 )
 
 # Simple operation
 test_imap(
-  {1,2,3},
+  Any[1,2,3],
   [1,2,3]
 )
 
 # Multiple arguments
 test_imap(
-  {5,7,9},
+  Any[5,7,9],
   [1,2,3],
   [4,5,6]
 )
 
 # Different-length arguments
 test_imap(
-  {2,4,6},
+  Any[2,4,6],
   [1,2,3],
   count(1)
 )
@@ -139,51 +139,51 @@ end
 
 # Empty arrays
 test_groupby(
-  [],
-  {}
+  Union()[],
+  Any[]
 )
 
 # Singletons
 test_groupby(
   ["xxx"],
-  {["xxx"]}
+  Any[["xxx"]]
 )
 
 # Typical operation
 test_groupby(
   ["face", "foo", "bar", "book", "baz"],
-  {["face", "foo"], ["bar", "book", "baz"]}
+  Any[["face", "foo"], ["bar", "book", "baz"]]
 )
 
 # Trailing singletons
 test_groupby(
   ["face", "foo", "bar", "book", "baz", "xxx"],
-  {["face", "foo"], ["bar", "book", "baz"], ["xxx"]}
+  Any[["face", "foo"], ["bar", "book", "baz"], ["xxx"]]
 )
 
 # Leading singletons
 test_groupby(
   ["xxx", "face", "foo", "bar", "book", "baz"],
-  {["xxx"], ["face", "foo"], ["bar", "book", "baz"]}
+  Any[["xxx"], ["face", "foo"], ["bar", "book", "baz"]]
 )
 
 # Middle singletons
 test_groupby(
   ["face", "foo", "xxx", "bar", "book", "baz"],
-  {["face", "foo"], ["xxx"], ["bar", "book", "baz"]}
+  Any[["face", "foo"], ["xxx"], ["bar", "book", "baz"]]
 )
 
 
 # subsets
 # -------
 
-@test collect(subsets({})) == {{}}
+@test collect(subsets(Any[])) == Any[Any[]]
 
-@test collect(subsets([:a])) == {Symbol[], Symbol[:a]}
+@test collect(subsets([:a])) == Any[Symbol[], Symbol[:a]]
 
 @test collect(subsets([:a, :b, :c])) ==
-      {Symbol[], Symbol[:a], Symbol[:b], Symbol[:a, :b], Symbol[:c],
-       Symbol[:a, :c], Symbol[:b, :c], Symbol[:a, :b, :c]}
+      Any[Symbol[], Symbol[:a], Symbol[:b], Symbol[:a, :b], Symbol[:c],
+          Symbol[:a, :c], Symbol[:b, :c], Symbol[:a, :b, :c]]
 
 ## @itr
 ## ====
@@ -197,11 +197,11 @@ macro test_zip(input...)
     v = Expr(:tuple, map(esc, input)...)
     w = :(zip($(map(esc, input)...)))
     quote
-	br = {}
+	br = Any[]
 	for $x in zip($v...)
 	    push!(br, $x)
 	end
-	mr = {}
+	mr = Any[]
 	@itr for $x in $w
 	    push!(mr, $x)
 	end
@@ -211,7 +211,7 @@ end
 
 @test_zip [1,2,3] [:a, :b, :c] ['x', 'y', 'z']
 @test_zip [1,2,3] [:a, :b] ['w', 'x', 'y', 'z']
-@test_zip [1,2,3] [] ['w', 'x', 'y', 'z']
+@test_zip [1,2,3] Union()[] ['w', 'x', 'y', 'z']
 
 # @enumerate
 # ----------
@@ -221,11 +221,11 @@ macro test_enumerate(input)
     x = gensym()
     v = esc(input)
     quote
-	br = {}
+	br = Any[]
 	for ($i,$x) in enumerate($v)
 	    push!(br, ($i,$x))
 	end
-	mr = {}
+	mr = Any[]
 	@itr for ($i,$x) in enumerate($v)
 	    push!(mr, ($i,$x))
 	end
@@ -234,7 +234,7 @@ macro test_enumerate(input)
 end
 
 @test_enumerate [:a, :b, :c]
-@test_enumerate []
+@test_enumerate Union()[]
 
 # @take
 # -----
@@ -243,11 +243,11 @@ macro test_take(input, n)
     x = gensym()
     v = esc(input)
     quote
-	br = {}
+	br = Any[]
 	for $x in take($v, $n)
 	    push!(br, $x)
 	end
-	mr = {}
+	mr = Any[]
 	@itr for $x in take($v, $n)
 	    push!(mr, $x)
 	end
@@ -258,8 +258,8 @@ end
 @test_take [:a, :b, :c] 2
 @test_take [:a, :b, :c] 5
 @test_take [:a, :b, :c] 0
-@test_take [] 2
-@test_take {} 0
+@test_take Union()[] 2
+@test_take Any[] 0
 @test_take [(:a,1), (:b,2), (:c,3)] 2
 
 # @takestrict
@@ -269,7 +269,7 @@ macro test_takestrict(input, n)
     x = gensym()
     v = esc(input)
     quote
-	br = {}
+	br = Any[]
 	bfailed = false
 	try
 	    for $x in takestrict($v, $n)
@@ -279,7 +279,7 @@ macro test_takestrict(input, n)
 	    bfailed = true
 	end
 
-	mr = {}
+	mr = Any[]
 	mfailed = false
 	try
 	    @itr for $x in takestrict($v, $n)
@@ -297,8 +297,8 @@ end
 @test_takestrict [:a, :b, :c] 3
 @test_takestrict [:a, :b, :c] 5
 @test_takestrict [:a, :b, :c] 0
-@test_takestrict [] 2
-@test_takestrict {} 0
+@test_takestrict Union()[] 2
+@test_takestrict Any[] 0
 @test_takestrict [(:a,1), (:b,2), (:c,3)] 2
 @test_takestrict [(:a,1), (:b,2), (:c,3)] 3
 @test_takestrict [(:a,1), (:b,2), (:c,3)] 4
@@ -310,11 +310,11 @@ macro test_drop(input, n)
     x = gensym()
     v = esc(input)
     quote
-	br = {}
+	br = Any[]
 	for $x in drop($v, $n)
 	    push!(br, $x)
 	end
-	mr = {}
+	mr = Any[]
 	@itr for $x in drop($v, $n)
 	    push!(mr, $x)
 	end
@@ -325,8 +325,8 @@ end
 @test_drop [:a, :b, :c] 2
 @test_drop [:a, :b, :c] 5
 @test_drop [:a, :b, :c] 0
-@test_drop [] 2
-@test_drop {} 0
+@test_drop Union()[] 2
+@test_drop Any[] 0
 @test_drop [(:a,1), (:b,2), (:c,3)] 2
 
 # @chain
@@ -337,11 +337,11 @@ macro test_chain(input...)
     v = Expr(:tuple, map(esc, input)...)
     w = :(chain($(map(esc, input)...)))
     quote
-	br = {}
+	br = Any[]
 	for $x in chain($v...)
 	    push!(br, $x)
 	end
-	mr = {}
+	mr = Any[]
 	@itr for $x in $w
 	    push!(mr, $x)
 	end
@@ -351,5 +351,5 @@ end
 
 @test_chain [1,2,3] [:a, :b, :c] ['x', 'y', 'z']
 @test_chain [1,2,3] [:a, :b] ['w', 'x', 'y', 'z']
-@test_chain [1,2,3] [] ['w', 'x', 'y', 'z']
+@test_chain [1,2,3] Union()[] ['w', 'x', 'y', 'z']
 @test_chain [1,2,3] 4 [('w',3), ('x',2), ('y',1), ('z',0)]
