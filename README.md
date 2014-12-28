@@ -1,5 +1,12 @@
 # Iterators.jl
 
+Julia 0.3 [![Iterators](http://pkg.julialang.org/badges/Iterators_release.svg)](http://pkg.julialang.org/?pkg=Iterators&ver=release)
+
+Julia 0.4 [![Iterators](http://pkg.julialang.org/badges/Iterators_nightly.svg)](http://pkg.julialang.org/?pkg=Iterators&ver=nightly)
+
+[![Build Status](http://img.shields.io/travis/JuliaLang/Iterators.jl.svg)](https://travis-ci.org/JuliaLang/Iterators.jl) [![Coverage Status](http://img.shields.io/coveralls/JuliaLang/Iterators.jl.svg)](https://coveralls.io/r/JuliaLang/Iterators.jl)
+
+
 Common functional iterator patterns.
 
 ## Installation
