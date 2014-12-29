@@ -10,6 +10,7 @@ export
     drop,
     cycle,
     repeated,
+    repeatedly,
     chain,
     product,
     distinct,
@@ -181,6 +182,30 @@ start(it::RepeatForever) = nothing
 next(it::RepeatForever, state) = (it.x, nothing)
 done(it::RepeatForever, state) = false
 
+# Repeat a function application n (or infinitely many) times.
+
+immutable RepeatCall
+    f::Function
+    n::Int
+end
+
+length(it::RepeatCall) = it.n
+repeatedly(f, n) = RepeatCall(f, n)
+
+start(it::RepeatCall) = it.n
+next(it::RepeatCall, state) = (it.f(), state - 1)
+done(it::RepeatCall, state) = state <= 0
+
+
+immutable RepeatCallForever
+    f::Function
+end
+
+repeatedly(f) = RepeatCallForever(f)
+
+start(it::RepeatCallForever) = nothing
+next(it::RepeatCallForever, state) = (it.f(), nothing)
+done(it::RepeatCallForever, state) = false
 
 
 # Concatenate the output of n iterators

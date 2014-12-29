@@ -67,6 +67,21 @@ for j = repeated(1)
 	i <= 10 || break
 end
 
+# repeatedly
+# ----------
+
+i = 0
+for j = repeatedly(() -> 1, 10)
+	@test j == 1
+	i += 1
+end
+@test i == 10
+for j = repeatedly(() -> 1)
+	@test j == 1
+	i += 1
+	i <= 10 || break
+end
+
 # chain
 # -----
 
