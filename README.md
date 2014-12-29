@@ -115,6 +115,23 @@ Install this package with `Pkg.add("Iterators")`
     i => "Hello"
     ```
 
+- **repeatedly**(f, [n])
+
+    Call a function `n` times, or infinitely if `n` is omitted.
+
+    Example:
+    ```julia
+    for t in repeatedly(time_ns, 3)
+        @show t
+    end
+    ```
+
+    ```
+    t => 0x0000592ff83caf87
+    t => 0x0000592ff83d8cf4
+    t => 0x0000592ff83dd11e
+    ```
+
 - **chain**(xs...)
 
     Iterate through any number of iterators in sequence.
