@@ -29,11 +29,11 @@ Install this package with `Pkg.add("Iterators")`
     ```
     yields
     ```
-    i => 5
-    i => 10
-    i => 15
-    i => 20
-    i => 25
+    i = 5
+    i = 10
+    i = 15
+    i = 20
+    i = 25
     ```
 
 - **take**(xs, n)
@@ -48,11 +48,11 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
     ```
-    i => 1
-    i => 2
-    i => 3
-    i => 4
-    i => 4
+    i = 1
+    i = 2
+    i = 3
+    i = 4
+    i = 5
     ```
 
 - **takestrict**(xs, n)
@@ -72,11 +72,11 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
     ```
-    i => 6
-    i => 7
-    i => 8
-    i => 9
-    i => 10
+    i = 6
+    i = 7
+    i = 8
+    i = 9
+    i = 10
     ```
 
 - **cycle**(xs)
@@ -91,11 +91,11 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
     ```
-    i => 1
-    i => 2
-    i => 3
-    i => 1
-    i => 2
+    i = 1
+    i = 2
+    i = 3
+    i = 1
+    i = 2
     ```
 
 - **repeated**(x, [n])
@@ -110,9 +110,9 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
     ```
-    i => "Hello"
-    i => "Hello"
-    i => "Hello"
+    i = "Hello"
+    i = "Hello"
+    i = "Hello"
     ```
 
 - **repeatedly**(f, [n])
@@ -127,9 +127,9 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
     ```
-    t => 0x0000592ff83caf87
-    t => 0x0000592ff83d8cf4
-    t => 0x0000592ff83dd11e
+    t = 0x0000592ff83caf87
+    t = 0x0000592ff83d8cf4
+    t = 0x0000592ff83dd11e
     ```
 
 - **chain**(xs...)
@@ -144,12 +144,12 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
     ```
-    i => 1
-    i => 2
-    i => 3
-    i => 'a'
-    i => 'b'
-    i => 'c'
+    i = 1
+    i = 2
+    i = 3
+    i = 'a'
+    i = 'b'
+    i = 'c'
     ```
 
 - **product**(xs...)
@@ -164,12 +164,12 @@ Install this package with `Pkg.add("Iterators")`
     ```
     yields
     ```
-    p => (1,1)
-    p => (2,1)
-    p => (3,1)
-    p => (1,2)
-    p => (2,2)
-    p => (3,2)
+    p = (1,1)
+    p = (2,1)
+    p = (3,1)
+    p = (1,2)
+    p = (2,2)
+    p = (3,2)
     ```
 
 
@@ -179,16 +179,16 @@ Install this package with `Pkg.add("Iterators")`
 
     Example:
     ```julia
-    for i in distinct([1,1,2,1,2,3,1,2,3,4])
+    for i in distinct([1,1,2,1,2,4,1,2,3,4])
         @show i
     end
     ```
 
     ```
-    i => 1
-    i => 2
-    i => 3
-    i => 4
+    i = 1
+    i = 2
+    i = 4
+    i = 3
     ```
 
 - **partition**(xs, n, [step])
@@ -203,9 +203,9 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
     ```
-    i => (1,2,3)
-    i => (4,5,6)
-    i => (7,8,9)
+    i = (1,2,3)
+    i = (4,5,6)
+    i = (7,8,9)
     ```
 
     If the `step` parameter is set, each tuple is separated by `step` values.
@@ -218,10 +218,10 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
     ```
-    i => (1,2,3)
-    i => (3,4,5)
-    i => (5,6,7)
-    i => (7,8,9)
+    i = (1,2,3)
+    i = (3,4,5)
+    i = (5,6,7)
+    i = (7,8,9)
     ```
 
 - **groupby**(xs, f)
@@ -236,9 +236,9 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
     ```
-    i => ASCIIString["face","foo"]
-    i => ASCIIString["bar","book","baz"]
-    i => ASCIIString["zzz"]
+    i = ASCIIString["face","foo"]
+    i = ASCIIString["bar","book","baz"]
+    i = ASCIIString["zzz"]
     ```
 
 - **imap**(f, xs1, [xs2, ...])
@@ -254,9 +254,9 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
     ```
-    i => 5
-    i => 7
-    i => 9
+    i = 5
+    i = 7
+    i = 9
     ```
 
 - **subsets**(xs)
@@ -271,14 +271,14 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
     ```
-    i => []
-    i => [1]
-    i => [2]
-    i => [1,2]
-    i => [3]
-    i => [1,3]
-    i => [2,3]
-    i => [1,2,3]
+    i = []
+    i = [1]
+    i = [2]
+    i = [1,2]
+    i = [3]
+    i = [1,3]
+    i = [2,3]
+    i = [1,2,3]
     ```
 
 - **iterate**(f, x)
@@ -293,11 +293,11 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
     ```
-    i => 1
-    i => 2
-    i => 4
-    i => 8
-    i => 16
+    i = 1
+    i = 2
+    i = 4
+    i = 8
+    i = 16
     ```
 
 ## The `@itr` macro for automatic inlining in `for` loops
