@@ -435,15 +435,20 @@ done(it::Partition, state) = done(it.xs, state[1])
 #       ["bar", "book", "baz"]
 #       ["zzz"]
 immutable GroupBy{I}
-    xs::I
     keyfunc::Function
+    xs::I
 end
 
 eltype{I}(it::GroupBy{I}) = I
 eltype{I<:Ranges}(it::GroupBy{I}) = Array{eltype(it.xs),}
 
-function groupby(xs, keyfunc)
-    GroupBy(xs, keyfunc)
+function groupby(xs, keyfunc::Function)
+    Base.warn_once("groupby(xs, keyfunc) should be groupby(keyfunc, xs)")
+    groupby(keyfunc, xs)
+end
+
+function groupby(keyfunc, xs)
+    GroupBy(keyfunc, xs)
 end
 
 function start(it::GroupBy)

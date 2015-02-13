@@ -58,16 +58,16 @@ abstract GroupBy
 type GroupBy1 <: GroupBy end
 type GroupBy2 <: GroupBy end
 
-collect(::GroupBy, v, f) = Base.collect(groupby(v, f))
+collect(::GroupBy, f, v) = Base.collect(groupby(f, v))
 
 function Base.run{Itr<:GroupBy}(p::Collect{Itr}, n::Int, state)
-    v, f = state
+    f, v = state
     op = Itr()
-    collect(op, v, f)
+    collect(op, f, v)
 end
 
-Base.start(::Collect{GroupBy1}, n::Int) = (["abc"[[rand(1:3), rand(1:3)]] for i = 1:n], x->x[1])
-Base.start(::Collect{GroupBy2}, n::Int) = (1:n, x->div(x,2))
+Base.start(::Collect{GroupBy1}, n::Int) = (x->x[1], ["abc"[[rand(1:3), rand(1:3)]] for i = 1:n])
+Base.start(::Collect{GroupBy2}, n::Int) = (iseven, [1:n])
 
 ############
 
