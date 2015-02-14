@@ -189,7 +189,7 @@ function done(it::TakeStrict, state)
     if n <= 0
         return true
     elseif done(it.xs, xs_state)
-        error("In takestrict(xs, n), xs had fewer than n items to take.")
+        throw(ArgumentError("In takestrict(xs, n), xs had fewer than n items to take."))
     else
         return false
     end
@@ -391,7 +391,7 @@ end
 
 function partition(xs, n::Int, step::Int)
     if step < 1
-        error("Partition step must be at least 1.")
+        throw(ArgumentError("Partition step must be at least 1."))
     end
 
     Partition(xs, n, step)
@@ -599,9 +599,9 @@ using Base.Meta
 # it dispatches on macros defined below
 
 macro itr(ex)
-    isexpr(ex, :for) || error("@itr macro expects a for loop")
-    isexpr(ex.args[1], :(=)) || error("malformed or unsupported for loop in @itr macro")
-    isexpr(ex.args[1].args[2], :call) || error("@itr macro expects an iterator call, e.g. @itr for (x,y) = zip(a,b)")
+    isexpr(ex, :for) || throw(ArgumentError("@itr macro expects a for loop"))
+    isexpr(ex.args[1], :(=)) || throw(ArgumentError("malformed or unsupported for loop in @itr macro"))
+    isexpr(ex.args[1].args[2], :call) || throw(ArgumentError("@itr macro expects an iterator call, e.g. @itr for (x,y) = zip(a,b)"))
     iterator = ex.args[1].args[2].args[1]
     ex.args[1].args[2] = Expr(:tuple, ex.args[1].args[2].args[2:end]...)
     if iterator == :zip
@@ -617,7 +617,7 @@ macro itr(ex)
     elseif iterator == :chain
         rex = :(@chain($(esc(ex))))
     else
-        error("unknown or unsupported iterator $iterator in @itr macro")
+        throw(ArgumentError("unknown or unsupported iterator $iterator in @itr macro"))
     end
     return rex
 end
@@ -625,10 +625,10 @@ end
 macro zip(ex)
     @assert ex.head == :for
     @assert ex.args[1].head == :(=)
-    isexpr(ex.args[1].args[1], :tuple) || error("@zip macro needs explicit tuple arguments")
-    isexpr(ex.args[1].args[2], :tuple) || error("@zip macro needs explicit tuple arguments")
+    isexpr(ex.args[1].args[1], :tuple) || throw(ArgumentError("@zip macro needs explicit tuple arguments"))
+    isexpr(ex.args[1].args[2], :tuple) || throw(ArgumentError("@zip macro needs explicit tuple arguments"))
     n = length(ex.args[1].args[1].args)
-    length(ex.args[1].args[2].args) == n || error("unequal tuple sizes in @zip macro")
+    length(ex.args[1].args[2].args) == n || throw(ArgumentError("unequal tuple sizes in @zip macro"))
     body = esc(ex.args[2])
     vars = map(esc, ex.args[1].args[1].args)
     iters = map(esc, ex.args[1].args[2].args)
@@ -650,8 +650,8 @@ end
 macro enumerate(ex)
     @assert ex.head == :for
     @assert ex.args[1].head == :(=)
-    isexpr(ex.args[1].args[1], :tuple) || error("@enumerate macro needs an explicit tuple argument")
-    length(ex.args[1].args[1].args) == 2 || error("lentgh of tuple must be 2 in @enumerate macro")
+    isexpr(ex.args[1].args[1], :tuple) || throw(ArgumentError("@enumerate macro needs an explicit tuple argument"))
+    length(ex.args[1].args[1].args) == 2 || throw(ArgumentError("lentgh of tuple must be 2 in @enumerate macro"))
     body = esc(ex.args[2])
     vars = map(esc, ex.args[1].args[1].args)
     if isexpr(ex.args[1].args[2], :tuple) && length(ex.args[1].args[2].args) == 1
@@ -678,8 +678,8 @@ macro _take(ex, strict)
     mname = strict ? "takestrict" : "take"
     @assert ex.head == :for
     @assert ex.args[1].head == :(=)
-    isexpr(ex.args[1].args[2], :tuple) || error("@$(mname) macro needs an explicit tuple argument")
-    length(ex.args[1].args[2].args) == 2 || error("length of tuple must be 2 in @$(mname) macro")
+    isexpr(ex.args[1].args[2], :tuple) || throw(ArgumentError("@$(mname) macro needs an explicit tuple argument"))
+    length(ex.args[1].args[2].args) == 2 || throw(ArgumentError("length of tuple must be 2 in @$(mname) macro"))
     body = esc(ex.args[2])
     var = esc(ex.args[1].args[1])
     iter = esc(ex.args[1].args[2].args[1])
@@ -698,7 +698,7 @@ macro _take(ex, strict)
         Expr(:(=), ind, Expr(:call, :(+), ind, 1)))
     if strict
         checkex = Expr(:if, Expr(:call, :(<), ind, n),
-            Expr(:call, :error, "in takestrict(xs, n), xs had fewer than n items to take."))
+            Expr(:call, :throw, ArgumentError("in takestrict(xs, n), xs had fewer than n items to take.")))
     else
         checkex = :nothing
     end
@@ -723,8 +723,8 @@ end
 macro drop(ex)
     @assert ex.head == :for
     @assert ex.args[1].head == :(=)
-    isexpr(ex.args[1].args[2], :tuple) || error("@drop macro needs an explicit tuple argument")
-    length(ex.args[1].args[2].args) == 2 || error("length of tuple must be 2 in @drop macro")
+    isexpr(ex.args[1].args[2], :tuple) || throw(ArgumentError("@drop macro needs an explicit tuple argument"))
+    length(ex.args[1].args[2].args) == 2 || throw(ArgumentError("length of tuple must be 2 in @drop macro"))
     body = esc(ex.args[2])
     var = esc(ex.args[1].args[1])
     iter = esc(ex.args[1].args[2].args[1])
@@ -756,7 +756,7 @@ end
 macro chain(ex)
     @assert ex.head == :for
     @assert ex.args[1].head == :(=)
-    isexpr(ex.args[1].args[2], :tuple) || error("@chain macro needs explicit tuple arguments")
+    isexpr(ex.args[1].args[2], :tuple) || throw(ArgumentError("@chain macro needs explicit tuple arguments"))
     n = length(ex.args[1].args[2].args)
     body = esc(ex.args[2])
     var = esc(ex.args[1].args[1])
