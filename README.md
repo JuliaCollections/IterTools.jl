@@ -100,7 +100,7 @@ Install this package with `Pkg.add("Iterators")`
 
 - **repeated**(x, [n])
 
-    Repeat one value `n` times, on infinitely if `n` is omitted.
+    Repeat one value `n` times, or infinitely if `n` is omitted.
 
     Example:
     ```julia
@@ -283,7 +283,7 @@ Install this package with `Pkg.add("Iterators")`
 
 - **iterate**(f, x)
 
-    Iterate over succesive applications of `f`, as in `f(x), f(f(x)), f(f(f(x))), ...`.
+    Iterate over successive applications of `f`, as in `f(x), f(f(x)), f(f(f(x))), ...`.
 
     Example:
     ```julia
