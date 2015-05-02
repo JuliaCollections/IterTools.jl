@@ -4,7 +4,7 @@ using Iterators, Base.Test
 # -----
 
 i = 0
-for j = count(0, 2)
+for j = countfrom(0, 2)
 	@test j == i*2
 	i += 1
 	i <= 10 || break
@@ -85,7 +85,7 @@ end
 # chain
 # -----
 
-@test collect(chain(1:2:5, 0.2:0.1:1.6)) == [1:2:5, 0.2:0.1:1.6]
+@test collect(chain(1:2:5, 0.2:0.1:1.6)) == [1:2:5; 0.2:0.1:1.6]
 
 # product
 # -------
@@ -103,9 +103,9 @@ x = [5, 2, 2, 1, 2, 1, 1, 2, 4, 2]
 # partition
 # ---------
 
-@test collect(partition(take(count(1), 6), 2)) == [(1,2), (3,4), (5,6)]
-@test collect(partition(take(count(1), 4), 2, 1)) == [(1,2), (2,3), (3,4)]
-@test collect(partition(take(count(1), 8), 2, 3)) == [(1,2), (4,5), (7,8)]
+@test collect(partition(take(countfrom(1), 6), 2)) == [(1,2), (3,4), (5,6)]
+@test collect(partition(take(countfrom(1), 4), 2, 1)) == [(1,2), (2,3), (3,4)]
+@test collect(partition(take(countfrom(1), 8), 2, 3)) == [(1,2), (4,5), (7,8)]
 
 # imap
 # ----
@@ -139,7 +139,7 @@ test_imap(
 test_imap(
   Any[2,4,6],
   [1,2,3],
-  count(1)
+  countfrom(1)
 )
 
 

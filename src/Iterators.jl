@@ -1,9 +1,12 @@
 module Iterators
 using Base
+# Not needed now since it does not work
+# using Compat
 
 import Base: start, next, done, count, take, eltype, length
 
 export
+    countfrom,
     count,
     take,
     takestrict,
@@ -23,46 +26,60 @@ export
 
 # Infinite counting
 
-immutable Count{S<:Number}
-    start::S
-    step::S
+if VERSION >= v"0.4-dev"
+    import Base: Count
+    @deprecate count(start::Number, step::Number) countfrom(start, step)
+    @deprecate count(start::Number)               countfrom(start)
+    @deprecate count()                            countfrom(1)
+else
+    immutable Count{S<:Number}
+        start::S
+        step::S
+    end
+
+    eltype{S}(it::Count{S}) = S
+
+    countfrom(start::Number, step::Number) = Count(promote(start, step)...)
+    countfrom(start::Number)               = Count(start, one(start))
+    countfrom()                            = Count(1, 1)
+
+    start(it::Count) = it.start
+    next(it::Count, state) = (state, state + it.step)
+    done(it::Count, state) = false
+
+    # Deprecate on 0.3 as well?
+    count(start::Number, step::Number) = countfrom(start, step)
+    count(start::Number)               = countfrom(start)
+    count()                            = countfrom(1)
 end
-
-eltype{S}(it::Count{S}) = S
-
-count(start::Number, step::Number) = Count(promote(start, step)...)
-count(start::Number)               = Count(start, one(start))
-count()                            = Count(0, 1)
-
-start(it::Count) = it.start
-next(it::Count, state) = (state, state + it.step)
-done(it::Count, state) = false
-
 
 # Iterate through the first n elements
 
-immutable Take{I}
-    xs::I
-    n::Int
+if VERSION >= v"0.4-dev"
+    import Base: Take
+else
+    immutable Take{I}
+        xs::I
+        n::Int
+    end
+
+    eltype(it::Take) = eltype(it.xs)
+
+    take(xs, n::Int) = Take(xs, n)
+
+    start(it::Take) = (it.n, start(it.xs))
+
+    function next(it::Take, state)
+        n, xs_state = state
+        v, xs_state = next(it.xs, xs_state)
+        return v, (n - 1, xs_state)
+    end
+
+    function done(it::Take, state)
+        n, xs_state = state
+        return n <= 0 || done(it.xs, xs_state)
+    end
 end
-
-eltype(it::Take) = eltype(it.xs)
-
-take(xs, n::Int) = Take(xs, n)
-
-start(it::Take) = (it.n, start(it.xs))
-
-function next(it::Take, state)
-    n, xs_state = state
-    v, xs_state = next(it.xs, xs_state)
-    return v, (n - 1, xs_state)
-end
-
-function done(it::Take, state)
-    n, xs_state = state
-    return n <= 0 || done(it.xs, xs_state)
-end
-
 
 # Iterate through the first n elements, throwing an exception if
 # fewer than n items ar encountered.
@@ -99,88 +116,100 @@ function length(it::TakeStrict)
     return it.n
 end
 
-
 # Iterator through all but the first n elements
 
-immutable Drop{I}
-    xs::I
-    n::Int
-end
-
-eltype(it::Drop) = eltype(it.xs)
-
-drop(xs, n::Int) = Drop(xs, n)
-
-function start(it::Drop)
-    xs_state = start(it.xs)
-    for i in 1:it.n
-        if done(it.xs, xs_state)
-            break
-        end
-
-        _, xs_state = next(it.xs, xs_state)
+if VERSION >= v"0.4-dev"
+    import Base: Drop
+else
+    immutable Drop{I}
+        xs::I
+        n::Int
     end
-    xs_state
+
+    eltype(it::Drop) = eltype(it.xs)
+
+    drop(xs, n::Int) = Drop(xs, n)
+
+    function start(it::Drop)
+        xs_state = start(it.xs)
+        for i in 1:it.n
+            if done(it.xs, xs_state)
+                break
+            end
+
+            _, xs_state = next(it.xs, xs_state)
+        end
+        xs_state
+    end
+
+    next(it::Drop, state) = next(it.xs, state)
+    done(it::Drop, state) = done(it.xs, state)
 end
-
-next(it::Drop, state) = next(it.xs, state)
-done(it::Drop, state) = done(it.xs, state)
-
 
 # Cycle an iterator forever
 
-immutable Cycle{I}
-    xs::I
-end
-
-eltype(it::Cycle) = eltype(it.xs)
-
-cycle(xs) = Cycle(xs)
-
-function start(it::Cycle)
-    s = start(it.xs)
-    return s, done(it.xs, s)
-end
-
-function next(it::Cycle, state)
-    s, d = state
-    if done(it.xs, s)
-        s = start(it.xs)
+if VERSION >= v"0.4-dev"
+    using Base: Cycle
+else
+    immutable Cycle{I}
+        xs::I
     end
-    v, s = next(it.xs, s)
-    return v, (s, false)
-end
 
-done(it::Cycle, state) = state[2]
+    eltype(it::Cycle) = eltype(it.xs)
+
+    cycle(xs) = Cycle(xs)
+
+    function start(it::Cycle)
+        s = start(it.xs)
+        return s, done(it.xs, s)
+    end
+
+    function next(it::Cycle, state)
+        s, d = state
+        if done(it.xs, s)
+            s = start(it.xs)
+        end
+        v, s = next(it.xs, s)
+        return v, (s, false)
+    end
+
+    done(it::Cycle, state) = state[2]
+end
 
 # Repeat an object n (or infinitely many) times.
 
-immutable Repeat{O}
-    x::O
-    n::Int
+if VERSION >= v"0.4-dev"
+    import Base: Repeated
+    typealias RepeatForever{O} Repeated{O}
+    typealias Repeat{O} Take{Repeated{O}}
+else
+    immutable Repeat{O}
+        x::O
+        n::Int
+    end
+
+    eltype{O}(it::Repeat{O}) = O
+    length(it::Repeat) = it.n
+
+    repeated(x, n) = Repeat(x, n)
+
+    start(it::Repeat) = it.n
+    next(it::Repeat, state) = (it.x, state - 1)
+    done(it::Repeat, state) = state <= 0
+
+
+    immutable RepeatForever{O}
+        x::O
+    end
+
+    eltype{O}(r::RepeatForever{O}) = O
+
+    repeated(x) = RepeatForever(x)
+
+    start(it::RepeatForever) = nothing
+    next(it::RepeatForever, state) = (it.x, nothing)
+    done(it::RepeatForever, state) = false
 end
-
-eltype{O}(it::Repeat{O}) = O
-length(it::Repeat) = it.n
-
-repeated(x, n) = Repeat(x, n)
-
-start(it::Repeat) = it.n
-next(it::Repeat, state) = (it.x, state - 1)
-done(it::Repeat, state) = state <= 0
-
-
-immutable RepeatForever{O}
-    x::O
-end
-
-eltype{O}(r::RepeatForever{O}) = O
-
-repeated(x) = RepeatForever(x)
-
-start(it::RepeatForever) = nothing
-next(it::RepeatForever, state) = (it.x, nothing)
-done(it::RepeatForever, state) = false
 
 # Repeat a function application n (or infinitely many) times.
 
@@ -265,7 +294,13 @@ immutable Product
     end
 end
 
-eltype(p::Product) = tuple(map(eltype, p.xss)...)
+# Using @compat causes error JuliaLang/Compat.jl#81
+# eltype(p::Product) = @compat(Tuple{map(eltype, p.xss)...})
+if VERSION >= v"0.4-dev"
+    eltype(p::Product) = Tuple{map(eltype, p.xss)...}
+else
+    eltype(p::Product) = tuple(map(eltype, p.xss)...)
+end
 length(p::Product) = prod(map(length, p.xss))
 
 product(xss...) = Product(xss...)
@@ -365,7 +400,13 @@ immutable Partition{I}
     step::Int
 end
 
-eltype(it::Partition) = tuple(fill(eltype(it.xs),it.n)...)
+# Using @compat causes error JuliaLang/Compat.jl#81
+# eltype(it::Partition) = @compat(Tuple{fill(eltype(it.xs),it.n)...})
+if VERSION >= v"0.4-dev"
+    eltype(it::Partition) = Tuple{fill(eltype(it.xs),it.n)...}
+else
+    eltype(it::Partition) = tuple(fill(eltype(it.xs),it.n)...)
+end
 
 function partition(xs, n::Int)
     Partition(xs, n, n)
