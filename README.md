@@ -17,103 +17,10 @@ Install this package with `Pkg.add("Iterators")`
 
 -----------
 
-- **count**([start, [step]])
-
-    Count, starting at ``start`` and incrementing by ``step``.  By default, ``start=0`` and ``step=1``.
-
-    Example:
-    ```julia
-    for i in take(count(5,5),5)
-        @show i
-    end
-    ```
-    yields
-    ```
-    i = 5
-    i = 10
-    i = 15
-    i = 20
-    i = 25
-    ```
-
-- **take**(xs, n)
-
-    Iterate through at most n elements from `xs`.
-
-    Example:
-    ```julia
-    for i in take(1:100, 5)
-        @show i
-    end
-    ```
-
-    ```
-    i = 1
-    i = 2
-    i = 3
-    i = 4
-    i = 5
-    ```
-
 - **takestrict**(xs, n)
 
   Equivalent to `take`, but will throw an exception if fewer than `n` items
   are encountered in `xs`.
-
-- **drop**(xs, n)
-
-    Iterate through all but the first n elements of `xs`
-
-    Example:
-    ```julia
-    for i in drop(1:10, 5)
-        @show i
-    end
-    ```
-
-    ```
-    i = 6
-    i = 7
-    i = 8
-    i = 9
-    i = 10
-    ```
-
-- **cycle**(xs)
-
-    Repeat an iterator in a cycle forever.
-
-    Example:
-    ```julia
-    for i in take(cycle(1:3), 5)
-        @show i
-    end
-    ```
-
-    ```
-    i = 1
-    i = 2
-    i = 3
-    i = 1
-    i = 2
-    ```
-
-- **repeated**(x, [n])
-
-    Repeat one value `n` times, or infinitely if `n` is omitted.
-
-    Example:
-    ```julia
-    for i in repeated("Hello", 3)
-        @show i
-    end
-    ```
-
-    ```
-    i = "Hello"
-    i = "Hello"
-    i = "Hello"
-    ```
 
 - **repeatedly**(f, [n])
 
@@ -298,6 +205,102 @@ Install this package with `Pkg.add("Iterators")`
     i = 4
     i = 8
     i = 16
+    ```
+
+## Moved Base Julia in 0.4, but still provided here for 0.3
+
+- **countfrom**([start, [step]])
+
+    Count, starting at ``start`` and incrementing by ``step``.  By default, ``start=0`` and ``step=1``.
+
+    Example:
+    ```julia
+    for i in take(countfrom(5,5),5)
+        @show i
+    end
+    ```
+    yields
+    ```
+    i = 5
+    i = 10
+    i = 15
+    i = 20
+    i = 25
+    ```
+
+- **take**(xs, n)
+
+    Iterate through at most n elements from `xs`.
+
+    Example:
+    ```julia
+    for i in take(1:100, 5)
+        @show i
+    end
+    ```
+
+    ```
+    i = 1
+    i = 2
+    i = 3
+    i = 4
+    i = 5
+    ```
+
+
+- **drop**(xs, n)
+
+    Iterate through all but the first n elements of `xs`
+
+    Example:
+    ```julia
+    for i in drop(1:10, 5)
+        @show i
+    end
+    ```
+
+    ```
+    i = 6
+    i = 7
+    i = 8
+    i = 9
+    i = 10
+    ```
+
+- **cycle**(xs)
+
+    Repeat an iterator in a cycle forever.
+
+    Example:
+    ```julia
+    for i in take(cycle(1:3), 5)
+        @show i
+    end
+    ```
+
+    ```
+    i = 1
+    i = 2
+    i = 3
+    i = 1
+    i = 2
+    ```
+
+- **repeated**(x, [n])
+
+    Repeat one value `n` times, on infinitely if `n` is omitted.
+
+    Example:
+    ```julia
+    for i in repeated("Hello", 3)
+        @show i
+    end
+    ```
+
+    ```
+    i = "Hello"
+    i = "Hello"
+    i = "Hello"
     ```
 
 ## The `@itr` macro for automatic inlining in `for` loops
