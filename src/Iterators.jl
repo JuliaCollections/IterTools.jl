@@ -14,7 +14,8 @@ export
     imap,
     subsets,
     iterate,
-    @itr
+    everynth
+    @itr,
 
 
 # Some iterators have been moved into Base (and count has been renamed as well)
@@ -633,6 +634,46 @@ function next(it::Binomial, state::(@compat Tuple{Array{Int64,1}, Bool}))
 end
 
 done(it::Binomial, state::(@compat Tuple{Array{Int64,1}, Bool})) = state[2]
+
+
+# everynth(xs,n): take every n'th element from xs
+
+immutable EveryNth{I}
+    xs::I
+    interval::Unsigned
+end
+
+type EveryNthState
+    xs_state
+    next_x
+end
+
+function everynth(xs, interval::Integer)
+    if interval<=0
+        throw(ArgumentError(string("expected interval to be 1 or more, ",
+                                   "got $interval")))
+    end
+    EveryNth(xs, convert(Unsigned, interval))
+end
+eltype(en::EveryNth) = eltype(en.xs)
+
+start(en::EveryNth) = EveryNthState(start(en.xs), nothing)
+
+function done(en::EveryNth, state::EveryNthState)
+    xs_state = state.xs_state
+    x = nothing
+    for i in 1:en.interval
+        if done(en.xs, xs_state)
+            return true
+        end
+        x, xs_state = next(en.xs, xs_state)
+    end
+    state.xs_state = xs_state
+    state.next_x = x
+    return false
+end
+
+next(::EveryNth, state::EveryNthState) = (state.next_x, state)
 
 
 # Unfolding (anamorphism)

@@ -214,6 +214,15 @@ test_groupby(
 @test length(collect(subsets(collect(1:4),4))) == binomial(4,4)
 
 
+# Every nth
+# ---------
+
+@test collect(everynth([], 10)) == []
+@test_throws ArgumentError everynth([], 0)
+@test collect(everynth(10:20, 3)) == [12,15,18]
+@test collect(everynth(10:20, 1)) == [10:20]
+
+
 ## @itr
 ## ====
 

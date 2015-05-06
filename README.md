@@ -98,6 +98,22 @@ Install this package with `Pkg.add("Iterators")`
     i = 3
     ```
 
+- **everynth**(xs, n)
+    
+    Iterate through every n'th element of `xs`
+
+    Example:
+    ```julia
+    collect(everynth(5:15,3))
+    ```
+
+    ```
+    3-element Array{Int32,1}:
+      7
+     10
+     13
+    ```
+
 - **partition**(xs, n, [step])
 
     Group values into `n`-tuples.
