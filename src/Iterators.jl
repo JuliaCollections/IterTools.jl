@@ -1,8 +1,6 @@
 module Iterators
-using Base
-# Not needed now since it does not work
-# using Compat
 
+using Compat
 import Base: start, next, done, eltype, length
 
 export
@@ -612,16 +610,16 @@ length(it::Binomial) = binomial(it.n,it.k)
 
 subsets(xs,k) = Binomial(xs,length(xs),k)
 
-start(it::Binomial) = (Int64[1:it.k],false)
+start(it::Binomial) = (collect(Int64, 1:it.k), false)
 
-function next(it::Binomial,state::(Array{Int64,1},Bool))
+function next(it::Binomial, state::(@compat Tuple{Array{Int64,1}, Bool}))
     idx = state[1]
     set = it.xs[idx]
     i = it.k
     while(i>0)
         if idx[i] < it.n - it.k + i
             idx[i] += 1
-            idx[i+1:it.k] = [idx[i]+1:idx[i]+it.k-i]
+            idx[i+1:it.k] = idx[i]+1:idx[i]+it.k-i
             break
         else
             i -= 1
@@ -634,7 +632,7 @@ function next(it::Binomial,state::(Array{Int64,1},Bool))
     end
 end
 
-done(it::Binomial,state::(Array{Int64,1},Bool)) = state[2]
+done(it::Binomial, state::(@compat Tuple{Array{Int64,1}, Bool})) = state[2]
 
 
 # Unfolding (anamorphism)
