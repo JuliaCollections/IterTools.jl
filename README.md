@@ -188,6 +188,23 @@ Install this package with `Pkg.add("Iterators")`
     i = [1,2,3]
     ```
 
+- **subsets**(xs, k)
+
+    Iterate over every subset of size `k` from a collection `xs`.
+
+    Example:
+    ```julia
+    for i in subsets([1,2,3],2)
+     @show i
+    end
+    ```
+
+    ```
+    i = [1,2]
+    i = [1,3]
+    i = [2,3]
+    ```
+
 - **iterate**(f, x)
 
     Iterate over successive applications of `f`, as in `f(x), f(f(x)), f(f(f(x))), ...`.

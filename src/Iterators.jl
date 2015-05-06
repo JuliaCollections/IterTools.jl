@@ -598,6 +598,45 @@ function done(it::Subsets, state)
     state[end]
 end
 
+
+# Iterate over all subsets of a collection with a given size
+
+immutable Binomial{T}
+    xs::Array{T,1}
+    n::Int64
+    k::Int64
+end
+
+eltype(it::Binomial) = Array{eltype(it.xs),1}
+length(it::Binomial) = binomial(it.n,it.k)
+
+subsets(xs,k) = Binomial(xs,length(xs),k)
+
+start(it::Binomial) = (Int64[1:it.k],false)
+
+function next(it::Binomial,state::(Array{Int64,1},Bool))
+    idx = state[1]
+    set = it.xs[idx]
+    i = it.k
+    while(i>0)
+        if idx[i] < it.n - it.k + i
+            idx[i] += 1
+            idx[i+1:it.k] = [idx[i]+1:idx[i]+it.k-i]
+            break
+        else
+            i -= 1
+        end
+    end
+    if i==0
+        return set, (idx,true)
+    else
+        return set, (idx,false)
+    end
+end
+
+done(it::Binomial,state::(Array{Int64,1},Bool)) = state[2]
+
+
 # Unfolding (anamorphism)
 # Outputs the stream: seed, f(seed), f(f(seed)), ...
 

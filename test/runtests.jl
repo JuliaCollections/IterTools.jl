@@ -200,6 +200,20 @@ test_groupby(
       Any[Symbol[], Symbol[:a], Symbol[:b], Symbol[:a, :b], Symbol[:c],
           Symbol[:a, :c], Symbol[:b, :c], Symbol[:a, :b, :c]]
 
+
+# subsets of size k
+# -----------------
+
+@test collect(subsets(Any[],0)) == Any[Any[]]
+@test collect(subsets([:a, :b, :c],1)) == Any[Symbol[:a], Symbol[:b], Symbol[:c]]
+@test collect(subsets([:a, :b, :c],2)) == Any[Symbol[:a,:b], Symbol[:a,:c], Symbol[:b,:c]]
+@test collect(subsets([:a, :b, :c],3)) == Any[Symbol[:a,:b,:c]]
+@test length(collect(subsets([1:4],1))) == binomial(4,1)
+@test length(collect(subsets([1:4],2))) == binomial(4,2)
+@test length(collect(subsets([1:4],3))) == binomial(4,3)
+@test length(collect(subsets([1:4],4))) == binomial(4,4)
+
+
 ## @itr
 ## ====
 
