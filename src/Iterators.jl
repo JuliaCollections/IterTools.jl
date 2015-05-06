@@ -14,8 +14,8 @@ export
     imap,
     subsets,
     iterate,
-    everynth
-    @itr,
+    takenth,
+    @itr
 
 
 # Some iterators have been moved into Base (and count has been renamed as well)
@@ -636,48 +636,47 @@ end
 done(it::Binomial, state::(@compat Tuple{Array{Int64,1}, Bool})) = state[2]
 
 
-# everynth(xs,n): take every n'th element from xs
+# takenth(xs,n): take every n'th element from xs
 
-immutable EveryNth{I}
+immutable TakeNth{I}
     xs::I
-    interval::Unsigned
+    interval::Uint
 end
 
-type EveryNthState
-    xs_state
-    next_x
-end
-
-function everynth(xs, interval::Integer)
-    if interval<=0
+function takenth(xs, interval::Integer)
+    if interval <= 0
         throw(ArgumentError(string("expected interval to be 1 or more, ",
                                    "got $interval")))
     end
-    EveryNth(xs, convert(Unsigned, interval))
+    TakeNth(xs, convert(Uint, interval))
 end
-eltype(en::EveryNth) = eltype(en.xs)
+eltype(en::TakeNth) = eltype(en.xs)
 
-start(en::EveryNth) = EveryNthState(start(en.xs), nothing)
 
-function done(en::EveryNth, state::EveryNthState)
-    xs_state = state.xs_state
-    x = nothing
-    for i in 1:en.interval
-        if done(en.xs, xs_state)
-            return true
-        end
-        x, xs_state = next(en.xs, xs_state)
+function start(it::TakeNth)
+    i = 1
+    state = start(it.xs)
+    while i < it.interval && !done(it.xs, state)
+        _, state = next(it.xs, state)
+        i += 1
     end
-    state.xs_state = xs_state
-    state.next_x = x
-    return false
+    return state
 end
 
-next(::EveryNth, state::EveryNthState) = (state.next_x, state)
+
+function next(it::TakeNth, state)
+    value, state = next(it.xs, state)
+    i = 1
+    while i < it.interval && !done(it.xs, state)
+        _, state = next(it.xs, state)
+        i += 1
+    end
+    return value, state
+end
 
 
-# Unfolding (anamorphism)
-# Outputs the stream: seed, f(seed), f(f(seed)), ...
+done(it::TakeNth, state) = done(it.xs, state)
+
 
 immutable Iterate{T}
     f::Function

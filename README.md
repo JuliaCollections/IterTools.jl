@@ -98,13 +98,13 @@ Install this package with `Pkg.add("Iterators")`
     i = 3
     ```
 
-- **everynth**(xs, n)
+- **takenth**(xs, n)
     
     Iterate through every n'th element of `xs`
 
     Example:
     ```julia
-    collect(everynth(5:15,3))
+    collect(takenth(5:15,3))
     ```
 
     ```
