@@ -642,7 +642,7 @@ done(it::Binomial, state::(@compat Tuple{Array{Int64,1}, Bool})) = state[2]
 
 immutable TakeNth{I}
     xs::I
-    interval::Uint
+    interval::UInt
 end
 
 function takenth(xs, interval::Integer)
@@ -650,7 +650,7 @@ function takenth(xs, interval::Integer)
         throw(ArgumentError(string("expected interval to be 1 or more, ",
                                    "got $interval")))
     end
-    TakeNth(xs, convert(Uint, interval))
+    TakeNth(xs, convert(UInt, interval))
 end
 eltype(en::TakeNth) = eltype(en.xs)
 
@@ -688,7 +688,7 @@ end
 iterate(f, seed) = Iterate(f, seed)
 start(it::Iterate) = it.seed
 next(it::Iterate, state) = (state, it.f(state))
-done(it::Iterate, state) = (state==None)
+@compat done(it::Iterate, state) = (state==Union{})
 
 using Base.Meta
 

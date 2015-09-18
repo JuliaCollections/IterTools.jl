@@ -1,5 +1,6 @@
 using BenchmarkLite
 using Iterators
+using Compat
 
 type Collect{Itr} <: Proc end
 
@@ -91,7 +92,7 @@ collect(::Distinct, v) = Base.collect(distinct(v))
 type Subsets end
 collect(::Subsets, v) = Base.collect(subsets(v))
 
-function Base.run{Itr<:Union(Subsets, Distinct)}(p::Collect{Itr}, n::Int, v)
+@compat function Base.run{Itr<:Union{Subsets, Distinct}}(p::Collect{Itr}, n::Int, v)
     op = Itr()
     collect(op, v)
 end
@@ -107,7 +108,7 @@ collect(::Chain, vs) = Base.collect(chain(vs...))
 type Product end
 collect(::Product, vs) = Base.collect(product(vs...))
 
-function Base.run{Itr<:Union(Chain, Product)}(p::Collect{Itr}, n::Int, vs)
+@compat function Base.run{Itr<:Union{Chain, Product}}(p::Collect{Itr}, n::Int, vs)
     op = Itr()
     collect(op, vs)
 end
