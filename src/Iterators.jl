@@ -3,7 +3,7 @@ VERSION >= v"0.4.0-dev+6521" && __precompile__()
 module Iterators
 
 using Compat
-import Base: start, next, done, eltype, length
+import Base: start, next, done, eltype, length, size
 
 export
     takestrict,
@@ -19,9 +19,18 @@ export
     takenth,
     @itr
 
+# iteratorsize is new in 0.5, declare it here for older versions. However,
+# we do not actually support calling these, since the traits are not defined
+if VERSION < v"0.5.0-dev+3305"
+    function iteratorsize
+    end
+else
+    import Base: iteratorsize, SizeUnknown, IsInfinite, HasLength
+end
+
 
 # Some iterators have been moved into Base (and count has been renamed as well)
-if VERSION >= v"0.4.0-def+3323"
+if VERSION >= v"0.4.0-dev+3323"
 
     import Base: count
     Base.@deprecate count(start::Number, step::Number) countfrom(start, step)
@@ -170,8 +179,6 @@ else
     done(it::RepeatForever, state) = false
 end
 
-
-
 # Iterate through the first n elements, throwing an exception if
 # fewer than n items ar encountered.
 
@@ -179,6 +186,7 @@ immutable TakeStrict{I}
     xs::I
     n::Int
 end
+iteratorsize{T<:TakeStrict}(::Type{T}) = HasLength()
 
 eltype(it::TakeStrict) = eltype(it.xs)
 
@@ -214,6 +222,7 @@ immutable RepeatCall
     f::Function
     n::Int
 end
+iteratorsize{T<:RepeatCall}(::Type{T}) = HasLength()
 
 length(it::RepeatCall) = it.n
 repeatedly(f, n) = RepeatCall(f, n)
@@ -226,6 +235,7 @@ done(it::RepeatCall, state) = state <= 0
 immutable RepeatCallForever
     f::Function
 end
+iteratorsize{T<:RepeatCallForever}(::Type{T}) = IsInfinite()
 
 repeatedly(f) = RepeatCallForever(f)
 
@@ -242,6 +252,7 @@ immutable Chain
         new(Any[xss...])
     end
 end
+iteratorsize{T<:Chain}(::Type{T}) = SizeUnknown()
 
 function eltype(it::Chain)
     try
@@ -290,6 +301,7 @@ immutable Product
         new(Any[xss...])
     end
 end
+iteratorsize{T<:Product}(::Type{T}) = SizeUnknown()
 
 # Using @compat causes error JuliaLang/Compat.jl#81
 # eltype(p::Product) = @compat(Tuple{map(eltype, p.xss)...})
@@ -355,6 +367,7 @@ immutable Distinct{I}
 
     Distinct(xs) = new(xs, Dict{Any, Int}())
 end
+iteratorsize{T<:Distinct}(::Type{T}) = SizeUnknown()
 
 eltype(it::Distinct) = eltype(it.xs)
 
@@ -396,6 +409,7 @@ immutable Partition{I}
     n::Int
     step::Int
 end
+iteratorsize{T<:Partition}(::Type{T}) = SizeUnknown()
 
 # Using @compat causes error JuliaLang/Compat.jl#81
 # eltype(it::Partition) = @compat(Tuple{fill(eltype(it.xs),it.n)...})
@@ -476,6 +490,7 @@ immutable GroupBy{I}
     keyfunc::Function
     xs::I
 end
+iteratorsize{T<:GroupBy}(::Type{T}) = SizeUnknown()
 
 eltype{I}(it::GroupBy{I}) = I
 eltype{I<:Range}(it::GroupBy{I}) = Array{eltype(it.xs),}
@@ -534,6 +549,7 @@ immutable IMap
     mapfunc::Base.Callable
     xs::Vector{Any}
 end
+iteratorsize{T<:IMap}(::Type{T}) = SizeUnknown()
 
 function imap(mapfunc, it1, its...)
     IMap(mapfunc, Any[it1, its...])
@@ -561,6 +577,7 @@ end
 immutable Subsets
     xs
 end
+iteratorsize{T<:Subsets}(::Type{T}) = HasLength()
 
 eltype(it::Subsets) = Array{eltype(it.xs),1}
 length(it::Subsets) = 1 << length(it.xs)
@@ -607,6 +624,7 @@ immutable Binomial{T}
     n::Int64
     k::Int64
 end
+iteratorsize{T<:Binomial}(::Type{T}) = HasLength()
 
 eltype(it::Binomial) = Array{eltype(it.xs),1}
 length(it::Binomial) = binomial(it.n,it.k)
@@ -644,6 +662,10 @@ immutable TakeNth{I}
     xs::I
     interval::UInt
 end
+iteratorsize{I}(::Type{TakeNth{I}}) = iteratorsize(I)
+
+length(x::TakeNth) = div(length(x.xs), x.interval)
+size(x::TakeNth) = (length(x),)
 
 function takenth(xs, interval::Integer)
     if interval <= 0
@@ -684,6 +706,7 @@ immutable Iterate{T}
     f::Function
     seed::T
 end
+iteratorsize{T<:Iterate}(::Type{T}) = SizeUnknown()
 
 iterate(f, seed) = Iterate(f, seed)
 start(it::Iterate) = it.seed
