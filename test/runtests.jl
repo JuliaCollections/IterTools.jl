@@ -392,3 +392,4 @@ end
 @test_chain [1,2,3] [:a, :b] ['w', 'x', 'y', 'z']
 @test_chain [1,2,3] @compat(Union{})[] ['w', 'x', 'y', 'z']
 @test_chain [1,2,3] 4 [('w',3), ('x',2), ('y',1), ('z',0)]
+
