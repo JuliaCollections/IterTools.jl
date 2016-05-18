@@ -22,7 +22,8 @@ export
 # iteratorsize is new in 0.5, declare it here for older versions. However,
 # we do not actually support calling these, since the traits are not defined
 if VERSION < v"0.5.0-dev+3305"
-    function iteratorsize
+    function iteratorsize(v)
+        error("Do not call this on older versions")
     end
 else
     import Base: iteratorsize, SizeUnknown, IsInfinite, HasLength
