@@ -2,6 +2,7 @@
 
 [![Iterators](http://pkg.julialang.org/badges/Iterators_0.3.svg)](http://pkg.julialang.org/?pkg=Iterators&ver=0.3)
 [![Iterators](http://pkg.julialang.org/badges/Iterators_0.4.svg)](http://pkg.julialang.org/?pkg=Iterators&ver=0.4)
+[![Iterators](http://pkg.julialang.org/badges/Iterators_0.5.svg)](http://pkg.julialang.org/?pkg=Iterators&ver=0.5)
 
 [![Build Status](https://travis-ci.org/JuliaLang/Iterators.jl.svg?branch=master)](https://travis-ci.org/JuliaLang/Iterators.jl)
 [![Coverage Status](https://coveralls.io/repos/JuliaLang/Iterators.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaLang/Iterators.jl?branch=master)
