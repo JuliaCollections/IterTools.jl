@@ -18,6 +18,8 @@ export
     iterate,
     nth,
     takenth,
+    peekiter,
+    peek,
     @itr
 
 # iteratorsize is new in 0.5, declare it here for older versions. However,
@@ -564,6 +566,53 @@ iterate(f, seed) = Iterate(f, seed)
 start(it::Iterate) = it.seed
 next(it::Iterate, state) = (state, it.f(state))
 done(it::Iterate, state) = (state==Union{})
+
+# peekiter(iter): possibility to peek the head of an iterator
+
+immutable PeekIter{I}
+    it::I
+end
+
+peekiter(itr) = PeekIter(itr)
+
+eltype{I}(::Type{PeekIter{I}}) = eltype(I)
+iteratorsize{I}(::Type{PeekIter{I}}) = iteratorsize(I)
+iteratoreltype{I}(::Type{PeekIter{I}}) = iteratoreltype(I)
+length(f::PeekIter) = length(f.it)
+size(f::PeekIter) = size(f.it)
+
+function start{I}(f::PeekIter{I})
+    s = start(f.it)
+    if done(f.it, s)
+        val = Nullable{eltype(I)}()
+    else
+        el, s = next(f.it, s)
+        val = Nullable{eltype(I)}(el)
+    end
+    return s, val
+end
+
+function next(f::PeekIter, state)
+    s, val = state
+    # done() should prevent condition `isnull(val) && done(state)`
+    !isnull(val) && done(f.it, s) && return get(val), (s, Nullable{typeof(val)}())
+    el, s = next(f.it, s)
+    return get(val), (s, Nullable(el), done(f.it, s))
+end
+
+@inline function done(f::PeekIter, state)
+    s, val = state
+    return done(f.it, s) && isnull(val)
+end
+
+peek{I}(f::PeekIter{I}, state) = done(f, state) ? Nullable{eltype(I)}() : state[2]
+
+
+start{T}(r::PeekIter{UnitRange{T}}) = start(r.it)
+next{T}(r::PeekIter{UnitRange{T}}, i) = next(r.it, i)
+done{T}(r::PeekIter{UnitRange{T}}, i) = done(r.it, i)
+peek{T}(r::PeekIter{UnitRange{T}}, i) = done(r.it, i) ? Nullable{T}() : Nullable{T}(next(r.it, i)[1])
+
 
 using Base.Meta
 

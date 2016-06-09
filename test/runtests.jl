@@ -359,6 +359,34 @@ tn3 = takenth(10:20, 1)
 @test collect(tn3) == collect(10:20)
 
 
+# peekiter
+# --------
+result = Int[]
+for x in peekiter(1:10) push!(result, x) end
+@test result == collect(1:10)
+
+result = Int[]
+for x in peekiter([]) push!(result, x) end
+@test result == []
+
+result = Int[]
+for x in peekiter(1:10) push!(result, x) end
+@test result == collect(1:10)
+
+it = peekiter([:a, :b, :c])
+s = start(it)
+@test get(peek(it, s)) == :a
+
+it = peekiter([])
+s = start(it)
+@test isnull(peek(it, s))
+
+it = peekiter(1:10)
+s = start(it)
+x, s = next(it, s)
+@test get(peek(it, s)) == 2
+
+
 ## @itr
 ## ====
 

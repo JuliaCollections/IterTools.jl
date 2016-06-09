@@ -233,6 +233,28 @@ Install this package with `Pkg.add("Iterators")`
     i = [2,3]
     ```
 
+- **peekiter**(xs)
+
+    Add possibility to peek head element of an iterator without updating the state.
+
+    Example:
+    ```julia
+    it = peekiter(["face", "foo", "bar", "book", "baz", "zzz"])
+    s = start(it)
+    @show peek(it, s)
+    @show peek(it, s)
+    x, s = next(it, s)
+    @show x
+    @show peek(it, s)
+    ```
+
+    ```
+    peek(it,s) = Nullable("face")
+    peek(it,s) = Nullable("face") # no change
+    x = "face"
+    peek(it,s) = Nullable("foo")
+    ```
+
 - **iterate**(f, x)
 
     Iterate over successive applications of `f`, as in `f(x), f(f(x)), f(f(f(x))), ...`.
