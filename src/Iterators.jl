@@ -311,16 +311,13 @@ if VERSION >= v"0.4-dev"
 else
     eltype(p::Product) = tuple(map(eltype, p.xss)...)
 end
-length(p::Product) = prod(map(length, p.xss))
+length(p::Product) = mapreduce(length, *, 1, p.xss)
 
 product(xss...) = Product(xss...)
 
 function start(it::Product)
     n = length(it.xss)
     js = Any[start(xs) for xs in it.xss]
-    if n == 0
-        return js, nothing
-    end
     for i = 1:n
         if done(it.xss[i], js[i])
             return js, nothing
@@ -342,16 +339,13 @@ function next(it::Product, state)
     for i in 1:n
         if !done(it.xss[i], js[i])
             vs[i], js[i] = next(it.xss[i], js[i])
-            break
-        elseif i == n
-            vs = nothing
-            break
+            return ans, (js, vs)
         end
 
         js[i] = start(it.xss[i])
         vs[i], js[i] = next(it.xss[i], js[i])
     end
-    return ans, (js, vs)
+    ans, (js, nothing)
 end
 
 done(it::Product, state) = state[2] === nothing

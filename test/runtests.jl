@@ -95,6 +95,9 @@ x1 = 1:2:10
 x2 = 1:5
 @test collect(product(x1, x2)) == vec([(y1, y2) for y1 in x1, y2 in x2])
 
+@test length(product()) == 1
+@test collect(product()) == [()]
+
 # distinct
 # --------
 
