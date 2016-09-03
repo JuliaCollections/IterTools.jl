@@ -98,6 +98,18 @@ Install this package with `Pkg.add("Iterators")`
     i = 4
     i = 3
     ```
+- **nth**(xs, n)
+    
+    Return the n'th element of `xs`. Mostly useful for non indexable collections.
+
+    Example:
+    ```julia
+    nth(1:3, 3)
+    ```
+
+    ```
+    3
+    ```
 
 - **takenth**(xs, n)
     

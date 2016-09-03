@@ -218,6 +218,24 @@ test_groupby(
 @test length(collect(subsets(collect(1:4),4))) == binomial(4,4)
 
 
+# nth element
+# -----------
+for xs in Any[[1, 2, 3], 1:3, reshape(1:3, 3, 1)]
+    @test nth(xs, 3) == 3
+    @test_throws BoundsError nth(xs, 0)
+    @test_throws BoundsError nth(xs, 4)
+end 
+
+for xs in Any[take(1:3, 3), drop(-1:3, 2)]
+    @test nth(xs, 3) == 3
+    @test_throws BoundsError nth(xs, 0)
+end 
+
+s = subsets([1, 2, 3])
+@test_throws BoundsError nth(s, 0)
+@test_throws BoundsError nth(s, length(s) + 1)
+
+
 # Every nth
 # ---------
 

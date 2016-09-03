@@ -16,6 +16,7 @@ export
     imap,
     subsets,
     iterate,
+    nth,
     takenth,
     @itr
 
@@ -649,6 +650,30 @@ function next(it::Binomial, state::(@compat Tuple{Array{Int64,1}, Bool}))
 end
 
 done(it::Binomial, state::(@compat Tuple{Array{Int64,1}, Bool})) = state[2]
+
+
+# nth : return the nth element in a collection
+
+if VERSION < v"0.4"
+    Core.BoundsError(xs, n) = Core.BoundsError()
+end
+
+function nth(xs, n::Integer)
+    n > 0 || throw(BoundsError(xs, n))
+    # catch, if possible
+    applicable(length, xs) && (n ≤ length(xs) || throw(BoundsError(xs, n)))
+    s = start(xs)
+    i = 0
+    while !done(xs, s)
+        (val, s) = next(xs, s)
+        i += 1
+        i == n && return val
+    end
+    # catch iterators with no length but actual finite size less then n
+    throw(BoundsError(xs, n))    
+end     
+
+nth(xs::AbstractArray, n::Integer) = xs[n]
 
 
 # takenth(xs,n): take every n'th element from xs
