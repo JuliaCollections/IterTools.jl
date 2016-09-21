@@ -1,6 +1,5 @@
 # Iterators.jl
 
-[![Iterators](http://pkg.julialang.org/badges/Iterators_0.3.svg)](http://pkg.julialang.org/?pkg=Iterators&ver=0.3)
 [![Iterators](http://pkg.julialang.org/badges/Iterators_0.4.svg)](http://pkg.julialang.org/?pkg=Iterators&ver=0.4)
 [![Iterators](http://pkg.julialang.org/badges/Iterators_0.5.svg)](http://pkg.julialang.org/?pkg=Iterators&ver=0.5)
 

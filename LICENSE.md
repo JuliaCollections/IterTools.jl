@@ -1,7 +1,8 @@
 Iterators.jl is licensed under the MIT License:
 
-> Copyright (c) 2012-2013: Daniel Jones, Stefan Karpinski, Simon Kornblith,
-> Kevin Squire, Jeff Bezanson, Tim Holy, Jonathan Malmaud, and other contributors.
+> Copyright (c) 2012-2016: Daniel Jones, Stefan Karpinski, Simon Kornblith,
+> Kevin Squire, Jeff Bezanson, Tim Holy, Jonathan Malmaud, Eric Davies, and 
+> other contributors.
 
 > Permission is hereby granted, free of charge, to any person obtaining
 > a copy of this software and associated documentation files (the

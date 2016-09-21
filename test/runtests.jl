@@ -87,6 +87,7 @@ end
 # -----
 
 @test collect(chain(1:2:5, 0.2:0.1:1.6)) == [1:2:5; 0.2:0.1:1.6]
+@test collect(chain(1:0, 1:2:5, 0.2:0.1:1.6)) == [1:2:5; 0.2:0.1:1.6]
 
 # product
 # -------
@@ -110,6 +111,9 @@ x = [5, 2, 2, 1, 2, 1, 1, 2, 4, 2]
 @test collect(partition(take(countfrom(1), 6), 2)) == [(1,2), (3,4), (5,6)]
 @test collect(partition(take(countfrom(1), 4), 2, 1)) == [(1,2), (2,3), (3,4)]
 @test collect(partition(take(countfrom(1), 8), 2, 3)) == [(1,2), (4,5), (7,8)]
+@test collect(partition(take(countfrom(1), 0), 2, 1)) == []
+
+@test_throws ArgumentError partition(take(countfrom(1), 8), 2, 0)
 
 # imap
 # ----
@@ -123,7 +127,12 @@ end
 # Empty arrays
 test_imap(
   Any[],
-  @compat(Union{})[]
+  []
+)
+
+test_imap(
+  Any[],
+  Union{}[]
 )
 
 # Simple operation
@@ -158,7 +167,12 @@ end
 
 # Empty arrays
 test_groupby(
-  @compat(Union{})[],
+  [],
+  Any[]
+)
+
+test_groupby(
+  Union{}[],
   Any[]
 )
 
@@ -224,12 +238,12 @@ for xs in Any[[1, 2, 3], 1:3, reshape(1:3, 3, 1)]
     @test nth(xs, 3) == 3
     @test_throws BoundsError nth(xs, 0)
     @test_throws BoundsError nth(xs, 4)
-end 
+end
 
 for xs in Any[take(1:3, 3), drop(-1:3, 2)]
     @test nth(xs, 3) == 3
     @test_throws BoundsError nth(xs, 0)
-end 
+end
 
 s = subsets([1, 2, 3])
 @test_throws BoundsError nth(s, 0)
@@ -271,7 +285,8 @@ end
 
 @test_zip [1,2,3] [:a, :b, :c] ['x', 'y', 'z']
 @test_zip [1,2,3] [:a, :b] ['w', 'x', 'y', 'z']
-@test_zip [1,2,3] @compat(Union{})[] ['w', 'x', 'y', 'z']
+@test_zip [1,2,3] Any[] ['w', 'x', 'y', 'z']
+@test_zip [1,2,3] Union{}[] ['w', 'x', 'y', 'z']
 
 # @enumerate
 # ----------
@@ -294,7 +309,8 @@ macro test_enumerate(input)
 end
 
 @test_enumerate [:a, :b, :c]
-@test_enumerate @compat(Union{})[]
+@test_enumerate Union{}[]
+@test_enumerate Any[]
 
 # @take
 # -----
@@ -318,7 +334,8 @@ end
 @test_take [:a, :b, :c] 2
 @test_take [:a, :b, :c] 5
 @test_take [:a, :b, :c] 0
-@test_take @compat(Union{})[] 2
+@test_take Any[] 2
+@test_take Union{}[] 2
 @test_take Any[] 0
 @test_take [(:a,1), (:b,2), (:c,3)] 2
 
@@ -357,7 +374,8 @@ end
 @test_takestrict [:a, :b, :c] 3
 @test_takestrict [:a, :b, :c] 5
 @test_takestrict [:a, :b, :c] 0
-@test_takestrict @compat(Union{})[] 2
+@test_takestrict Any[] 2
+@test_takestrict Union{}[] 2
 @test_takestrict Any[] 0
 @test_takestrict [(:a,1), (:b,2), (:c,3)] 2
 @test_takestrict [(:a,1), (:b,2), (:c,3)] 3
@@ -385,7 +403,8 @@ end
 @test_drop [:a, :b, :c] 2
 @test_drop [:a, :b, :c] 5
 @test_drop [:a, :b, :c] 0
-@test_drop @compat(Union{})[] 2
+@test_drop Any[] 2
+@test_drop Union{}[] 2
 @test_drop Any[] 0
 @test_drop [(:a,1), (:b,2), (:c,3)] 2
 
@@ -411,6 +430,7 @@ end
 
 @test_chain [1,2,3] [:a, :b, :c] ['x', 'y', 'z']
 @test_chain [1,2,3] [:a, :b] ['w', 'x', 'y', 'z']
-@test_chain [1,2,3] @compat(Union{})[] ['w', 'x', 'y', 'z']
+@test_chain [1,2,3] Any[] ['w', 'x', 'y', 'z']
+@test_chain [1,2,3] Union{}[] ['w', 'x', 'y', 'z']
 @test_chain [1,2,3] 4 [('w',3), ('x',2), ('y',1), ('z',0)]
 
