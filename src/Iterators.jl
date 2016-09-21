@@ -472,7 +472,7 @@ length(it::Binomial) = binomial(it.n,it.k)
 
 subsets(xs,k) = Binomial(xs,length(xs),k)
 
-start(it::Binomial) = (collect(Int64, 1:it.k), false)
+start(it::Binomial) = (collect(Int64, 1:it.k), it.k>it.n ? true : false)
 
 function next(it::Binomial, state::Tuple{Array{Int64,1}, Bool})
     idx = state[1]
