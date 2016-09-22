@@ -429,16 +429,11 @@ end
 
 function start(it::Subsets)
     # one extra bit to indicated that we are at the end
-    BitVector(length(it.xs) + 1)
+    fill(false, length(it.xs) + 1)
 end
 
 function next(it::Subsets, state)
-    ss = Array(eltype(it.xs), 0)
-    for i = 1:length(it.xs)
-        if state[i]
-            push!(ss, it.xs[i])
-        end
-    end
+    ss = it.xs[state[1:end-1]]
 
     state = copy(state)
     state[1] = !state[1]
