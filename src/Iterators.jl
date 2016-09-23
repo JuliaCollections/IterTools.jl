@@ -429,16 +429,11 @@ end
 
 function start(it::Subsets)
     # one extra bit to indicated that we are at the end
-    BitVector(length(it.xs) + 1)
+    fill(false, length(it.xs) + 1)
 end
 
 function next(it::Subsets, state)
-    ss = Array(eltype(it.xs), 0)
-    for i = 1:length(it.xs)
-        if state[i]
-            push!(ss, it.xs[i])
-        end
-    end
+    ss = it.xs[state[1:end-1]]
 
     state = copy(state)
     state[1] = !state[1]
@@ -472,29 +467,37 @@ length(it::Binomial) = binomial(it.n,it.k)
 
 subsets(xs,k) = Binomial(xs,length(xs),k)
 
-start(it::Binomial) = (collect(Int64, 1:it.k), it.k>it.n ? true : false)
+type BinomialIterState
+    idx::Vector{Int64}
+    done::Bool
+end
 
-function next(it::Binomial, state::Tuple{Array{Int64,1}, Bool})
-    idx = state[1]
+start(it::Binomial) = BinomialIterState(collect(Int64, 1:it.k), (it.k > it.n) ? true : false)
+
+function next(it::Binomial, state::BinomialIterState)
+    idx = state.idx
     set = it.xs[idx]
     i = it.k
     while(i>0)
         if idx[i] < it.n - it.k + i
             idx[i] += 1
-            idx[i+1:it.k] = idx[i]+1:idx[i]+it.k-i
+
+            for j in 1:it.k-i
+                idx[i+j] = idx[i] + j
+            end
+
             break
         else
             i -= 1
         end
     end
-    if i==0
-        return set, (idx,true)
-    else
-        return set, (idx,false)
-    end
+
+    state.done = i==0
+
+    return set, state
 end
 
-done(it::Binomial, state::Tuple{Array{Int64,1}, Bool}) = state[2]
+done(it::Binomial, state::BinomialIterState) = state.done
 
 
 # nth : return the nth element in a collection
