@@ -47,7 +47,7 @@ immutable TakeStrict{I}
 end
 iteratorsize{T<:TakeStrict}(::Type{T}) = HasLength()
 
-eltype(it::TakeStrict) = eltype(it.xs)
+eltype{I}(::Type{TakeStrict{I}}) = eltype(I)
 
 takestrict(xs, n::Int) = TakeStrict(xs, n)
 
@@ -105,23 +105,15 @@ done(it::RepeatCallForever, state) = false
 
 # Concatenate the output of n iterators
 
-immutable Chain
-    xss::Vector{Any}
-    function Chain(xss...)
-        new(Any[xss...])
-    end
+immutable Chain{T<:Tuple}
+    xss::T
 end
+
 iteratorsize{T<:Chain}(::Type{T}) = SizeUnknown()
 
-function eltype(it::Chain)
-    try
-        typejoin([eltype(xs) for xs in it.xss]...)
-    catch
-        Any
-    end
-end
+eltype{T}(::Type{Chain{T}}) = typejoin([eltype(t) for t in T.parameters]...)
 
-chain(xss...) = Chain(xss...)
+chain(xss...) = Chain(xss)
 
 function start(it::Chain)
     i = 1
@@ -154,18 +146,16 @@ done(it::Chain, state) = state[1] > length(it.xss)
 
 # Cartesian product as a sequence of tuples
 
-immutable Product
-    xss::Vector{Any}
-    function Product(xss...)
-        new(Any[xss...])
-    end
+immutable Product{T<:Tuple}
+    xss::T
 end
+
 iteratorsize{T<:Product}(::Type{T}) = SizeUnknown()
 
-eltype(p::Product) = Tuple{map(eltype, p.xss)...}
+eltype{T}(::Type{Product{T}}) = Tuple{map(eltype, T.parameters)...}
 length(p::Product) = mapreduce(length, *, 1, p.xss)
 
-product(xss...) = Product(xss...)
+product(xss...) = Product(xss)
 
 function start(it::Product)
     n = length(it.xss)
@@ -216,7 +206,7 @@ immutable Distinct{I}
 end
 iteratorsize{T<:Distinct}(::Type{T}) = SizeUnknown()
 
-eltype(it::Distinct) = eltype(it.xs)
+eltype{I}(::Type{Distinct{I}}) = eltype(I)
 
 distinct{I}(xs::I) = Distinct{I}(xs)
 
@@ -251,31 +241,30 @@ done(it::Distinct, state) = done(it.xs, state[1])
 #   partition(count(1), 2, 1) = (1,2), (2,3), (3,4) ...
 #   partition(count(1), 2, 3) = (1,2), (4,5), (7,8) ...
 
-immutable Partition{I}
+immutable Partition{I, N}
     xs::I
-    n::Int
     step::Int
 end
 iteratorsize{T<:Partition}(::Type{T}) = SizeUnknown()
 
-eltype(it::Partition) = Tuple{fill(eltype(it.xs),it.n)...}
+eltype{I, N}(::Type{Partition{I, N}}) = NTuple{N, eltype(I)}
 
-function partition(xs, n::Int)
-    Partition(xs, n, n)
+function partition{I}(xs::I, n::Int)
+    Partition{I, n}(xs, n)
 end
 
-function partition(xs, n::Int, step::Int)
+function partition{I}(xs::I, n::Int, step::Int)
     if step < 1
         throw(ArgumentError("Partition step must be at least 1."))
     end
 
-    Partition(xs, n, step)
+    Partition{I, n}(xs, step)
 end
 
-function start(it::Partition)
-    p = Array(eltype(it.xs), it.n)
+function start{I, N}(it::Partition{I, N})
+    p = Vector{eltype(I)}(N)
     s = start(it.xs)
-    for i in 1:(it.n - 1)
+    for i in 1:(N - 1)
         if done(it.xs, s)
             break
         end
@@ -284,26 +273,26 @@ function start(it::Partition)
     (s, p)
 end
 
-function next(it::Partition, state)
+function next{I, N}(it::Partition{I, N}, state)
     (s, p0) = state
     (x, s) = next(it.xs, s)
     ans = p0; ans[end] = x
 
     p = similar(p0)
-    overlap = max(0, it.n - it.step)
+    overlap = max(0, N - it.step)
     for i in 1:overlap
         p[i] = ans[it.step + i]
     end
 
     # when step > n, skip over some elements
-    for i in 1:max(0, it.step - it.n)
+    for i in 1:max(0, it.step - N)
         if done(it.xs, s)
             break
         end
         (x, s) = next(it.xs, s)
     end
 
-    for i in (overlap + 1):(it.n - 1)
+    for i in (overlap + 1):(N - 1)
         if done(it.xs, s)
             break
         end
@@ -323,7 +312,7 @@ done(it::Partition, state) = done(it.xs, state[1])
 # Inspired by itertools.groupby in python.
 # E.g.,
 #   x = ["face", "foo", "bar", "book", "baz", "zzz"]
-#   groupby(x, z -> z[1]) =
+#   groupby(z -> z[1], x) =
 #       ["face", "foo"]
 #       ["bar", "book", "baz"]
 #       ["zzz"]
@@ -333,8 +322,8 @@ immutable GroupBy{I}
 end
 iteratorsize{T<:GroupBy}(::Type{T}) = SizeUnknown()
 
-eltype{I}(it::GroupBy{I}) = I
-eltype{I<:Range}(it::GroupBy{I}) = Array{eltype(it.xs),}
+# eltype{I}(it::GroupBy{I}) = I
+eltype{I}(::Type{GroupBy{I}}) = Vector{eltype(I)}
 
 function groupby(xs, keyfunc::Function)
     Base.warn_once("groupby(xs, keyfunc) should be groupby(keyfunc, xs)")
@@ -352,9 +341,9 @@ function start(it::GroupBy)
     return (s, (prev_key, prev_value))
 end
 
-function next(it::GroupBy, state)
+function next{I}(it::GroupBy{I}, state)
     (s, (prev_key, prev_value)) = state
-    values = Array(eltype(it.xs), 0)
+    values = Vector{eltype(I)}(0)
     # We had a left over value from the last time the key changed.
     if prev_value != nothing || prev_key != nothing
         push!(values, prev_value)
@@ -415,12 +404,12 @@ end
 
 # Iterate over all subsets of a collection
 
-immutable Subsets
-    xs
+immutable Subsets{C}
+    xs::C
 end
 iteratorsize{T<:Subsets}(::Type{T}) = HasLength()
 
-eltype(it::Subsets) = Array{eltype(it.xs),1}
+eltype{C}(::Type{Subsets{C}}) = Vector{eltype(C)}
 length(it::Subsets) = 1 << length(it.xs)
 
 function subsets(xs)
@@ -456,13 +445,13 @@ end
 # Iterate over all subsets of a collection with a given size
 
 immutable Binomial{T}
-    xs::Array{T,1}
+    xs::Vector{T}
     n::Int64
     k::Int64
 end
 iteratorsize{T<:Binomial}(::Type{T}) = HasLength()
 
-eltype(it::Binomial) = Array{eltype(it.xs),1}
+eltype{T}(::Type{Binomial{T}}) = Vector{T}
 length(it::Binomial) = binomial(it.n,it.k)
 
 subsets(xs,k) = Binomial(xs,length(xs),k)
@@ -538,7 +527,7 @@ function takenth(xs, interval::Integer)
     end
     TakeNth(xs, convert(UInt, interval))
 end
-eltype(en::TakeNth) = eltype(en.xs)
+eltype{I}(::Type{TakeNth{I}}) = eltype(I)
 
 
 function start(it::TakeNth)
