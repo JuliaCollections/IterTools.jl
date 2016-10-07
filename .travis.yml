@@ -8,3 +8,5 @@ julia:
     - nightly
 notifications:
   email: false
+after_script:
+    - julia -e 'cd(Pkg.dir("Iterators")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'

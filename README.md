@@ -4,7 +4,7 @@
 [![Iterators](http://pkg.julialang.org/badges/Iterators_0.5.svg)](http://pkg.julialang.org/?pkg=Iterators&ver=0.5)
 
 [![Build Status](https://travis-ci.org/JuliaLang/Iterators.jl.svg?branch=master)](https://travis-ci.org/JuliaLang/Iterators.jl)
-[![Coverage Status](https://coveralls.io/repos/JuliaLang/Iterators.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaLang/Iterators.jl?branch=master)
+[![Coverage Status](https://codecov.io/gh/JuliaLang/Iterators.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaLang/Iterators.jl)
 
 
 Common functional iterator patterns.
