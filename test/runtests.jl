@@ -5,7 +5,11 @@ using Compat
 # -----
 
 i = 0
-for j = countfrom(0, 2)
+c0 = countfrom(0, 2)
+
+@test eltype(c0) == Int
+
+for j in c0
 	@test j == i*2
 	i += 1
 	i <= 10 || break
@@ -17,6 +21,7 @@ end
 t = take(0:2:8, 10)
 
 @test length(collect(t)) == 5
+@test eltype(t) == Int
 
 i = 0
 for j = t
@@ -35,8 +40,12 @@ end
 # drop
 # ----
 
+d0 = drop(0:2:10, 2)
+
+@test eltype(d0) == Int
+
 i = 0
-for j = drop(0:2:10, 2)
+for j in d0
 	@test j == (i+2)*2
 	i += 1
 end
@@ -45,8 +54,12 @@ end
 # cycle
 # -----
 
+cy1 = cycle(0:3)
+
+@test eltype(cy1) == Int
+
 i = 0
-for j = cycle(0:3)
+for j in cy1
 	@test j == i % 4
 	i += 1
 	i <= 10 || break
@@ -55,14 +68,23 @@ end
 # repeated
 # --------
 
+r0 = repeated(1, 10)
+
+@test eltype(r0) == Int
+
 i = 0
-for j = repeated(1, 10)
+for j in r0
 	@test j == 1
 	i += 1
 end
 @test i == 10
+
+r1 = repeated(1)
+
+@test eltype(r1) == Int
+
 i = 0
-for j = repeated(1)
+for j in r1
 	@test j == 1
 	i += 1
 	i <= 10 || break
@@ -86,32 +108,59 @@ end
 # chain
 # -----
 
-@test collect(chain(1:2:5, 0.2:0.1:1.6)) == [1:2:5; 0.2:0.1:1.6]
-@test collect(chain(1:0, 1:2:5, 0.2:0.1:1.6)) == [1:2:5; 0.2:0.1:1.6]
+ch1 = chain(1:2:5, 0.2:0.1:1.6)
+
+@test eltype(ch1) == typejoin(Int, Float64)
+@test collect(ch1) == [1:2:5; 0.2:0.1:1.6]
+
+ch2 = chain(1:0, 1:2:5, 0.2:0.1:1.6)
+
+@test eltype(ch2) == typejoin(Int, Float64)
+@test collect(ch2) == [1:2:5; 0.2:0.1:1.6]
 
 # product
 # -------
 
 x1 = 1:2:10
 x2 = 1:5
-@test collect(product(x1, x2)) == vec([(y1, y2) for y1 in x1, y2 in x2])
 
-@test length(product()) == 1
-@test collect(product()) == [()]
+p0 = product(x1, x2)
+
+@test eltype(p0) == Tuple{Int, Int}
+@test collect(p0) == vec([(y1, y2) for y1 in x1, y2 in x2])
+
+p1 = product()
+
+@test eltype(p1) == Tuple{}
+@test length(p1) == 1
+@test collect(p1) == [()]
 
 # distinct
 # --------
 
 x = [5, 2, 2, 1, 2, 1, 1, 2, 4, 2]
-@test collect(distinct(x)) == unique(x)
+di0 = distinct(x)
+@test eltype(di0) == Int
+@test collect(di0) == unique(x)
 
 # partition
 # ---------
 
-@test collect(partition(take(countfrom(1), 6), 2)) == [(1,2), (3,4), (5,6)]
-@test collect(partition(take(countfrom(1), 4), 2, 1)) == [(1,2), (2,3), (3,4)]
-@test collect(partition(take(countfrom(1), 8), 2, 3)) == [(1,2), (4,5), (7,8)]
-@test collect(partition(take(countfrom(1), 0), 2, 1)) == []
+pa0 = partition(take(countfrom(1), 6), 2)
+@test eltype(pa0) == Tuple{Int, Int}
+@test collect(pa0) == [(1,2), (3,4), (5,6)]
+
+pa1 = partition(take(countfrom(1), 4), 2, 1)
+@test eltype(pa1) == Tuple{Int, Int}
+@test collect(pa1) == [(1,2), (2,3), (3,4)]
+
+pa2 = partition(take(countfrom(1), 8), 2, 3)
+@test eltype(pa2) == Tuple{Int, Int}
+@test collect(pa2) == [(1,2), (4,5), (7,8)]
+
+pa3 = partition(take(countfrom(1), 0), 2, 1)
+@test eltype(pa3) == Tuple{Int, Int}
+@test collect(pa3) == []
 
 @test_throws ArgumentError partition(take(countfrom(1), 8), 2, 0)
 
@@ -119,40 +168,40 @@ x = [5, 2, 2, 1, 2, 1, 1, 2, 4, 2]
 # ----
 
 function test_imap(expected, input...)
-  result = collect(imap(+, input...))
-  @test result == expected
+    result = collect(imap(+, input...))
+    @test result == expected
 end
 
 
 # Empty arrays
 test_imap(
-  Any[],
-  []
+    Any[],
+    []
 )
 
 test_imap(
-  Any[],
-  Union{}[]
+    Any[],
+    Union{}[]
 )
 
 # Simple operation
 test_imap(
-  Any[1,2,3],
-  [1,2,3]
+    Any[1,2,3],
+    [1,2,3]
 )
 
 # Multiple arguments
 test_imap(
-  Any[5,7,9],
-  [1,2,3],
-  [4,5,6]
+    Any[5,7,9],
+    [1,2,3],
+    [4,5,6]
 )
 
 # Different-length arguments
 test_imap(
-  Any[2,4,6],
-  [1,2,3],
-  countfrom(1)
+    Any[2,4,6],
+    [1,2,3],
+    countfrom(1)
 )
 
 
@@ -160,78 +209,115 @@ test_imap(
 # -------
 
 function test_groupby(input, expected)
-  result = collect(groupby(x -> x[1], input))
-  @test result == expected
+    result = collect(groupby(x -> x[1], input))
+    @test result == expected
 end
 
 
 # Empty arrays
 test_groupby(
-  [],
-  Any[]
+    [],
+    Any[]
 )
 
 test_groupby(
-  Union{}[],
-  Any[]
+    Union{}[],
+    Any[]
 )
 
 # Singletons
 test_groupby(
-  ["xxx"],
-  Any[["xxx"]]
+    ["xxx"],
+    Any[["xxx"]]
 )
 
 # Typical operation
 test_groupby(
-  ["face", "foo", "bar", "book", "baz"],
-  Any[["face", "foo"], ["bar", "book", "baz"]]
+    ["face", "foo", "bar", "book", "baz"],
+    Any[["face", "foo"], ["bar", "book", "baz"]]
 )
 
 # Trailing singletons
 test_groupby(
-  ["face", "foo", "bar", "book", "baz", "xxx"],
-  Any[["face", "foo"], ["bar", "book", "baz"], ["xxx"]]
+    ["face", "foo", "bar", "book", "baz", "xxx"],
+    Any[["face", "foo"], ["bar", "book", "baz"], ["xxx"]]
 )
 
 # Leading singletons
 test_groupby(
-  ["xxx", "face", "foo", "bar", "book", "baz"],
-  Any[["xxx"], ["face", "foo"], ["bar", "book", "baz"]]
+    ["xxx", "face", "foo", "bar", "book", "baz"],
+    Any[["xxx"], ["face", "foo"], ["bar", "book", "baz"]]
 )
 
 # Middle singletons
 test_groupby(
-  ["face", "foo", "xxx", "bar", "book", "baz"],
-  Any[["face", "foo"], ["xxx"], ["bar", "book", "baz"]]
+    ["face", "foo", "xxx", "bar", "book", "baz"],
+    Any[["face", "foo"], ["xxx"], ["bar", "book", "baz"]]
 )
 
 
 # subsets
 # -------
 
-@test collect(subsets(Any[])) == Any[Any[]]
+s0 = subsets(Any[])
+@test eltype(eltype(s0)) == Any
+@test collect(s0) == Vector{Any}[Any[]]
 
-@test collect(subsets([:a])) == Any[Symbol[], Symbol[:a]]
+s1 = subsets([:a])
+@test eltype(eltype(s1)) == Symbol
+@test collect(s1) == Vector{Symbol}[Symbol[], Symbol[:a]]
 
-@test collect(subsets([:a, :b, :c])) ==
-      Any[Symbol[], Symbol[:a], Symbol[:b], Symbol[:a, :b], Symbol[:c],
-          Symbol[:a, :c], Symbol[:b, :c], Symbol[:a, :b, :c]]
+s2 = subsets([:a, :b, :c])
+@test eltype(eltype(s2)) == Symbol
+@test collect(s2) == Vector{Symbol}[
+    Symbol[], Symbol[:a], Symbol[:b], Symbol[:a, :b], Symbol[:c],
+    Symbol[:a, :c], Symbol[:b, :c], Symbol[:a, :b, :c],
+]
 
 
 # subsets of size k
 # -----------------
 
-@test collect(subsets(Any[],0)) == Any[Any[]]
-@test collect(subsets([:a, :b, :c],1)) == Any[Symbol[:a], Symbol[:b], Symbol[:c]]
-@test collect(subsets([:a, :b, :c],2)) == Any[Symbol[:a,:b], Symbol[:a,:c], Symbol[:b,:c]]
-@test collect(subsets([:a, :b, :c],3)) == Any[Symbol[:a,:b,:c]]
-@test collect(subsets([:a, :b, :c],4)) == Any[]
-@test length(collect(subsets(collect(1:4),1))) == binomial(4,1)
-@test length(collect(subsets(collect(1:4),2))) == binomial(4,2)
-@test length(collect(subsets(collect(1:4),3))) == binomial(4,3)
-@test length(collect(subsets(collect(1:4),4))) == binomial(4,4)
-@test length(collect(subsets(collect(1:4),5))) == binomial(4,5)
+sk0 = subsets(Any[],0)
+@test eltype(eltype(sk0)) == Any
+@test collect(sk0) == Vector{Any}[Any[]]
+
+sk1 = subsets([:a, :b, :c], 1)
+@test eltype(eltype(sk1)) == Symbol
+@test collect(sk1) == Vector{Symbol}[Symbol[:a], Symbol[:b], Symbol[:c]]
+
+sk2 = subsets([:a, :b, :c], 2)
+@test eltype(eltype(sk2)) == Symbol
+@test collect(sk2) == Vector{Symbol}[Symbol[:a,:b], Symbol[:a,:c], Symbol[:b,:c]]
+
+sk3 = subsets([:a, :b, :c], 3)
+@test eltype(eltype(sk3)) == Symbol
+@test collect(sk3) == Vector{Symbol}[Symbol[:a,:b,:c]]
+
+sk4 = subsets([:a, :b, :c], 4)
+@test eltype(eltype(sk4)) == Symbol
+@test collect(sk4) == Vector{Symbol}[]
+
+sk5 = subsets(collect(1:4), 1)
+@test eltype(eltype(sk5)) == Int
+@test length(collect(sk5)) == binomial(4,1)
+
+sk6 = subsets(collect(1:4), 2)
+@test eltype(eltype(sk6)) == Int
+@test length(collect(sk6)) == binomial(4,2)
+
+sk7 = subsets(collect(1:4), 3)
+@test eltype(eltype(sk7)) == Int
+@test length(collect(sk7)) == binomial(4,3)
+
+sk8 = subsets(collect(1:4), 4)
+@test eltype(eltype(sk8)) == Int
+@test length(collect(sk8)) == binomial(4,4)
+
+sk9 = subsets(collect(1:4), 5)
+@test eltype(eltype(sk9)) == Int
+@test length(collect(sk9)) == binomial(4,5)
+
 
 # nth element
 # -----------
@@ -254,10 +340,23 @@ s = subsets([1, 2, 3])
 # Every nth
 # ---------
 
-@test collect(takenth([], 10)) == []
+tn0 = takenth(Any[], 10)
+@test eltype(tn0) == Any
+@test collect(tn0) == Any[]
+
+tn1 = takenth(Int[], 10)
+@test eltype(tn1) == Int
+@test collect(tn1) == Int[]
+
 @test_throws ArgumentError takenth([], 0)
-@test collect(takenth(10:20, 3)) == [12,15,18]
-@test collect(takenth(10:20, 1)) == collect(10:20)
+
+tn2 = takenth(10:20, 3)
+@test eltype(tn2) == Int
+@test collect(tn2) == [12,15,18]
+
+tn3 = takenth(10:20, 1)
+@test eltype(tn3) == Int
+@test collect(tn3) == collect(10:20)
 
 
 ## @itr
