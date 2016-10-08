@@ -195,20 +195,19 @@ done(it::Product, state) = state[2] === nothing
 
 # Filter out reccuring elements.
 
-immutable Distinct{I}
+immutable Distinct{I, J}
     xs::I
 
     # Map elements to the index at which it was first seen, so given an iterator
     # state (index) we can test if an element has previously been observed.
-    seen::Dict{Any, Int}
-
-    Distinct(xs) = new(xs, Dict{Any, Int}())
+    seen::Dict{J, Int}
 end
+
 iteratorsize{T<:Distinct}(::Type{T}) = SizeUnknown()
 
-eltype{I}(::Type{Distinct{I}}) = eltype(I)
+eltype{I, J}(::Type{Distinct{I, J}}) = J
 
-distinct{I}(xs::I) = Distinct{I}(xs)
+distinct{I}(xs::I) = Distinct{I, eltype(xs)}(xs, Dict{eltype(xs), Int}())
 
 function start(it::Distinct)
     start(it.xs), 1
