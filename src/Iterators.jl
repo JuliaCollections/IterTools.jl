@@ -28,7 +28,8 @@ if VERSION < v"0.5.0-dev+3305"
         error("Do not call this on older versions")
     end
 else
-    import Base: iteratorsize, SizeUnknown, IsInfinite, HasLength
+    import Base: iteratorsize, SizeUnknown, IsInfinite,
+                HasLength, HasShape
 end
 
 
@@ -105,16 +106,31 @@ done(it::RepeatCallForever, state) = false
 
 
 # Concatenate the output of n iterators
-
 immutable Chain{T<:Tuple}
     xss::T
 end
 
-iteratorsize{T<:Chain}(::Type{T}) = SizeUnknown()
+if VERSION >= v"0.5.0-dev+3305"
+    iteratorsize{T}(::Type{Chain{T}}) = _chain_is(T)
 
-eltype{T}(::Type{Chain{T}}) = typejoin([eltype(t) for t in T.parameters]...)
+    @generated function _chain_is{T}(t::Type{T})
+        for itype in T.types
+            if iteratorsize(itype) == IsInfinite()
+                return :(IsInfinite())
+            elseif iteratorsize(itype) == SizeUnknown()
+                return :(SizeUnknown())
+            end
+        end
+        return :(HasLength())
+    end
+end
 
 chain(xss...) = Chain(xss)
+
+length(it::Chain{Tuple{}}) = 0
+length(it::Chain) = sum(length, it.xss)
+
+eltype{T}(::Type{Chain{T}}) = typejoin([eltype(t) for t in T.parameters]...)
 
 function start(it::Chain)
     i = 1
