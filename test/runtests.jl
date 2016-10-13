@@ -361,19 +361,16 @@ tn3 = takenth(10:20, 1)
 
 # peekiter
 # --------
-result = Int[]
-for x in peekiter(1:10) push!(result, x) end
-@test result == collect(1:10)
+pi0 = peekiter(1:10)
+@test eltype(pi0) == Int
+@test collect(pi0) == collect(1:10)
 
-result = Int[]
-for x in peekiter([]) push!(result, x) end
-@test result == []
-
-result = Int[]
-for x in peekiter(1:10) push!(result, x) end
-@test result == collect(1:10)
+pi1 = peekiter([])
+@test eltype(pi1) == eltype([])
+@test collect(pi1) == collect([])
 
 it = peekiter([:a, :b, :c])
+@test eltype(it) == Symbol
 s = start(it)
 @test get(peek(it, s)) == :a
 
