@@ -1,5 +1,4 @@
 using Iterators, Base.Test
-using Compat
 
 # count
 # -----

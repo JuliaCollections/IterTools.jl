@@ -2,7 +2,6 @@ __precompile__()
 
 module Iterators
 
-using Compat
 import Base: start, next, done, eltype, length, size
 
 export
