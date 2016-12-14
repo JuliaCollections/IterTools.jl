@@ -19,6 +19,7 @@ export
     takenth,
     peekiter,
     peek,
+    ncycle,
     @itr
 
 # iteratorsize is new in 0.5, declare it here for older versions. However,
@@ -628,6 +629,34 @@ next{T}(r::PeekIter{UnitRange{T}}, i) = next(r.it, i)
 done{T}(r::PeekIter{UnitRange{T}}, i) = done(r.it, i)
 peek{T}(r::PeekIter{UnitRange{T}}, i) = done(r.it, i) ? Nullable{T}() : Nullable{T}(next(r.it, i)[1])
 
+#NCycle - cycle through an object N times
+
+immutable NCycle{I}
+    iter::I
+    n::Int
+end
+
+"""
+    ncycle(iter, n)
+An iterator that cycles through `iter` `n` times.
+"""
+ncycle(iter, n::Int) = NCycle(iter, n)
+
+eltype{I}(nc::NCycle{I}) = eltype(I)
+length(nc::NCycle) = nc.n*length(nc.iter)
+iteratorsize{I}(::Type{NCycle{I}}) = HasLength()
+iteratoreltype{I}(::Type{NCycle{I}}) = iteratoreltype(I)
+
+start(nc::NCycle) = (start(nc.iter), 0)
+function next(nc::NCycle, state)
+    nv, ns = next(nc.iter,state[1])
+    if done(nc.iter, ns)
+        return (nv, (start(nc.iter), state[2]+1))
+    else
+        return (nv, (ns, state[2]))
+    end
+end
+done(nc::NCycle, state) = state[2] == nc.n
 
 using Base.Meta
 

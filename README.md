@@ -255,6 +255,26 @@ Install this package with `Pkg.add("Iterators")`
     peek(it,s) = Nullable("foo")
     ```
 
+- **ncycle**(xs,n)
+
+    Cycles through an iterator `n` times
+
+    Example:
+    ```julia
+    for i in ncycle(1:3, 2)
+        @show i
+    end
+    ```
+
+    ```
+    i = 1
+    i = 2
+    i = 3
+    i = 1
+    i = 2
+    i = 3
+    ```
+
 - **iterate**(f, x)
 
     Iterate over successive applications of `f`, as in `f(x), f(f(x)), f(f(f(x))), ...`.

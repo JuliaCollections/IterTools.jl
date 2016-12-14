@@ -68,6 +68,24 @@ for j in cy1
 	i <= 10 || break
 end
 
+# ncycle
+# ------
+
+ncy1 = ncycle(0:3,3)
+
+i = 0
+for j in ncy1
+    @test j == i % 4
+    i += 1
+end
+
+@test eltype(ncy1) == Int
+i = 0
+for j in collect(ncy1)
+    @test j == i % 4
+    i += 1
+end
+
 # repeated
 # --------
 
