@@ -386,6 +386,15 @@ sk9 = subsets(collect(1:4), 5)
 @test eltype(eltype(sk9)) == Int
 @test length(collect(sk9)) == binomial(4,5)
 
+# Implicit conversions
+sk10 = subsets(1:4, 3)
+@test eltype(eltype(sk10)) == Int
+@test length(collect(sk10)) == binomial(4, 3)
+
+sk11 = subsets(1:3, Int32(2))
+@test eltype(eltype(sk11)) == Int
+@test length(collect(sk11)) == binomial(3, 2)
+
 
 # nth element
 # -----------

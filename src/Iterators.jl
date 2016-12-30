@@ -466,6 +466,8 @@ immutable Binomial{T}
     n::Int64
     k::Int64
 end
+Binomial{T}(xs::AbstractVector{T}, n::Integer, k::Integer) = Binomial{T}(xs, n, k)
+
 iteratorsize{T<:Binomial}(::Type{T}) = HasLength()
 
 eltype{T}(::Type{Binomial{T}}) = Vector{T}
