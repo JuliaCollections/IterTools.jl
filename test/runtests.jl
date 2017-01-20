@@ -4,6 +4,11 @@ if VERSION >= v"0.5.0-dev+3305"
 	import Base: IsInfinite, SizeUnknown, HasLength, iteratorsize, HasShape
 end
 
+# gets around deprecation warnings in v0.6
+if isdefined(Base, :Iterators)
+    import Base.Iterators: drop, countfrom, cycle, take, repeated
+end
+
 # count
 # -----
 

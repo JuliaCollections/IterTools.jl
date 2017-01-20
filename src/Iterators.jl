@@ -2,6 +2,11 @@ __precompile__()
 
 module Iterators
 
+# gets around deprecation warnings in v0.6
+if isdefined(Base, :Iterators)
+    import Base.Iterators: drop, countfrom, cycle, take, repeated
+end
+
 import Base: start, next, done, eltype, length, size
 
 export
@@ -183,7 +188,7 @@ function start(it::Product)
             return js, nothing
         end
     end
-    vs = Array(Any, n)
+    vs = Vector{Any}(n)
     for i = 1:n
         vs[i], js[i] = next(it.xss[i], js[i])
     end
