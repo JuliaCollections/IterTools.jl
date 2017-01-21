@@ -2,6 +2,11 @@ __precompile__()
 
 module Iterators
 
+# gets around deprecation warnings in v0.6
+if isdefined(Base, :Iterators)
+    import Base.Iterators: drop, countfrom, cycle, take, repeated
+end
+
 import Base: start, next, done, eltype, length, size
 
 export
@@ -183,7 +188,7 @@ function start(it::Product)
             return js, nothing
         end
     end
-    vs = Array(Any, n)
+    vs = Vector{Any}(n)
     for i = 1:n
         vs[i], js[i] = next(it.xss[i], js[i])
     end
@@ -670,8 +675,16 @@ macro itr(ex)
     isexpr(ex, :for) || throw(ArgumentError("@itr macro expects a for loop"))
     isexpr(ex.args[1], :(=)) || throw(ArgumentError("malformed or unsupported for loop in @itr macro"))
     isexpr(ex.args[1].args[2], :call) || throw(ArgumentError("@itr macro expects an iterator call, e.g. @itr for (x,y) = zip(a,b)"))
+
     iterator = ex.args[1].args[2].args[1]
+
+    # fix for Julia v0.6
+    if isa(iterator, Expr) && iterator.head === :globalref
+        iterator = iterator.args[2]
+    end
+
     ex.args[1].args[2] = Expr(:tuple, ex.args[1].args[2].args[2:end]...)
+
     if iterator == :zip
         rex = :(@zip($(esc(ex))))
     elseif iterator == :enumerate
