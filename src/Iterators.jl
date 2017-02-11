@@ -245,7 +245,6 @@ p = (3,4)
 p = (1,5)
 p = (2,5)
 p = (3,5)
-
 ```
 """
 product(xss...) = Product(xss)
@@ -313,7 +312,6 @@ i = 1
 i = 2
 i = 4
 i = 3
-
 ```
 """
 distinct{I}(xs::I) = Distinct{I, eltype(xs)}(xs, Dict{eltype(xs), Int}())
@@ -369,7 +367,6 @@ julia> for i in partition(1:9, 3)
 i = (1,2,3)
 i = (4,5,6)
 i = (7,8,9)
-
 ```
 
 If the `step` parameter is set, each tuple is separated by `step` values.
@@ -396,7 +393,6 @@ julia> for i in partition(1:9, 2, 3)
 i = (1,2)
 i = (4,5)
 i = (7,8)
-
 ```
 """
 function partition{I}(xs::I, n::Int)
@@ -492,7 +488,6 @@ julia> for i in groupby(x -> x[1], ["face", "foo", "bar", "book", "baz", "zzz"])
 i = String["face","foo"]
 i = String["bar","book","baz"]
 i = String["zzz"]
-
 ```
 """
 function groupby(keyfunc, xs)
@@ -558,7 +553,6 @@ julia> for i in imap(+, [1,2,3], [4,5,6])
 i = 5
 i = 7
 i = 9
-
 ```
 """
 function imap(mapfunc, it1, its...)
@@ -621,7 +615,6 @@ i = [1,4]
 i = [2,3]
 i = [2,4]
 i = [3,4]
- 
 ```
 """
 function subsets(xs)
@@ -716,7 +709,6 @@ Set([7,31,3,127])
 
 julia> nth(mersenne, 3)
 3
-
 ```
 """
 function nth(xs, n::Integer)
@@ -759,7 +751,6 @@ julia> collect(takenth(5:15,3))
   7
  10
  13
-
 ```
 """
 function takenth(xs, interval::Integer)
@@ -829,7 +820,6 @@ i = 3.1622776601683795
 i = 1.7782794100389228
 i = 1.333521432163324
 i = 1.1547819846894583
-
 ```
 """
 iterate(f, seed) = Iterate(f, seed)
@@ -873,7 +863,6 @@ x = "face"
 julia> @show peek(it, s)
 peek(it,s) = Nullable{String}("foo")
 Nullable{String}("foo")
-
 ```
 """
 peekiter(itr) = PeekIter(itr)
@@ -938,9 +927,7 @@ i = 3
 i = 1
 i = 2
 i = 3
-
 ```
-
 """
 ncycle(iter, n::Int) = NCycle(iter, n)
 
@@ -988,7 +975,6 @@ julia> @itr for (x,y) in zip(1:3, 4:6)
 (x,y) = (1,4)
 (x,y) = (2,5)
 (x,y) = (3,6)
-
 ```
 """
 macro itr(ex)
