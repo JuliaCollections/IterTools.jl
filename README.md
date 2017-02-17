@@ -3,8 +3,8 @@
 [![Iterators](http://pkg.julialang.org/badges/Iterators_0.4.svg)](http://pkg.julialang.org/?pkg=Iterators&ver=0.4)
 [![Iterators](http://pkg.julialang.org/badges/Iterators_0.5.svg)](http://pkg.julialang.org/?pkg=Iterators&ver=0.5)
 
-[![Build Status](https://travis-ci.org/JuliaLang/Iterators.jl.svg?branch=master)](https://travis-ci.org/JuliaLang/Iterators.jl)
-[![Coverage Status](https://codecov.io/gh/JuliaLang/Iterators.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaLang/Iterators.jl)
+[![Build Status](https://travis-ci.org/JuliaCollections/Iterators.jl.svg?branch=master)](https://travis-ci.org/JuliaCollections/Iterators.jl)
+[![Coverage Status](https://codecov.io/gh/JuliaCollections/Iterators.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaCollections/Iterators.jl)
 
 
 Common functional iterator patterns.
