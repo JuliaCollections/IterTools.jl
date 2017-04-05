@@ -124,20 +124,7 @@ immutable Chain{T<:Tuple}
     xss::T
 end
 
-if VERSION >= v"0.5.0-dev+3305"
-    iteratorsize{T}(::Type{Chain{T}}) = _chain_is(T)
-
-    @generated function _chain_is{T}(t::Type{T})
-        for itype in T.types
-            if iteratorsize(itype) == IsInfinite()
-                return :(IsInfinite())
-            elseif iteratorsize(itype) == SizeUnknown()
-                return :(SizeUnknown())
-            end
-        end
-        return :(HasLength())
-    end
-end
+# iteratorsize method defined at bottom because of how @generated functions work in 0.6 now
 
 chain(xss...) = Chain(xss)
 
@@ -859,6 +846,23 @@ macro chain(ex)
             body))) for i = 1:n]
 
     Expr(:let, Expr(:block, cycleex...), states...)
+end
+
+if VERSION >= v"0.5.0-dev+3305"
+    iteratorsize{T}(::Type{Chain{T}}) = _chain_is(T)
+
+    # on 0.6, must be defined after the other iteratorsize methods are defined
+    # generated functions probably should not be used going forward
+    @generated function _chain_is{T}(t::Type{T})
+        for itype in T.types
+            if iteratorsize(itype) == IsInfinite()
+                return :(IsInfinite())
+            elseif iteratorsize(itype) == SizeUnknown()
+                return :(SizeUnknown())
+            end
+        end
+        return :(HasLength())
+    end
 end
 
 end # module Iterators
