@@ -418,6 +418,9 @@ s = subsets([1, 2, 3])
 @test_throws BoundsError nth(s, 0)
 @test_throws BoundsError nth(s, length(s) + 1)
 
+# #100
+nth(drop(repeatedly(() -> 1), 1), 1)
+
 
 # Every nth
 # ---------

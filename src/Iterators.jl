@@ -33,9 +33,17 @@ if VERSION < v"0.5.0-dev+3305"
     function iteratorsize(v)
         error("Do not call this on older versions")
     end
+
+    has_length(it) = applicable(length, it)
 else
     import Base: iteratorsize, SizeUnknown, IsInfinite,
                 HasLength, HasShape
+
+    function has_length(it)
+        it_size = iteratorsize(it)
+
+        return isa(it_size, HasLength) || isa(it_size, HasShape)
+    end
 end
 
 
@@ -518,7 +526,7 @@ done(it::Binomial, state::BinomialIterState) = state.done
 function nth(xs, n::Integer)
     n > 0 || throw(BoundsError(xs, n))
     # catch, if possible
-    applicable(length, xs) && (n ≤ length(xs) || throw(BoundsError(xs, n)))
+    has_length(xs) && (n ≤ length(xs) || throw(BoundsError(xs, n)))
     s = start(xs)
     i = 0
     while !done(xs, s)
