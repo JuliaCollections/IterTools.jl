@@ -33,9 +33,17 @@ if VERSION < v"0.5.0-dev+3305"
     function iteratorsize(v)
         error("Do not call this on older versions")
     end
+
+    has_length(it) = applicable(length, it)
 else
     import Base: iteratorsize, SizeUnknown, IsInfinite,
                 HasLength, HasShape
+
+    function has_length(it)
+        it_size = iteratorsize(it)
+
+        return isa(it_size, HasLength) || isa(it_size, HasShape)
+    end
 end
 
 
@@ -116,20 +124,7 @@ immutable Chain{T<:Tuple}
     xss::T
 end
 
-if VERSION >= v"0.5.0-dev+3305"
-    iteratorsize{T}(::Type{Chain{T}}) = _chain_is(T)
-
-    @generated function _chain_is{T}(t::Type{T})
-        for itype in T.types
-            if iteratorsize(itype) == IsInfinite()
-                return :(IsInfinite())
-            elseif iteratorsize(itype) == SizeUnknown()
-                return :(SizeUnknown())
-            end
-        end
-        return :(HasLength())
-    end
-end
+# iteratorsize method defined at bottom because of how @generated functions work in 0.6 now
 
 chain(xss...) = Chain(xss)
 
@@ -518,7 +513,7 @@ done(it::Binomial, state::BinomialIterState) = state.done
 function nth(xs, n::Integer)
     n > 0 || throw(BoundsError(xs, n))
     # catch, if possible
-    applicable(length, xs) && (n ≤ length(xs) || throw(BoundsError(xs, n)))
+    has_length(xs) && (n ≤ length(xs) || throw(BoundsError(xs, n)))
     s = start(xs)
     i = 0
     while !done(xs, s)
@@ -851,6 +846,23 @@ macro chain(ex)
             body))) for i = 1:n]
 
     Expr(:let, Expr(:block, cycleex...), states...)
+end
+
+if VERSION >= v"0.5.0-dev+3305"
+    iteratorsize{T}(::Type{Chain{T}}) = _chain_is(T)
+
+    # on 0.6, must be defined after the other iteratorsize methods are defined
+    # generated functions probably should not be used going forward
+    @generated function _chain_is{T}(t::Type{T})
+        for itype in T.types
+            if iteratorsize(itype) == IsInfinite()
+                return :(IsInfinite())
+            elseif iteratorsize(itype) == SizeUnknown()
+                return :(SizeUnknown())
+            end
+        end
+        return :(HasLength())
+    end
 end
 
 end # module Iterators
