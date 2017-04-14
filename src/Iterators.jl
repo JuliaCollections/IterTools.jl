@@ -65,6 +65,23 @@ iteratorsize{T<:TakeStrict}(::Type{T}) = HasLength()
 
 eltype{I}(::Type{TakeStrict{I}}) = eltype(I)
 
+"""
+    takestrict(xs, n::Int)
+
+Like `take()`, an iterator that generates at most the first `n` elements of `xs`, but throws
+an exception if fewer than `n` items are encountered in `xs`.
+
+```jldoctest
+julia> a = :1:2:11
+1:2:11
+
+julia> collect(takestrict(a, 3))
+3-element Array{Int64,1}:
+ 1
+ 3
+ 5
+```
+"""
 takestrict(xs, n::Int) = TakeStrict(xs, n)
 
 start(it::TakeStrict) = (it.n, start(it.xs))
@@ -100,12 +117,30 @@ end
 iteratorsize{T<:RepeatCall}(::Type{T}) = HasLength()
 
 length(it::RepeatCall) = it.n
+
+"""
+    repeatedly(f, n)
+
+Call function `f` `n` times, or infinitely if `n` is omitted.
+
+```julia
+julia> t() = (sleep(0.1); Dates.millisecond(now()))
+t (generic function with 1 method)
+
+julia> collect(repeatedly(t, 5))
+5-element Array{Any,1}:
+ 993
+  97
+ 200
+ 303
+ 408
+```
+"""
 repeatedly(f, n) = RepeatCall(f, n)
 
 start(it::RepeatCall) = it.n
 next(it::RepeatCall, state) = (it.f(), state - 1)
 done(it::RepeatCall, state) = state <= 0
-
 
 immutable RepeatCallForever
     f::Function
@@ -126,6 +161,23 @@ end
 
 # iteratorsize method defined at bottom because of how @generated functions work in 0.6 now
 
+"""
+    chain(xs...)
+    
+Iterate through any number of iterators in sequence.
+
+```jldoctest
+julia> for i in chain(1:3, ['a', 'b', 'c'])
+           @show i
+       end
+i = 1
+i = 2
+i = 3
+i = 'a'
+i = 'b'
+i = 'c'
+```
+"""
 chain(xss...) = Chain(xss)
 
 length(it::Chain{Tuple{}}) = 0
@@ -173,6 +225,23 @@ iteratorsize{T<:Product}(::Type{T}) = SizeUnknown()
 eltype{T}(::Type{Product{T}}) = Tuple{map(eltype, T.parameters)...}
 length(p::Product) = mapreduce(length, *, 1, p.xss)
 
+"""
+    product(xs...)
+
+Iterate over all combinations in the Cartesian product of the inputs.
+
+```jldoctest
+julia> for p in product(1:3,4:5)
+           @show p
+       end
+p = (1,4)
+p = (2,4)
+p = (3,4)
+p = (1,5)
+p = (2,5)
+p = (3,5)
+```
+"""
 product(xss...) = Product(xss)
 
 function start(it::Product)
@@ -225,6 +294,21 @@ iteratorsize{T<:Distinct}(::Type{T}) = SizeUnknown()
 
 eltype{I, J}(::Type{Distinct{I, J}}) = J
 
+"""
+    distinct(xs)
+
+Iterate through values skipping over those already encountered.
+
+```jldoctest
+julia> for i in distinct([1,1,2,1,2,4,1,2,3,4])
+           @show i
+       end
+i = 1
+i = 2
+i = 4
+i = 3
+```
+"""
 distinct{I}(xs::I) = Distinct{I, eltype(xs)}(xs, Dict{eltype(xs), Int}())
 
 function start(it::Distinct)
@@ -266,6 +350,46 @@ iteratorsize{T<:Partition}(::Type{T}) = SizeUnknown()
 
 eltype{I, N}(::Type{Partition{I, N}}) = NTuple{N, eltype(I)}
 
+"""
+    partition(xs, n, [step])
+
+Group values into `n`-tuples.
+
+```jldoctest
+julia> for i in partition(1:9, 3)
+           @show i
+       end
+i = (1,2,3)
+i = (4,5,6)
+i = (7,8,9)
+```
+
+If the `step` parameter is set, each tuple is separated by `step` values.
+
+```jldoctest
+julia> for i in partition(1:9, 3, 2)
+           @show i
+       end
+i = (1,2,3)
+i = (3,4,5)
+i = (5,6,7)
+i = (7,8,9)
+
+julia> for i in partition(1:9, 3, 3)
+           @show i
+       end
+i = (1,2,3)
+i = (4,5,6)
+i = (7,8,9)
+
+julia> for i in partition(1:9, 2, 3)
+           @show i
+       end
+i = (1,2)
+i = (4,5)
+i = (7,8)
+```
+"""
 function partition{I}(xs::I, n::Int)
     Partition{I, n}(xs, n)
 end
@@ -347,6 +471,20 @@ function groupby(xs, keyfunc::Function)
     groupby(keyfunc, xs)
 end
 
+"""
+    groupby(f, xs)
+
+Group consecutive values that share the same result of applying `f`.
+
+```jldoctest
+julia> for i in groupby(x -> x[1], ["face", "foo", "bar", "book", "baz", "zzz"])
+           @show i
+       end
+i = String["face","foo"]
+i = String["bar","book","baz"]
+i = String["zzz"]
+```
+"""
 function groupby(keyfunc, xs)
     GroupBy(keyfunc, xs)
 end
@@ -398,6 +536,20 @@ immutable IMap
 end
 iteratorsize{T<:IMap}(::Type{T}) = SizeUnknown()
 
+"""
+    imap(f, xs1, [xs2, ...])
+
+Iterate over values of a function applied to successive values from one or more iterators.
+
+```jldoctest
+julia> for i in imap(+, [1,2,3], [4,5,6])
+            @show i
+       end
+i = 5
+i = 7
+i = 9
+```
+"""
 function imap(mapfunc, it1, its...)
     IMap(mapfunc, Any[it1, its...])
 end
@@ -429,6 +581,37 @@ iteratorsize{T<:Subsets}(::Type{T}) = HasLength()
 eltype{C}(::Type{Subsets{C}}) = Vector{eltype(C)}
 length(it::Subsets) = 1 << length(it.xs)
 
+"""
+    subsets(xs)
+    subsets(xs, k)
+
+Iterate over every subset of the collection `xs`. You can restrict the subsets to a specific
+size `k`.
+
+```jldoctest
+julia> for i in subsets([1, 2, 3])
+          @show i
+       end
+i = Int64[]
+i = [1]
+i = [2]
+i = [1,2]
+i = [3]
+i = [1,3]
+i = [2,3]
+i = [1,2,3]
+
+julia> for i in subsets(1:4, 2)
+          @show i
+       end
+i = [1,2]
+i = [1,3]
+i = [1,4]
+i = [2,3]
+i = [2,4]
+i = [3,4]
+```
+"""
 function subsets(xs)
     Subsets(xs)
 end
@@ -510,6 +693,19 @@ done(it::Binomial, state::BinomialIterState) = state.done
 
 # nth : return the nth element in a collection
 
+"""
+    nth(xs, n)
+
+Return the `n`th element of `xs`. This is mostly useful for non-indexable collections.
+
+```jldoctest
+julia> mersenne = Set([3, 7, 31, 127])
+Set([7,31,3,127])
+
+julia> nth(mersenne, 3)
+3
+```
+"""
 function nth(xs, n::Integer)
     n > 0 || throw(BoundsError(xs, n))
     # catch, if possible
@@ -539,6 +735,19 @@ iteratorsize{I}(::Type{TakeNth{I}}) = iteratorsize(I)
 length(x::TakeNth) = div(length(x.xs), x.interval)
 size(x::TakeNth) = (length(x),)
 
+"""
+    takenth(xs, n)
+
+Iterate through every `n`th element of `xs`.
+
+```jldoctest
+julia> collect(takenth(5:15,3))
+3-element Array{Int64,1}:
+  7
+ 10
+ 13
+```
+"""
 function takenth(xs, interval::Integer)
     if interval <= 0
         throw(ArgumentError(string("expected interval to be 1 or more, ",
@@ -580,6 +789,34 @@ immutable Iterate{T}
 end
 iteratorsize{T<:Iterate}(::Type{T}) = SizeUnknown()
 
+"""
+    iterate(f, x)
+
+Iterate over successive applications of `f`, as in `f(x)`, `f(f(x))`, `f(f(f(x)))`, ....
+
+Use `Base.take()` to obtain the required number of elements.
+
+```jldoctest
+julia> for i in take(iterate(x -> 2x, 1), 5)
+           @show i
+       end
+i = 1
+i = 2
+i = 4
+i = 8
+i = 16
+
+julia> for i in take(iterate(sqrt, 100), 6)
+           @show i
+       end
+i = 100
+i = 10.0
+i = 3.1622776601683795
+i = 1.7782794100389228
+i = 1.333521432163324
+i = 1.1547819846894583
+```
+"""
 iterate(f, seed) = Iterate(f, seed)
 start(it::Iterate) = it.seed
 next(it::Iterate, state) = (state, it.f(state))
@@ -591,6 +828,38 @@ immutable PeekIter{I}
     it::I
 end
 
+"""
+    peekiter(xs)
+
+Lets you peek at the head element of an iterator without updating the state.
+
+```jldoctest
+julia> it = peekiter(["face", "foo", "bar", "book", "baz", "zzz"])
+Iterators.PeekIter{Array{String,1}}(String["face","foo","bar","book","baz","zzz"])
+
+julia> s = start(it)
+(2,Nullable{String}("face"))
+
+julia> @show peek(it, s)
+peek(it,s) = Nullable{String}("face")
+Nullable{String}("face")
+
+julia> @show peek(it, s)
+peek(it,s) = Nullable{String}("face")
+Nullable{String}("face")
+
+julia> x, s = next(it, s)
+("face",(3,Nullable{String}("foo"),false))
+
+julia> @show x
+x = "face"
+"face"
+
+julia> @show peek(it, s)
+peek(it,s) = Nullable{String}("foo")
+Nullable{String}("foo")
+```
+"""
 peekiter(itr) = PeekIter(itr)
 
 eltype{I}(::Type{PeekIter{I}}) = eltype(I)
@@ -639,8 +908,21 @@ immutable NCycle{I}
 end
 
 """
-    ncycle(iter, n)
-An iterator that cycles through `iter` `n` times.
+    ncycle(xs, n)
+
+Cycle through `iter` `n` times.
+
+```jldoctest
+julia> for i in ncycle(1:3, 2)
+           @show i
+       end
+i = 1
+i = 2
+i = 3
+i = 1
+i = 2
+i = 3
+```
 """
 ncycle(iter, n::Int) = NCycle(iter, n)
 
@@ -666,6 +948,30 @@ using Base.Meta
 #
 # it dispatches on macros defined below
 
+"""
+    @itr(ex)
+
+The `@itr` macro automaticaly inlines some iterators in `for` loops, to produce faster code.
+
+The macro can be used with the following supported iterators: `zip()`, `enumerate()`,
+`take()`, `takestrict()`, `drop()`, and `chain()`.
+
+```jldoctest
+julia> for (x,y) in zip(1:3, 4:6)
+           @show x,y
+       end
+(x,y) = (1,4)
+(x,y) = (2,5)
+(x,y) = (3,6)
+
+julia> @itr for (x,y) in zip(1:3, 4:6)
+           @show x,y
+       end
+(x,y) = (1,4)
+(x,y) = (2,5)
+(x,y) = (3,6)
+```
+"""
 macro itr(ex)
     isexpr(ex, :for) || throw(ArgumentError("@itr macro expects a for loop"))
     isexpr(ex.args[1], :(=)) || throw(ArgumentError("malformed or unsupported for loop in @itr macro"))
