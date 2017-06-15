@@ -1,5 +1,5 @@
 using BenchmarkLite
-using Iterators
+using IterTools
 using Compat
 
 type Collect{Itr} <: Proc end

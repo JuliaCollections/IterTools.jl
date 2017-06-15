@@ -1,4 +1,4 @@
-using Iterators, Base.Test
+using IterTools, Base.Test
 
 if VERSION >= v"0.5.0-dev+3305"
 	import Base: IsInfinite, SizeUnknown, HasLength, iteratorsize, HasShape

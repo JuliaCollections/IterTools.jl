@@ -1,17 +1,17 @@
-# Iterators.jl
+# IterTools.jl
 
-[![Iterators](http://pkg.julialang.org/badges/Iterators_0.4.svg)](http://pkg.julialang.org/?pkg=Iterators&ver=0.4)
-[![Iterators](http://pkg.julialang.org/badges/Iterators_0.5.svg)](http://pkg.julialang.org/?pkg=Iterators&ver=0.5)
+[![IterTools](http://pkg.julialang.org/badges/IterTools_0.4.svg)](http://pkg.julialang.org/?pkg=IterTools&ver=0.4)
+[![IterTools](http://pkg.julialang.org/badges/IterTools_0.5.svg)](http://pkg.julialang.org/?pkg=IterTools&ver=0.5)
 
-[![Build Status](https://travis-ci.org/JuliaCollections/Iterators.jl.svg?branch=master)](https://travis-ci.org/JuliaCollections/Iterators.jl)
-[![Coverage Status](https://codecov.io/gh/JuliaCollections/Iterators.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaCollections/Iterators.jl)
+[![Build Status](https://travis-ci.org/JuliaCollections/IterTools.jl.svg?branch=master)](https://travis-ci.org/JuliaCollections/IterTools.jl)
+[![Coverage Status](https://codecov.io/gh/JuliaCollections/IterTools.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaCollections/IterTools.jl)
 
 
-Common functional iterator patterns.
+Common functional iterator patterns (formerly Iterators.jl).
 
 ## Installation
 
-Install this package with `Pkg.add("Iterators")`
+Install this package with `Pkg.add("IterTools")`
 
 ## Usage
 
@@ -98,7 +98,7 @@ Install this package with `Pkg.add("Iterators")`
     i = 3
     ```
 - **nth**(xs, n)
-    
+
     Return the n'th element of `xs`. Mostly useful for non indexable collections.
 
     Example:
@@ -111,7 +111,7 @@ Install this package with `Pkg.add("Iterators")`
     ```
 
 - **takenth**(xs, n)
-    
+
     Iterate through every n'th element of `xs`
 
     Example:

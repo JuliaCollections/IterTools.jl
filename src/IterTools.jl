@@ -1,6 +1,6 @@
 __precompile__()
 
-module Iterators
+module IterTools
 
 # gets around deprecation warnings in v0.6
 if isdefined(Base, :Iterators)
@@ -163,7 +163,7 @@ end
 
 """
     chain(xs...)
-    
+
 Iterate through any number of iterators in sequence.
 
 ```jldoctest
@@ -835,7 +835,7 @@ Lets you peek at the head element of an iterator without updating the state.
 
 ```jldoctest
 julia> it = peekiter(["face", "foo", "bar", "book", "baz", "zzz"])
-Iterators.PeekIter{Array{String,1}}(String["face","foo","bar","book","baz","zzz"])
+IterTools.PeekIter{Array{String,1}}(String["face","foo","bar","book","baz","zzz"])
 
 julia> s = start(it)
 (2,Nullable{String}("face"))
@@ -1171,4 +1171,4 @@ if VERSION >= v"0.5.0-dev+3305"
     end
 end
 
-end # module Iterators
+end # module IterTools

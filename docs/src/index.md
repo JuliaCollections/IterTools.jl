@@ -1,14 +1,14 @@
 ```@meta
 DocTestSetup = quote
-    using Iterators
+    using IterTools
 end
 ```
 
-# Iterators
+# IterTools
 
 ## Installation
 
-Install this package with `Pkg.add("Iterators")`
+Install this package with `Pkg.add("IterTools")`
 
 # Usage
 
@@ -126,7 +126,7 @@ takestrict
 
 # The `@itr` macro for automatic inlining in `for` loops
 
-Using functional iterators is powerful and concise, but may incur in some overhead, and manually inlining the operations can typically improve performance in critical parts of the code. The `@itr` macro is provided to do that automatically in some cases. 
+Using functional iterators is powerful and concise, but may incur in some overhead, and manually inlining the operations can typically improve performance in critical parts of the code. The `@itr` macro is provided to do that automatically in some cases.
 
 Its usage is trivial: for example, given this code:
 

@@ -1,16 +1,16 @@
-using Documenter, Iterators
+using Documenter, IterTools
 
 makedocs(
-    modules = [Iterators],
+    modules = [IterTools],
     format = :html,
-    sitename = "Iterators",
+    sitename = "IterTools",
     pages = Any[
         "Introduction" => "index.md",
         "Function index" => "functionindex.md"
         ])
 
 deploydocs(
-    repo = "github.com/JuliaCollections/Iterators.jl.git",
+    repo = "github.com/JuliaCollections/IterTools.jl.git",
     target = "build",
     julia  = "0.5",
     osname = "osx",
