@@ -1,8 +1,6 @@
 using IterTools, Base.Test
 
-if VERSION >= v"0.5.0-dev+3305"
-	import Base: IsInfinite, SizeUnknown, HasLength, iteratorsize, HasShape
-end
+import Base: IsInfinite, SizeUnknown, HasLength, iteratorsize, HasShape
 
 # gets around deprecation warnings in v0.6
 if isdefined(Base, :Iterators)
@@ -144,30 +142,22 @@ ch2 = chain(1:0, 1:2:5, 0.2:0.1:1.6)
 @test eltype(ch2) == typejoin(Int, Float64)
 @test collect(ch2) == [1:2:5; 0.2:0.1:1.6]
 @test length(ch2) == length(collect(ch2))
-if VERSION >= v"0.5.0-dev+3305"
-	@test iteratorsize(ch2) == HasLength()
-end
+@test iteratorsize(ch2) == HasLength()
 
 ch3 = chain(1:10, 1:10, 1:10)
 @test length(ch3) == 30
-if VERSION >= v"0.5.0-dev+3305"
-	@test iteratorsize(ch3) == HasLength()
-end
+@test iteratorsize(ch3) == HasLength()
 
 r = countfrom(1)
 ch4 = chain(1:10, countfrom(1))
 @test eltype(ch4) == Int
 @test_throws MethodError length(ch4)
-if VERSION >= v"0.5.0-dev+3305"
-	@assert iteratorsize(r) == IsInfinite()
-	@test iteratorsize(ch4) == IsInfinite()
-end
+@assert iteratorsize(r) == IsInfinite()
+@test iteratorsize(ch4) == IsInfinite()
 
 ch5 = chain()
 @test length(ch5) == 0
-if VERSION >= v"0.5.0-dev+3305"
-	@test iteratorsize(ch5) == HasLength()
-end
+@test iteratorsize(ch5) == HasLength()
 
 c = chain(ch1, ch2, ch3)
 @test length(c) == length(ch1) + length(ch2) + length(ch3)
@@ -177,19 +167,15 @@ r = rand(2,2)
 c = chain(r, r)
 @test length(c) == 8
 @test collect(c) == [vec(r); vec(r)]
-if VERSION >= v"0.5.0-dev+3305"
-	@test iteratorsize(r) == HasShape()
-	@test iteratorsize(c) == HasLength()
-end
+@test iteratorsize(r) == HasShape()
+@test iteratorsize(c) == HasLength()
 
-if VERSION >= v"0.5.0-dev+3305"
-	r = distinct(collect(1:10))
-	@test iteratorsize(r) == SizeUnknown() #lazy filtering
-	c = chain(1:10, r)
-	@test_throws MethodError length(c)
-	@test length(collect(c)) == 20
-	@test iteratorsize(c) == SizeUnknown()
-end
+r = distinct(collect(1:10))
+@test iteratorsize(r) == SizeUnknown() #lazy filtering
+c = chain(1:10, r)
+@test_throws MethodError length(c)
+@test length(collect(c)) == 20
+@test iteratorsize(c) == SizeUnknown()
 
 # product
 # -------
