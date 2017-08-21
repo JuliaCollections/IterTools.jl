@@ -8,6 +8,7 @@ if isdefined(Base, :Iterators)
 end
 
 import Base: start, next, done, eltype, length, size
+import Base: iteratorsize, SizeUnknown, IsInfinite, HasLength, HasShape
 
 export
     takestrict,
@@ -27,32 +28,11 @@ export
     ncycle,
     @itr
 
-# iteratorsize is new in 0.5, declare it here for older versions. However,
-# we do not actually support calling these, since the traits are not defined
-if VERSION < v"0.5.0-dev+3305"
-    function iteratorsize(v)
-        error("Do not call this on older versions")
-    end
+function has_length(it)
+    it_size = iteratorsize(it)
 
-    has_length(it) = applicable(length, it)
-else
-    import Base: iteratorsize, SizeUnknown, IsInfinite,
-                HasLength, HasShape
-
-    function has_length(it)
-        it_size = iteratorsize(it)
-
-        return isa(it_size, HasLength) || isa(it_size, HasShape)
-    end
+    return isa(it_size, HasLength) || isa(it_size, HasShape)
 end
-
-
-# Some iterators have been moved into Base (and count has been renamed as well)
-
-import Base: count
-Base.@deprecate count(start::Number, step::Number) countfrom(start, step)
-Base.@deprecate count(start::Number) countfrom(start)
-Base.@deprecate count() countfrom()
 
 # Iterate through the first n elements, throwing an exception if
 # fewer than n items ar encountered.
@@ -1154,21 +1134,19 @@ macro chain(ex)
     Expr(:let, Expr(:block, cycleex...), states...)
 end
 
-if VERSION >= v"0.5.0-dev+3305"
-    iteratorsize{T}(::Type{Chain{T}}) = _chain_is(T)
+iteratorsize{T}(::Type{Chain{T}}) = _chain_is(T)
 
-    # on 0.6, must be defined after the other iteratorsize methods are defined
-    # generated functions probably should not be used going forward
-    @generated function _chain_is{T}(t::Type{T})
-        for itype in T.types
-            if iteratorsize(itype) == IsInfinite()
-                return :(IsInfinite())
-            elseif iteratorsize(itype) == SizeUnknown()
-                return :(SizeUnknown())
-            end
+# on 0.6, must be defined after the other iteratorsize methods are defined
+# generated functions probably should not be used going forward
+@generated function _chain_is{T}(t::Type{T})
+    for itype in T.types
+        if iteratorsize(itype) == IsInfinite()
+            return :(IsInfinite())
+        elseif iteratorsize(itype) == SizeUnknown()
+            return :(SizeUnknown())
         end
-        return :(HasLength())
     end
+    return :(HasLength())
 end
 
 end # module IterTools
