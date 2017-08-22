@@ -99,7 +99,8 @@ include("testing_macros.jl")
         p1 = product()
 
         @test eltype(p1) == Tuple{}
-        @test length(p1) == 0
+        @test length(p1) == 1
+        @test collect(p1) == [()]
     end
 
     @testset "distinct" begin

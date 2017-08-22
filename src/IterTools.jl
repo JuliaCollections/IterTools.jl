@@ -238,8 +238,7 @@ function iteratorsize(::Type{Product{T}}) where T
     mapreduce_tt(iteratorsize, longest, HasLength(), T)
 end
 eltype(::Type{Product{T}}) where {T} = map_tt_t(eltype, T)
-length(p::Product{Tuple{}}) = 0
-length(p::Product) = prod(length, p.xss)
+length(p::Product) = mapreduce(length, *, 1, p.xss)
 
 """
     product(xs...)
