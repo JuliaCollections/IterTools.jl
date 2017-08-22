@@ -12,8 +12,8 @@ makedocs(
 deploydocs(
     repo = "github.com/JuliaCollections/IterTools.jl.git",
     target = "build",
-    julia  = "0.5",
-    osname = "osx",
+    julia  = "0.6",
+    osname = "linux",
     deps = nothing,
     make = nothing
 )
