@@ -8,7 +8,8 @@ if isdefined(Base, :Iterators)
 end
 
 import Base: start, next, done, eltype, length, size
-import Base: iteratorsize, SizeUnknown, IsInfinite, HasLength, HasShape
+import Base: iteratorsize, IteratorSize, SizeUnknown, IsInfinite, HasLength, HasShape
+import Base: iteratoreltype, IteratorEltype, HasEltype, EltypeUnknown
 
 export
     takestrict,
@@ -34,6 +35,37 @@ function has_length(it)
     return isa(it_size, HasLength) || isa(it_size, HasShape)
 end
 
+promote_iteratoreltype(::HasEltype, ::HasEltype) = HasEltype()
+promote_iteratoreltype(::IteratorEltype, ::IteratorEltype) = EltypeUnknown()
+
+# return the size for methods depending on the longest iterator
+longest{T<:IteratorSize}(::T, ::T) = T()
+function longest{T<:IteratorSize, S<:IteratorSize}(::S, ::T)
+    longest(T(), S())
+end
+longest(::HasShape, ::HasShape) = HasLength()
+longest(::HasLength, ::HasShape) = HasLength()
+longest(::SizeUnknown, ::HasShape) = SizeUnknown()
+longest(::SizeUnknown, ::HasLength) = SizeUnknown()
+longest(::IsInfinite, ::HasShape) = IsInfinite()
+longest(::IsInfinite, ::HasLength) = IsInfinite()
+longest(::IsInfinite, ::SizeUnknown) = IsInfinite()
+
+# return the size for methods depending on the shortest iterator
+shortest{T<:IteratorSize}(::T, ::T) = T()
+function shortest{T<:IteratorSize, S<:IteratorSize}(::S, ::T)
+    shortest(T(), S())
+end
+shortest(::HasShape, ::HasShape) = HasLength()
+shortest(::HasLength, ::HasShape) = HasLength()
+shortest(::IsInfinite, ::HasShape) = HasLength()
+shortest(::IsInfinite, ::HasLength) = HasLength()
+shortest(::SizeUnknown, ::HasShape) = SizeUnknown()
+shortest(::SizeUnknown, ::HasLength) = SizeUnknown()
+shortest(::SizeUnknown, ::IsInfinite) = SizeUnknown()
+
+include("tuple_types.jl")
+
 # Iterate through the first n elements, throwing an exception if
 # fewer than n items ar encountered.
 
@@ -42,7 +74,7 @@ immutable TakeStrict{I}
     n::Int
 end
 iteratorsize{T<:TakeStrict}(::Type{T}) = HasLength()
-
+iteratoreltype{I}(::Type{TakeStrict{I}}) = iteratoreltype(I)
 eltype{I}(::Type{TakeStrict{I}}) = eltype(I)
 
 """
@@ -90,8 +122,8 @@ end
 
 # Repeat a function application n (or infinitely many) times.
 
-immutable RepeatCall
-    f::Function
+immutable RepeatCall{F<:Base.Callable}
+    f::F
     n::Int
 end
 iteratorsize{T<:RepeatCall}(::Type{T}) = HasLength()
@@ -122,8 +154,8 @@ start(it::RepeatCall) = it.n
 next(it::RepeatCall, state) = (it.f(), state - 1)
 done(it::RepeatCall, state) = state <= 0
 
-immutable RepeatCallForever
-    f::Function
+immutable RepeatCallForever{F<:Base.Callable}
+    f::F
 end
 iteratorsize{T<:RepeatCallForever}(::Type{T}) = IsInfinite()
 
@@ -162,8 +194,11 @@ chain(xss...) = Chain(xss)
 
 length(it::Chain{Tuple{}}) = 0
 length(it::Chain) = sum(length, it.xss)
-
-eltype{T}(::Type{Chain{T}}) = typejoin([eltype(t) for t in T.parameters]...)
+function iteratoreltype{T}(::Type{Chain{T}})
+    mapreduce_tt(iteratoreltype, promote_iteratoreltype, HasEltype(), T)
+end
+iteratorsize{T}(::Type{Chain{T}}) = mapreduce_tt(iteratorsize, longest, HasLength(), T)
+eltype{T}(::Type{Chain{T}}) = mapreduce_tt(eltype, typejoin, Union{}, T)
 
 function start(it::Chain)
     i = 1
@@ -200,9 +235,8 @@ immutable Product{T<:Tuple}
     xss::T
 end
 
-iteratorsize{T<:Product}(::Type{T}) = SizeUnknown()
-
-eltype{T}(::Type{Product{T}}) = Tuple{map(eltype, T.parameters)...}
+iteratorsize{T}(::Type{Product{T}}) = mapreduce_tt(iteratorsize, longest, HasLength(), T)
+eltype{T}(::Type{Product{T}}) = map_tt_t(eltype, T)
 length(p::Product{Tuple{}}) = 0
 length(p::Product) = prod(length, p.xss)
 
@@ -291,7 +325,7 @@ i = 3
 ```
 """
 distinct{I}(xs::I) = Distinct{I, eltype(xs)}(xs, Dict{eltype(xs), Int}())
-
+# TODO: only use eltype when I has iteratoreltype?
 function start(it::Distinct)
     start(it.xs), 1
 end
@@ -438,19 +472,14 @@ done(it::Partition, state) = done(it.xs, state[1])
 #       ["face", "foo"]
 #       ["bar", "book", "baz"]
 #       ["zzz"]
-immutable GroupBy{I}
-    keyfunc::Function
+immutable GroupBy{I, F<:Base.Callable}
+    keyfunc::F
     xs::I
 end
 iteratorsize{T<:GroupBy}(::Type{T}) = SizeUnknown()
 
 # eltype{I}(it::GroupBy{I}) = I
-eltype{I}(::Type{GroupBy{I}}) = Vector{eltype(I)}
-
-function groupby(xs, keyfunc::Function)
-    Base.warn_once("groupby(xs, keyfunc) should be groupby(keyfunc, xs)")
-    groupby(keyfunc, xs)
-end
+eltype{I, F}(::Type{GroupBy{I, F}}) = Vector{eltype(I)}
 
 """
     groupby(f, xs)
@@ -466,7 +495,7 @@ i = String["bar","book","baz"]
 i = String["zzz"]
 ```
 """
-function groupby(keyfunc, xs)
+function groupby(keyfunc::Base.Callable, xs)
     GroupBy(keyfunc, xs)
 end
 
@@ -511,11 +540,14 @@ end
 # is done when any of the input iterators have been exhausted.
 # E.g.,
 #   imap(+, count(), [1, 2, 3]) = 1, 3, 5 ...
-immutable IMap
-    mapfunc::Base.Callable
-    xs::Vector{Any}
+immutable IMap{F<:Base.Callable, T<:Tuple}
+    mapfunc::F
+    xs::T
 end
-iteratorsize{T<:IMap}(::Type{T}) = SizeUnknown()
+
+iteratorsize{F, T}(::Type{IMap{F, T}}) = mapreduce_tt(iteratorsize, shortest, HasLength(), T)
+iteratoreltype{I<:IMap}(::Type{I}) = EltypeUnknown()
+length(it::IMap) = minimum(length(x) for x in it.xs if has_length(x))
 
 """
     imap(f, xs1, [xs2, ...])
@@ -532,7 +564,7 @@ i = 9
 ```
 """
 function imap(mapfunc, it1, its...)
-    IMap(mapfunc, Any[it1, its...])
+    IMap(mapfunc, (it1, its...))
 end
 
 function start(it::IMap)
@@ -542,8 +574,8 @@ end
 function next(it::IMap, state)
     next_result = map(next, it.xs, state)
     return (
-        it.mapfunc(map(x -> x[1], next_result)...),
-        map(x -> x[2], next_result)
+        it.mapfunc(map(first, next_result)...),
+        map(last, next_result)
     )
 end
 
@@ -557,7 +589,7 @@ end
 immutable Subsets{C}
     xs::C
 end
-iteratorsize{T<:Subsets}(::Type{T}) = HasLength()
+iteratorsize{C}(::Type{Subsets{C}}) = longest(HasLength(), iteratorsize(C))
 
 eltype{C}(::Type{Subsets{C}}) = Vector{eltype(C)}
 length(it::Subsets) = 1 << length(it.xs)
@@ -702,7 +734,7 @@ function nth(xs, n::Integer)
     throw(BoundsError(xs, n))
 end
 
-nth(xs::AbstractArray, n::Integer) = xs[n]
+nth(xs::Union{Tuple, AbstractArray}, n::Integer) = xs[n]
 
 
 # takenth(xs,n): take every n'th element from xs
@@ -711,8 +743,9 @@ immutable TakeNth{I}
     xs::I
     interval::UInt
 end
-iteratorsize{I}(::Type{TakeNth{I}}) = iteratorsize(I)
-
+iteratorsize{I}(::Type{TakeNth{I}}) = longest(HasLength(), iteratorsize(I))
+iteratoreltype{I}(::Type{TakeNth{I}}) = iteratoreltype(I)
+eltype{I}(::Type{TakeNth{I}}) = eltype(I)
 length(x::TakeNth) = div(length(x.xs), x.interval)
 size(x::TakeNth) = (length(x),)
 
@@ -736,7 +769,6 @@ function takenth(xs, interval::Integer)
     end
     TakeNth(xs, convert(UInt, interval))
 end
-eltype{I}(::Type{TakeNth{I}}) = eltype(I)
 
 
 function start(it::TakeNth)
@@ -763,12 +795,11 @@ end
 
 done(it::TakeNth, state) = done(it.xs, state)
 
-
 immutable Iterate{T}
     f::Function
     seed::T
 end
-iteratorsize{T<:Iterate}(::Type{T}) = SizeUnknown()
+iteratorsize{T<:Iterate}(::Type{T}) = IsInfinite()
 
 """
     iterate(f, x)
@@ -909,7 +940,7 @@ ncycle(iter, n::Int) = NCycle(iter, n)
 
 eltype{I}(nc::NCycle{I}) = eltype(I)
 length(nc::NCycle) = nc.n*length(nc.iter)
-iteratorsize{I}(::Type{NCycle{I}}) = HasLength()
+iteratorsize{I}(::Type{NCycle{I}}) = longest(HasLength(), iteratorsize(I))
 iteratoreltype{I}(::Type{NCycle{I}}) = iteratoreltype(I)
 
 start(nc::NCycle) = (start(nc.iter), 0)
@@ -1133,21 +1164,6 @@ macro chain(ex)
             body))) for i = 1:n]
 
     Expr(:let, Expr(:block, cycleex...), states...)
-end
-
-iteratorsize{T}(::Type{Chain{T}}) = _chain_is(T)
-
-# on 0.6, must be defined after the other iteratorsize methods are defined
-# generated functions probably should not be used going forward
-@generated function _chain_is{T}(t::Type{T})
-    for itype in T.types
-        if iteratorsize(itype) == IsInfinite()
-            return :(IsInfinite())
-        elseif iteratorsize(itype) == SizeUnknown()
-            return :(SizeUnknown())
-        end
-    end
-    return :(HasLength())
 end
 
 end # module IterTools
