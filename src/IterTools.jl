@@ -203,7 +203,8 @@ end
 iteratorsize{T<:Product}(::Type{T}) = SizeUnknown()
 
 eltype{T}(::Type{Product{T}}) = Tuple{map(eltype, T.parameters)...}
-length(p::Product) = mapreduce(length, *, 1, p.xss)
+length(p::Product{Tuple{}}) = 0
+length(p::Product) = prod(length, p.xss)
 
 """
     product(xs...)

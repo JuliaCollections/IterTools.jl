@@ -191,8 +191,7 @@ p0 = product(x1, x2)
 p1 = product()
 
 @test eltype(p1) == Tuple{}
-@test length(p1) == 1
-@test collect(p1) == [()]
+@test length(p1) == 0
 
 # distinct
 # --------
