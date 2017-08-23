@@ -361,8 +361,8 @@ struct Partition{I, N}
     xs::I
     step::Int
 end
-iteratorsize(::Type{<:Partition}) = SizeUnknown()
-
+iteratorsize(::Type{<:Partition}) = longest(HasLength(), iteratorsize(I))
+length(p::Partition{I, N}) where {I, N} = max(fld(length(p.xs) - N, p.step) + 1, 0)
 eltype(::Type{Partition{I, N}}) where {I, N} = NTuple{N, eltype(I)}
 
 """
