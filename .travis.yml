@@ -1,12 +1,13 @@
 language: julia
 os:
-    - linux
-    - osx
+  - linux
 julia:
-    - 0.5
-    - 0.6
-    - nightly
+  - 0.6
+  - nightly
+matrix:
+  allow_failures:
+    - julia: nightly
 notifications:
   email: false
 after_script:
-    - julia -e 'cd(Pkg.dir("IterTools")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
+  - julia -e 'cd(Pkg.dir("IterTools")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'

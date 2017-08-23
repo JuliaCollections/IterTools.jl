@@ -1,6 +1,6 @@
 IterTools.jl is licensed under the MIT License:
 
-> Copyright (c) 2012-2016: Daniel Jones, Stefan Karpinski, Simon Kornblith,
+> Copyright (c) 2012-2017: Daniel Jones, Stefan Karpinski, Simon Kornblith,
 > Kevin Squire, Jeff Bezanson, Tim Holy, Jonathan Malmaud, Eric Davies, and
 > other contributors.
 
