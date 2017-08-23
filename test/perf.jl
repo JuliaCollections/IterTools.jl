@@ -2,25 +2,25 @@ using BenchmarkLite
 using IterTools
 using Compat
 
-type Collect{Itr} <: Proc end
+mutable struct Collect{Itr} <: Proc end
 
-Base.string{Itr}(::Collect{Itr}) = string(Itr)
+Base.string(::Collect{Itr}) where {Itr} = string(Itr)
 Base.length(::Collect, n::Int) = n
 Base.isvalid(::Collect, n::Int) = n > 0
 Base.done(::Collect, n, s) = nothing
 
-abstract Take
+abstract type Take end
 
-type Take1 <: Take end
-type Take2 <: Take end
-type Take3 <: Take end
-type Take4 <: Take end
-type Take5 <: Take end
-type Take6 <: Take end
+mutable struct Take1 <: Take end
+mutable struct Take2 <: Take end
+mutable struct Take3 <: Take end
+mutable struct Take4 <: Take end
+mutable struct Take5 <: Take end
+mutable struct Take6 <: Take end
 
 collect(::Take, v, n) = Base.collect(take(v, n))
 
-function Base.run{Itr<:Take}(::Collect{Itr}, n::Int, v)
+function Base.run(::Collect{Itr}, n::Int, v) where Itr<:Take
     op = Itr()
     collect(op, v, n)
 end
@@ -34,15 +34,15 @@ Base.start(::Collect{Take6}, n::Int) = partition(cycle(1:3), 2, 1)
 
 ############
 
-abstract Partition
+abstract type Partition end
 
-type Partition1 <: Partition end
-type Partition2 <: Partition end
-type Partition3 <: Partition end
+mutable struct Partition1 <: Partition end
+mutable struct Partition2 <: Partition end
+mutable struct Partition3 <: Partition end
 
 collect(::Partition, v, m, n) = Base.collect(partition(v, m, n))
 
-function Base.run{Itr<:Partition}(p::Collect{Itr}, n::Int, state)
+function Base.run(p::Collect{Itr}, n::Int, state) where Itr<:Partition
     v,x,y = state
     op = Itr()
     collect(op, v, x, y)
@@ -54,14 +54,14 @@ Base.start(::Collect{Partition3}, n::Int) = (1:10n+10, 2, 10)
 
 ############
 
-abstract GroupBy
+abstract type GroupBy end
 
-type GroupBy1 <: GroupBy end
-type GroupBy2 <: GroupBy end
+mutable struct GroupBy1 <: GroupBy end
+mutable struct GroupBy2 <: GroupBy end
 
 collect(::GroupBy, f, v) = Base.collect(groupby(f, v))
 
-function Base.run{Itr<:GroupBy}(p::Collect{Itr}, n::Int, state)
+function Base.run(p::Collect{Itr}, n::Int, state) where Itr<:GroupBy
     f, v = state
     op = Itr()
     collect(op, f, v)
@@ -72,7 +72,7 @@ Base.start(::Collect{GroupBy2}, n::Int) = (iseven, [1:n])
 
 ############
 
-type IMap end
+mutable struct IMap end
 
 collect(::IMap, op, vs) = Base.collect(imap(op, vs...))
 
@@ -86,13 +86,13 @@ Base.start(::Collect{IMap}, n::Int) = (+, (1:n, 2n:-2:0))
 
 ############
 
-type Distinct end
+mutable struct Distinct end
 collect(::Distinct, v) = Base.collect(distinct(v))
 
-type Subsets end
+mutable struct Subsets end
 collect(::Subsets, v) = Base.collect(subsets(v))
 
-@compat function Base.run{Itr<:Union{Subsets, Distinct}}(p::Collect{Itr}, n::Int, v)
+function Base.run(p::Collect{Itr}, n::Int, v) where Itr<:Union{Subsets, Distinct}
     op = Itr()
     collect(op, v)
 end
@@ -102,13 +102,13 @@ Base.start(::Collect{Subsets}, n::Int) = 1:n
 
 #############
 
-type Chain end
+mutable struct Chain end
 collect(::Chain, vs) = Base.collect(chain(vs...))
 
-type Product end
+mutable struct Product end
 collect(::Product, vs) = Base.collect(product(vs...))
 
-@compat function Base.run{Itr<:Union{Chain, Product}}(p::Collect{Itr}, n::Int, vs)
+function Base.run(p::Collect{Itr}, n::Int, vs) where Itr<:Union{Chain, Product}
     op = Itr()
     collect(op, vs)
 end
