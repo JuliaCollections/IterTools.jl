@@ -708,6 +708,50 @@ end
 done(it::Binomial, state::BinomialIterState) = state.done
 
 
+# Iterate over all subsets of a collection with a given *statically* known size
+
+struct StaticSizeBinomial{K,Container}
+    xs::Container
+end
+
+iteratorsize(::Type{<:StaticSizeBinomial}) = HasLength()
+
+eltype(::Type{StaticSizeBinomial{K,C}}) where {K,C} = NTuple{K,eltype(C)}
+length(it::StaticSizeBinomial{K,C}) where {K,C} = binomial(length(it.xs),K)
+
+subsets(xs,::Type{Val{K}}) where {K} = StaticSizeBinomial{K,typeof(xs)}(xs)
+
+using StaticArrays
+function start(it::StaticSizeBinomial{K,C}) where {K,C}
+    n = length(it.xs)
+    return MVector((K <= n ? 0 : 1, ntuple(i->i,Val{K})...))
+end
+
+function next(it::StaticSizeBinomial{K,C}, idx) where {K,C}
+    xs = it.xs
+    sidx = ((_,idx...)->idx)(idx.data...) # Type-stable version of idx.data[2:end]
+    x = map(i->xs[i], sidx)
+
+    begin # i = findlast(i->idx[i] != length(xs)-K+i-1, 2:K+1)+1
+        i = K+1
+        while i > 1 && idx[i] == length(xs)-K+i-1
+            i -= 1
+        end
+    end
+
+    idx[i] += 1;
+    begin # idx[i+1:end] = idx[i] + (1:K-i+1)
+        for j = i+1:K
+            idx[j] = idx[i] + j-i
+        end
+    end
+
+    return x,idx
+end
+
+done(it::StaticSizeBinomial{K,C},idx) where {K,C} = idx[1] > 0
+
+
 # nth : return the nth element in a collection
 
 """
