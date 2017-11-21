@@ -717,20 +717,19 @@ end
 iteratorsize(::Type{<:StaticSizeBinomial}) = HasLength()
 
 eltype(::Type{StaticSizeBinomial{K,C}}) where {K,C} = NTuple{K,eltype(C)}
-length(it::StaticSizeBinomial{K,C}) where {K,C} = binomial(length(it.xs),K)
+length(it::StaticSizeBinomial{K,<:Any}) where {K} = binomial(length(it.xs),K)
 
 subsets(xs,::Type{Val{K}}) where {K} = StaticSizeBinomial{K,typeof(xs)}(xs)
 
 using StaticArrays
-function start(it::StaticSizeBinomial{K,C}) where {K,C}
+function start(it::StaticSizeBinomial{K,<:Any}) where {K}
     n = length(it.xs)
-    return MVector((K <= n ? 0 : 1, ntuple(i->i,Val{K})...))
+    return MVector((K <= n ? 0 : 1, ntuple(identity,Val{K})...))
 end
 
-function next(it::StaticSizeBinomial{K,C}, idx) where {K,C}
+function next(it::StaticSizeBinomial{K,<:Any}, idx) where {K}
     xs = it.xs
-    sidx = ((_,idx...)->idx)(idx.data...) # Type-stable version of idx.data[2:end]
-    x = map(i->xs[i], sidx)
+    x = xs[shift(idx)].data
 
     begin # i = findlast(i->idx[i] != length(xs)-K+i-1, 2:K+1)+1
         i = K+1
@@ -749,7 +748,7 @@ function next(it::StaticSizeBinomial{K,C}, idx) where {K,C}
     return x,idx
 end
 
-done(it::StaticSizeBinomial{K,C},idx) where {K,C} = idx[1] > 0
+done(it::StaticSizeBinomial,idx) = idx[1] > 0
 
 
 # nth : return the nth element in a collection
