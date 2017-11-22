@@ -741,7 +741,7 @@ function next(it::StaticSizeBinomial{K,<:Any}, idx) where {K}
 
     idx[i] += 1;
     begin # idx[i+1:end] = idx[i] + (1:K-i+1)
-        for j = i+1:K
+        for j = i+1:K+1
             idx[j] = idx[i] + j-i
         end
     end
