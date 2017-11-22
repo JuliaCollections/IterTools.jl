@@ -715,6 +715,7 @@ struct StaticSizeBinomial{K,Container}
 end
 
 iteratorsize(::Type{<:StaticSizeBinomial}) = HasLength()
+Base.iteratoreltype(::Type{StaticSizeBinomial{K,C}}) where {K,C} = iteratoreltype(C)
 
 eltype(::Type{StaticSizeBinomial{K,C}}) where {K,C} = NTuple{K,eltype(C)}
 length(it::StaticSizeBinomial{K,<:Any}) where {K} = binomial(length(it.xs),K)
