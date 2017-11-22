@@ -720,12 +720,12 @@ Base.iteratoreltype(::Type{StaticSizeBinomial{K,C}}) where {K,C} = iteratoreltyp
 eltype(::Type{StaticSizeBinomial{K,C}}) where {K,C} = NTuple{K,eltype(C)}
 length(it::StaticSizeBinomial{K,<:Any}) where {K} = binomial(length(it.xs),K)
 
-subsets(xs,::Type{Val{K}}) where {K} = StaticSizeBinomial{K,typeof(xs)}(xs)
+subsets(xs,::Val{K}) where {K} = StaticSizeBinomial{K,typeof(xs)}(xs)
 
 using StaticArrays
 function start(it::StaticSizeBinomial{K,<:Any}) where {K}
     n = length(it.xs)
-    return MVector((K <= n ? 0 : 1, ntuple(identity,Val{K})...))
+    return MVector((K <= n ? 0 : 1, ntuple(identity,Val{K}())...))
 end
 
 function next(it::StaticSizeBinomial{K,<:Any}, idx) where {K}
