@@ -722,34 +722,47 @@ length(it::StaticSizeBinomial{K,<:Any}) where {K} = binomial(length(it.xs),K)
 
 subsets(xs,::Val{K}) where {K} = StaticSizeBinomial{K,typeof(xs)}(xs)
 
-using StaticArrays
+@generated minus1(::Val{A}) where {A} = :(Val{$(A-1)}())
+pop(t::NTuple{K,<:Any}) where {K} = ntuple(i->t[i], minus1(Val{K}()))
+
 function start(it::StaticSizeBinomial{K,<:Any}) where {K}
-    n = length(it.xs)
-    return MVector((K <= n ? 0 : 1, ntuple(identity,Val{K}())...))
+	xs = it.xs
+	li = ntuple(identity,minus1(Val{K}()))
+	lx = ntuple(i->xs[i],minus1(Val{K}()))
+	return lx, li, li[end]+1
 end
 
-function next(it::StaticSizeBinomial{K,<:Any}, idx) where {K}
+function advance(it::StaticSizeBinomial{K,<:Any}, x,i) where {K}
+	xs = it.xs
+	lx = pop(x)
+	li = pop(i)
+	i = i[end] + 1
+	if i > length(xs)-K+length(i)
+		lx,li = advance(it,pop(x),pop(i))
+		i = li[end]+1
+	end
+	return (lx...,x[i]),(li...,i)
+end
+function advance(it::StaticSizeBinomial,x::NTuple{1,<:Any},i::NTuple{1,<:Any})
+	xs = it.xs
+	i = i[end]+1
+	return (xs[i],),(i,)
+end
+
+function next(it::StaticSizeBinomial,state)
     xs = it.xs
-    x = xs[shift(idx)].data
+    lx,li,i = state
+    x = (lx...,xs[i])
 
-    begin # i = findlast(i->idx[i] != length(xs)-K+i-1, 2:K+1)+1
-        i = K+1
-        while i > 1 && idx[i] == length(xs)-K+i-1
-            i -= 1
-        end
+    i += 1
+    if i > length(xs)
+		lx,li = advance(it,lx,li)
+        i = li[end]+1
     end
-
-    idx[i] += 1;
-    begin # idx[i+1:end] = idx[i] + (1:K-i+1)
-        for j = i+1:K+1
-            idx[j] = idx[i] + j-i
-        end
-    end
-
-    return x,idx
+    return x,(lx,li,i)
 end
 
-done(it::StaticSizeBinomial,idx) = idx[1] > 0
+done(it::StaticSizeBinomial,state) = state[end] > length(it.xs)
 
 
 # nth : return the nth element in a collection
