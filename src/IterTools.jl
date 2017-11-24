@@ -722,47 +722,30 @@ length(it::StaticSizeBinomial{K,<:Any}) where {K} = binomial(length(it.xs),K)
 
 subsets(xs,::Val{K}) where {K} = StaticSizeBinomial{K,typeof(xs)}(xs)
 
+# Special cases for K == 0
+start(it::StaticSizeBinomial{0,<:Any}) = false
+next(it::StaticSizeBinomial{0,<:Any},_) = (),true
+done(it::StaticSizeBinomial{0,<:Any},d) = d
+
+# Generic case K >= 1
+using Compat # To enable Val{k}() syntax
 @generated minus1(::Val{A}) where {A} = :(Val{$(A-1)}())
-pop(t::NTuple{K,<:Any}) where {K} = ntuple(i->t[i], minus1(Val{K}()))
-
-function start(it::StaticSizeBinomial{K,<:Any}) where {K}
+@inline pop(t::NTuple{K,<:Any}) where {K} = ntuple(i->t[i], minus1(Val{K}())),t[end]
+@inline function advance(it::StaticSizeBinomial{K,<:Any}, idx) where {K}
 	xs = it.xs
-	li = ntuple(identity,minus1(Val{K}()))
-	lx = ntuple(i->xs[i],minus1(Val{K}()))
-	return lx, li, li[end]+1
-end
-
-function advance(it::StaticSizeBinomial{K,<:Any}, xx,ii) where {K}
-	xs = it.xs
-	lx = pop(xx)
-	li = pop(ii)
-	i = ii[end] + 1
-	if i > length(xs)-K+length(ii)
-		lx,li = advance(it,lx,li)
-		i = li[end]+1
-	end
-	return (lx...,xs[i]),(li...,i)
-end
-function advance(it::StaticSizeBinomial,x::NTuple{1,<:Any},i::NTuple{1,<:Any})
-	xs = it.xs
-	i = i[end]+1
-	return (xs[i],),(i,)
-end
-
-function next(it::StaticSizeBinomial,state)
-    xs = it.xs
-    lx,li,i = state
-    x = (lx...,xs[i])
-
+	lidx,i = pop(idx)
     i += 1
-    if i > length(xs)
-		lx,li = advance(it,lx,li)
-        i = li[end]+1
-    end
-    return x,(lx,li,i)
+	if i > length(xs)-K+length(idx)
+		lidx = advance(it,lidx)
+		i = lidx[end]+1
+	end
+	return (lidx...,i)
 end
+@inline advance(it::StaticSizeBinomial,idx::NTuple{1,<:Any}) = (idx[end]+1,)
 
-done(it::StaticSizeBinomial,state) = state[end] > length(it.xs)
+@inline start(it::StaticSizeBinomial{K,<:Any}) where {K} = ntuple(identity,Val{K}())
+@inline next(it::StaticSizeBinomial,idx) = map(i->it.xs[i],idx),advance(it,idx)
+@inline done(it::StaticSizeBinomial,state) = state[end] > length(it.xs)
 
 
 # nth : return the nth element in a collection
