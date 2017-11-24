@@ -732,16 +732,16 @@ function start(it::StaticSizeBinomial{K,<:Any}) where {K}
 	return lx, li, li[end]+1
 end
 
-function advance(it::StaticSizeBinomial{K,<:Any}, x,i) where {K}
+function advance(it::StaticSizeBinomial{K,<:Any}, xx,ii) where {K}
 	xs = it.xs
-	lx = pop(x)
-	li = pop(i)
-	i = i[end] + 1
-	if i > length(xs)-K+length(i)
-		lx,li = advance(it,pop(x),pop(i))
+	lx = pop(xx)
+	li = pop(ii)
+	i = ii[end] + 1
+	if i > length(xs)-K+length(ii)
+		lx,li = advance(it,lx,li)
 		i = li[end]+1
 	end
-	return (lx...,x[i]),(li...,i)
+	return (lx...,xs[i]),(li...,i)
 end
 function advance(it::StaticSizeBinomial,x::NTuple{1,<:Any},i::NTuple{1,<:Any})
 	xs = it.xs
