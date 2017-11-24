@@ -729,8 +729,7 @@ done(it::StaticSizeBinomial{0,<:Any},d) = d
 
 # Generic case K >= 1
 using Compat # To enable Val{k}() syntax
-@generated minus1(::Val{A}) where {A} = :(Val{$(A-1)}())
-@inline pop(t::NTuple{K,<:Any}) where {K} = ntuple(i->t[i], minus1(Val{K}())),t[end]
+@inline pop(t::NTuple) = reverse(Base.tail(reverse(t))), t[end]
 @inline function advance(it::StaticSizeBinomial{K,<:Any}, idx) where {K}
 	xs = it.xs
 	lidx,i = pop(idx)
