@@ -808,7 +808,7 @@ iteratorsize(::Type{<:Iterate}) = IsInfinite()
 """
     iterate(f, x)
 
-Iterate over successive applications of `f`, as in `f(x)`, `f(f(x))`, `f(f(f(x)))`, ....
+Iterate over successive applications of `f`, as in `x`, `f(x)`, `f(f(x))`, `f(f(f(x)))`, ...
 
 Use `Base.take()` to obtain the required number of elements.
 

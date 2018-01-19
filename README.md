@@ -276,7 +276,7 @@ Install this package with `Pkg.add("IterTools")`
 
 - **iterate**(f, x)
 
-    Iterate over successive applications of `f`, as in `f(x), f(f(x)), f(f(f(x))), ...`.
+    Iterate over successive applications of `f`, as in `x, f(x), f(f(x)), f(f(f(x))), ...`.
 
     Example:
     ```julia
