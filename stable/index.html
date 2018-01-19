@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Introduction · IterTools</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="index.html"><img class="logo" src="assets/logo.png" alt="IterTools logo"/></a><h1>IterTools</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="search.html"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li class="current"><a class="toctext" href="index.html">Introduction</a><ul class="internal"><li><a class="toctext" href="#Installation-1">Installation</a></li><li class="toplevel"><a class="toctext" href="#Usage-1">Usage</a></li><li><a class="toctext" href="#chain(xs...)-1">chain(xs...)</a></li><li><a class="toctext" href="#distinct(xs)-1">distinct(xs)</a></li><li><a class="toctext" href="#groupby(f,-xs)-1">groupby(f, xs)</a></li><li><a class="toctext" href="#imap(f,-xs1,-[xs2,-...])-1">imap(f, xs1, [xs2, ...])</a></li><li><a class="toctext" href="#iterate(f,-x)-1">iterate(f, x)</a></li><li><a class="toctext" href="#ncycle(xs,-n)-1">ncycle(xs, n)</a></li><li><a class="toctext" href="#nth(xs,-n)-1">nth(xs, n)</a></li><li><a class="toctext" href="#partition(xs,-n,-[step])-1">partition(xs, n, [step])</a></li><li><a class="toctext" href="#peekiter(xs)-1">peekiter(xs)</a></li><li><a class="toctext" href="#product(xs...)-1">product(xs...)</a></li><li><a class="toctext" href="#repeatedly(f,-[n])-1">repeatedly(f, [n])</a></li><li><a class="toctext" href="#takenth(xs,-n)-1">takenth(xs, n)</a></li><li><a class="toctext" href="#subsets(xs,-[k])-1">subsets(xs, [k])</a></li><li><a class="toctext" href="#takestrict(xs,-n)-1">takestrict(xs, n)</a></li><li class="toplevel"><a class="toctext" href="#The-@itr-macro-for-automatic-inlining-in-for-loops-1">The <code>@itr</code> macro for automatic inlining in <code>for</code> loops</a></li></ul></li><li><a class="toctext" href="functionindex.html">Function index</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href="index.html">Introduction</a></li></ul><a class="edit-page" href="https://github.com/JuliaCollections/IterTools.jl/blob/master/docs/src/index.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Introduction</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="IterTools-1" href="#IterTools-1">IterTools</a></h1><h2><a class="nav-anchor" id="Installation-1" href="#Installation-1">Installation</a></h2><p>Install this package with <code>Pkg.add(&quot;IterTools&quot;)</code></p><h1><a class="nav-anchor" id="Usage-1" href="#Usage-1">Usage</a></h1><h2><a class="nav-anchor" id="chain(xs...)-1" href="#chain(xs...)-1">chain(xs...)</a></h2><p>Iterate through any number of iterators in sequence.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.chain" href="#IterTools.chain"><code>IterTools.chain</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">chain(xs...)</code></pre><p>Iterate through any number of iterators in sequence.</p><pre><code class="language-julia-repl">julia&gt; for i in chain(1:3, [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;])
+           @show i
+       end
+i = 1
+i = 2
+i = 3
+i = &#39;a&#39;
+i = &#39;b&#39;
+i = &#39;c&#39;</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L173-L189">source</a></section><h2><a class="nav-anchor" id="distinct(xs)-1" href="#distinct(xs)-1">distinct(xs)</a></h2><p>Iterate through values skipping over those already encountered.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.distinct" href="#IterTools.distinct"><code>IterTools.distinct</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">distinct(xs)</code></pre><p>Iterate through values skipping over those already encountered.</p><pre><code class="language-julia-repl">julia&gt; for i in distinct([1,1,2,1,2,4,1,2,3,4])
+           @show i
+       end
+i = 1
+i = 2
+i = 4
+i = 3</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L312-L326">source</a></section><h2><a class="nav-anchor" id="groupby(f,-xs)-1" href="#groupby(f,-xs)-1">groupby(f, xs)</a></h2><p>Group consecutive values that share the same result of applying <code>f</code>.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.groupby" href="#IterTools.groupby"><code>IterTools.groupby</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">groupby(f, xs)</code></pre><p>Group consecutive values that share the same result of applying <code>f</code>.</p><pre><code class="language-julia-repl">julia&gt; for i in groupby(x -&gt; x[1], [&quot;face&quot;, &quot;foo&quot;, &quot;bar&quot;, &quot;book&quot;, &quot;baz&quot;, &quot;zzz&quot;])
+           @show i
+       end
+i = String[&quot;face&quot;,&quot;foo&quot;]
+i = String[&quot;bar&quot;,&quot;book&quot;,&quot;baz&quot;]
+i = String[&quot;zzz&quot;]</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L484-L497">source</a></section><h2><a class="nav-anchor" id="imap(f,-xs1,-[xs2,-...])-1" href="#imap(f,-xs1,-[xs2,-...])-1">imap(f, xs1, [xs2, ...])</a></h2><p>Iterate over values of a function applied to successive values from one or more iterators.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.imap" href="#IterTools.imap"><code>IterTools.imap</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">imap(f, xs1, [xs2, ...])</code></pre><p>Iterate over values of a function applied to successive values from one or more iterators.</p><pre><code class="language-julia-repl">julia&gt; for i in imap(+, [1,2,3], [4,5,6])
+            @show i
+       end
+i = 5
+i = 7
+i = 9</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L554-L567">source</a></section><h2><a class="nav-anchor" id="iterate(f,-x)-1" href="#iterate(f,-x)-1">iterate(f, x)</a></h2><p>Iterate over successive applications of <code>f</code>, as in <code>x, f(x), f(f(x)), f(f(f(x))), ...</code>.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.iterate" href="#IterTools.iterate"><code>IterTools.iterate</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">iterate(f, x)</code></pre><p>Iterate over successive applications of <code>f</code>, as in <code>x</code>, <code>f(x)</code>, <code>f(f(x))</code>, <code>f(f(f(x)))</code>, ...</p><p>Use <code>Base.take()</code> to obtain the required number of elements.</p><pre><code class="language-julia-repl">julia&gt; for i in take(iterate(x -&gt; 2x, 1), 5)
+           @show i
+       end
+i = 1
+i = 2
+i = 4
+i = 8
+i = 16
+
+julia&gt; for i in take(iterate(sqrt, 100), 6)
+           @show i
+       end
+i = 100
+i = 10.0
+i = 3.1622776601683795
+i = 1.7782794100389228
+i = 1.333521432163324
+i = 1.1547819846894583</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L808-L835">source</a></section><h2><a class="nav-anchor" id="ncycle(xs,-n)-1" href="#ncycle(xs,-n)-1">ncycle(xs, n)</a></h2><p>Cycles through an iterator <code>n</code> times.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.ncycle" href="#IterTools.ncycle"><code>IterTools.ncycle</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">ncycle(xs, n)</code></pre><p>Cycle through <code>iter</code> <code>n</code> times.</p><pre><code class="language-julia-repl">julia&gt; for i in ncycle(1:3, 2)
+           @show i
+       end
+i = 1
+i = 2
+i = 3
+i = 1
+i = 2
+i = 3</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L928-L944">source</a></section><h2><a class="nav-anchor" id="nth(xs,-n)-1" href="#nth(xs,-n)-1">nth(xs, n)</a></h2><p>Return the <code>n</code>th element of <code>xs</code>.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.nth" href="#IterTools.nth"><code>IterTools.nth</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">nth(xs, n)</code></pre><p>Return the <code>n</code>th element of <code>xs</code>. This is mostly useful for non-indexable collections.</p><pre><code class="language-julia-repl">julia&gt; mersenne = Set([3, 7, 31, 127])
+Set([7,31,3,127])
+
+julia&gt; nth(mersenne, 3)
+3</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L713-L725">source</a></section><h2><a class="nav-anchor" id="partition(xs,-n,-[step])-1" href="#partition(xs,-n,-[step])-1">partition(xs, n, [step])</a></h2><p>Group values into <code>n</code>-tuples.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.partition" href="#IterTools.partition"><code>IterTools.partition</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">partition(xs, n, [step])</code></pre><p>Group values into <code>n</code>-tuples.</p><pre><code class="language-julia-repl">julia&gt; for i in partition(1:9, 3)
+           @show i
+       end
+i = (1,2,3)
+i = (4,5,6)
+i = (7,8,9)</code></pre><p>If the <code>step</code> parameter is set, each tuple is separated by <code>step</code> values.</p><pre><code class="language-julia-repl">julia&gt; for i in partition(1:9, 3, 2)
+           @show i
+       end
+i = (1,2,3)
+i = (3,4,5)
+i = (5,6,7)
+i = (7,8,9)
+
+julia&gt; for i in partition(1:9, 3, 3)
+           @show i
+       end
+i = (1,2,3)
+i = (4,5,6)
+i = (7,8,9)
+
+julia&gt; for i in partition(1:9, 2, 3)
+           @show i
+       end
+i = (1,2)
+i = (4,5)
+i = (7,8)</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L368-L407">source</a></section><h2><a class="nav-anchor" id="peekiter(xs)-1" href="#peekiter(xs)-1">peekiter(xs)</a></h2><p>Peek at the head element of an iterator without updating the state.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.peekiter" href="#IterTools.peekiter"><code>IterTools.peekiter</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">peekiter(xs)</code></pre><p>Lets you peek at the head element of an iterator without updating the state.</p><pre><code class="language-julia-repl">julia&gt; it = peekiter([&quot;face&quot;, &quot;foo&quot;, &quot;bar&quot;, &quot;book&quot;, &quot;baz&quot;, &quot;zzz&quot;])
+IterTools.PeekIter{Array{String,1}}(String[&quot;face&quot;,&quot;foo&quot;,&quot;bar&quot;,&quot;book&quot;,&quot;baz&quot;,&quot;zzz&quot;])
+
+julia&gt; s = start(it)
+(2,Nullable{String}(&quot;face&quot;))
+
+julia&gt; @show peek(it, s)
+peek(it,s) = Nullable{String}(&quot;face&quot;)
+Nullable{String}(&quot;face&quot;)
+
+julia&gt; @show peek(it, s)
+peek(it,s) = Nullable{String}(&quot;face&quot;)
+Nullable{String}(&quot;face&quot;)
+
+julia&gt; x, s = next(it, s)
+(&quot;face&quot;,(3,Nullable{String}(&quot;foo&quot;),false))
+
+julia&gt; @show x
+x = &quot;face&quot;
+&quot;face&quot;
+
+julia&gt; @show peek(it, s)
+peek(it,s) = Nullable{String}(&quot;foo&quot;)
+Nullable{String}(&quot;foo&quot;)</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L847-L878">source</a></section><h2><a class="nav-anchor" id="product(xs...)-1" href="#product(xs...)-1">product(xs...)</a></h2><p>Iterate over all combinations in the Cartesian product of the inputs.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.product" href="#IterTools.product"><code>IterTools.product</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">product(xs...)</code></pre><p>Iterate over all combinations in the Cartesian product of the inputs.</p><pre><code class="language-julia-repl">julia&gt; for p in product(1:3,4:5)
+           @show p
+       end
+p = (1,4)
+p = (2,4)
+p = (3,4)
+p = (1,5)
+p = (2,5)
+p = (3,5)</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L243-L259">source</a></section><h2><a class="nav-anchor" id="repeatedly(f,-[n])-1" href="#repeatedly(f,-[n])-1">repeatedly(f, [n])</a></h2><p>Call a function <code>n</code> times, or infinitely if <code>n</code> is omitted.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.repeatedly" href="#IterTools.repeatedly"><code>IterTools.repeatedly</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">repeatedly(f, n)</code></pre><p>Call function <code>f</code> <code>n</code> times, or infinitely if <code>n</code> is omitted.</p><pre><code class="language-julia">julia&gt; t() = (sleep(0.1); Dates.millisecond(now()))
+t (generic function with 1 method)
+
+julia&gt; collect(repeatedly(t, 5))
+5-element Array{Any,1}:
+ 993
+  97
+ 200
+ 303
+ 408</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L130-L147">source</a></section><h2><a class="nav-anchor" id="takenth(xs,-n)-1" href="#takenth(xs,-n)-1">takenth(xs, n)</a></h2><p>Iterate through every n&#39;th element of <code>xs</code></p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.takenth" href="#IterTools.takenth"><code>IterTools.takenth</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">takenth(xs, n)</code></pre><p>Iterate through every <code>n</code>th element of <code>xs</code>.</p><pre><code class="language-julia-repl">julia&gt; collect(takenth(5:15,3))
+3-element Array{Int64,1}:
+  7
+ 10
+ 13</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L756-L768">source</a></section><h2><a class="nav-anchor" id="subsets(xs,-[k])-1" href="#subsets(xs,-[k])-1">subsets(xs, [k])</a></h2><p>Iterate over every subset of a collection <code>xs</code>, or iterate over every subset of size <code>k</code> from a collection <code>xs</code>.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.subsets" href="#IterTools.subsets"><code>IterTools.subsets</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">subsets(xs)
+subsets(xs, k)</code></pre><p>Iterate over every subset of the collection <code>xs</code>. You can restrict the subsets to a specific size <code>k</code>.</p><pre><code class="language-julia-repl">julia&gt; for i in subsets([1, 2, 3])
+          @show i
+       end
+i = Int64[]
+i = [1]
+i = [2]
+i = [1,2]
+i = [3]
+i = [1,3]
+i = [2,3]
+i = [1,2,3]
+
+julia&gt; for i in subsets(1:4, 2)
+          @show i
+       end
+i = [1,2]
+i = [1,3]
+i = [1,4]
+i = [2,3]
+i = [2,4]
+i = [3,4]</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L599-L629">source</a></section><h2><a class="nav-anchor" id="takestrict(xs,-n)-1" href="#takestrict(xs,-n)-1">takestrict(xs, n)</a></h2><p>Equivalent to <code>take</code>, but will throw an exception if fewer than <code>n</code> items are encountered in <code>xs</code>.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.takestrict" href="#IterTools.takestrict"><code>IterTools.takestrict</code></a> — <span class="docstring-category">Function</span>.</div><div><pre><code class="language-none">takestrict(xs, n::Int)</code></pre><p>Like <code>take()</code>, an iterator that generates at most the first <code>n</code> elements of <code>xs</code>, but throws an exception if fewer than <code>n</code> items are encountered in <code>xs</code>.</p><pre><code class="language-julia-repl">julia&gt; a = :1:2:11
+1:2:11
+
+julia&gt; collect(takestrict(a, 3))
+3-element Array{Int64,1}:
+ 1
+ 3
+ 5</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L77-L93">source</a></section><h1><a class="nav-anchor" id="The-@itr-macro-for-automatic-inlining-in-for-loops-1" href="#The-@itr-macro-for-automatic-inlining-in-for-loops-1">The <code>@itr</code> macro for automatic inlining in <code>for</code> loops</a></h1><p>Using functional iterators is powerful and concise, but may incur in some overhead, and manually inlining the operations can typically improve performance in critical parts of the code. The <code>@itr</code> macro is provided to do that automatically in some cases.</p><p>Its usage is trivial: for example, given this code:</p><pre><code class="language-none">for (x,y) in zip(a,b)
+    @show x,y
+end</code></pre><p>the automatically inlined version can be obtained by simply doing:</p><pre><code class="language-none">@itr for (x,y) in zip(a,b)
+    @show x,y
+end</code></pre><p>This typically results in faster code, but its applicability has limitations:</p><ul><li><p>it only works with <code>for</code> loops;</p></li><li><p>if multiple nested iterators are used, only the outermost is affected by the transformation;</p></li><li><p>explicit expressions are required (i.e. when a <code>Tuple</code> is expected, an explicit tuple must be provided, a tuple variable won&#39;t be accepted);</p></li><li><p>splicing is not supported;</p></li><li><p>multidimensional loops (i.e. expressions such as <code>for x in a, y in b</code>) are not supported</p></li></ul><p>The <code>@itr</code> macro can be used with the following supported iterators:</p><ul><li><p>zip</p></li><li><p>enumerate</p></li><li><p>take</p></li><li><p>takestrict</p></li><li><p>drop</p></li><li><p>chain</p></li></ul><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="IterTools.@itr" href="#IterTools.@itr"><code>IterTools.@itr</code></a> — <span class="docstring-category">Macro</span>.</div><div><pre><code class="language-none">@itr(ex)</code></pre><p>The <code>@itr</code> macro automaticaly inlines some iterators in <code>for</code> loops, to produce faster code.</p><p>The macro can be used with the following supported iterators: <code>zip()</code>, <code>enumerate()</code>, <code>take()</code>, <code>takestrict()</code>, <code>drop()</code>, and <code>chain()</code>.</p><pre><code class="language-julia-repl">julia&gt; for (x,y) in zip(1:3, 4:6)
+           @show x,y
+       end
+(x,y) = (1,4)
+(x,y) = (2,5)
+(x,y) = (3,6)
+
+julia&gt; @itr for (x,y) in zip(1:3, 4:6)
+           @show x,y
+       end
+(x,y) = (1,4)
+(x,y) = (2,5)
+(x,y) = (3,6)</code></pre></div><a class="source-link" target="_blank" href="https://github.com/JuliaCollections/IterTools.jl/blob/747400bc1f3307e79b490175854aef42d7a65235/src/IterTools.jl#L969-L992">source</a></section><footer><hr/><a class="next" href="functionindex.html"><span class="direction">Next</span><span class="title">Function index</span></a></footer></article></body></html>
