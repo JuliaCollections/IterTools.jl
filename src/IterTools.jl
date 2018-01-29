@@ -5,8 +5,16 @@ module IterTools
 import Base.Iterators: drop, take
 
 import Base: start, next, done, eltype, length, size
-import Base: iteratorsize, IteratorSize, SizeUnknown, IsInfinite, HasLength, HasShape
-import Base: iteratoreltype, IteratorEltype, HasEltype, EltypeUnknown
+import Base: IteratorSize, IteratorEltype
+import Base: SizeUnknown, IsInfinite, HasLength, HasShape
+import Base: HasEltype, EltypeUnknown
+
+@static if VERSION < v"0.7.0-DEV.3309"
+    import Base: iteratorsize, iteratoreltype
+else
+    const iteratorsize = IteratorSize
+    const iteratoreltype = IteratorEltype
+end
 
 export
     takestrict,
