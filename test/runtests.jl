@@ -1,8 +1,14 @@
 using IterTools, Base.Test
 
-import Base: IsInfinite, SizeUnknown, HasLength, iteratorsize, HasShape
+import Base: IsInfinite, SizeUnknown, HasLength, HasShape
 
 import Base.Iterators: take, countfrom, drop
+
+@static if VERSION < v"0.7.0-DEV.3309"
+    import Base: iteratorsize
+else
+    const iteratorsize = Base.IteratorSize
+end
 
 include("testing_macros.jl")
 
