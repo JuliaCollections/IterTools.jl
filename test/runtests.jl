@@ -4,8 +4,6 @@ import Base: IsInfinite, SizeUnknown, HasLength, iteratorsize, HasShape
 
 import Base.Iterators: take, countfrom, drop
 
-include("testing_macros.jl")
-
 @static if VERSION < v"0.7.0-DEV.3519"
     has_shape(n) = HasShape()
 else
@@ -354,62 +352,6 @@ end
         s = start(it)
         x, s = next(it, s)
         @test get(peek(it, s)) == 2
-    end
-end
-
-@testset "@itr" begin
-    @testset "@zip" begin
-        @test_zip [1,2,3] [:a, :b, :c] ['x', 'y', 'z']
-        @test_zip [1,2,3] [:a, :b] ['w', 'x', 'y', 'z']
-        @test_zip [1,2,3] Any[] ['w', 'x', 'y', 'z']
-        @test_zip [1,2,3] Union{}[] ['w', 'x', 'y', 'z']
-    end
-
-    @testset "@enumerate" begin
-        @test_enumerate [:a, :b, :c]
-        @test_enumerate Union{}[]
-        @test_enumerate Any[]
-    end
-
-    @testset "@take" begin
-        @test_take [:a, :b, :c] 2
-        @test_take [:a, :b, :c] 5
-        @test_take [:a, :b, :c] 0
-        @test_take Any[] 2
-        @test_take Union{}[] 2
-        @test_take Any[] 0
-        @test_take [(:a,1), (:b,2), (:c,3)] 2
-    end
-
-    @testset "@takestrict" begin
-        @test_takestrict [:a, :b, :c] 2
-        @test_takestrict [:a, :b, :c] 3
-        @test_takestrict [:a, :b, :c] 5
-        @test_takestrict [:a, :b, :c] 0
-        @test_takestrict Any[] 2
-        @test_takestrict Union{}[] 2
-        @test_takestrict Any[] 0
-        @test_takestrict [(:a,1), (:b,2), (:c,3)] 2
-        @test_takestrict [(:a,1), (:b,2), (:c,3)] 3
-        @test_takestrict [(:a,1), (:b,2), (:c,3)] 4
-    end
-
-    @testset "@drop" begin
-        @test_drop [:a, :b, :c] 2
-        @test_drop [:a, :b, :c] 5
-        @test_drop [:a, :b, :c] 0
-        @test_drop Any[] 2
-        @test_drop Union{}[] 2
-        @test_drop Any[] 0
-        @test_drop [(:a,1), (:b,2), (:c,3)] 2
-    end
-
-    @testset "@chain" begin
-        @test_chain [1,2,3] [:a, :b, :c] ['x', 'y', 'z']
-        @test_chain [1,2,3] [:a, :b] ['w', 'x', 'y', 'z']
-        @test_chain [1,2,3] Any[] ['w', 'x', 'y', 'z']
-        @test_chain [1,2,3] Union{}[] ['w', 'x', 'y', 'z']
-        @test_chain [1,2,3] 4 [('w',3), ('x',2), ('y',1), ('z',0)]
     end
 end
 end
