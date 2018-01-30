@@ -6,6 +6,12 @@ import Base.Iterators: take, countfrom, drop
 
 include("testing_macros.jl")
 
+@static if VERSION < v"0.7.0-DEV.3519"
+    has_shape(n) = HasShape()
+else
+    has_shape(n) = HasShape{n}()
+end
+
 
 @testset "IterTools" begin
 @testset "iterators" begin
@@ -76,7 +82,7 @@ include("testing_macros.jl")
         c = chain(r, r)
         @test length(c) == 8
         @test collect(c) == [vec(r); vec(r)]
-        @test iteratorsize(r) == HasShape()
+        @test iteratorsize(r) == has_shape(2)
         @test iteratorsize(c) == HasLength()
 
         r = distinct(collect(1:10))
