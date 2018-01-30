@@ -4,6 +4,8 @@ import Base: IsInfinite, SizeUnknown, HasLength, iteratorsize, HasShape
 
 import Base.Iterators: take, countfrom, drop
 
+include("testing_macros.jl")
+
 @static if VERSION < v"0.7.0-DEV.3519"
     has_shape(n) = HasShape()
 else
@@ -353,5 +355,9 @@ end
         x, s = next(it, s)
         @test get(peek(it, s)) == 2
     end
+end
+
+@testset "Deprecated @itr" begin
+    @test_take [:a, :b, :c] 2
 end
 end
