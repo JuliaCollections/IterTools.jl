@@ -257,22 +257,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#IterTools.@itr",
-    "page": "Introduction",
-    "title": "IterTools.@itr",
-    "category": "Macro",
-    "text": "@itr(ex)\n\nThe @itr macro automaticaly inlines some iterators in for loops, to produce faster code.\n\nThe macro can be used with the following supported iterators: zip(), enumerate(), take(), takestrict(), drop(), and chain().\n\njulia> for (x,y) in zip(1:3, 4:6)\n           @show x,y\n       end\n(x,y) = (1,4)\n(x,y) = (2,5)\n(x,y) = (3,6)\n\njulia> @itr for (x,y) in zip(1:3, 4:6)\n           @show x,y\n       end\n(x,y) = (1,4)\n(x,y) = (2,5)\n(x,y) = (3,6)\n\n\n\n"
-},
-
-{
-    "location": "index.html#The-@itr-macro-for-automatic-inlining-in-for-loops-1",
-    "page": "Introduction",
-    "title": "The @itr macro for automatic inlining in for loops",
-    "category": "section",
-    "text": "Using functional iterators is powerful and concise, but may incur in some overhead, and manually inlining the operations can typically improve performance in critical parts of the code. The @itr macro is provided to do that automatically in some cases.Its usage is trivial: for example, given this code:for (x,y) in zip(a,b)\n    @show x,y\nendthe automatically inlined version can be obtained by simply doing:@itr for (x,y) in zip(a,b)\n    @show x,y\nendThis typically results in faster code, but its applicability has limitations:it only works with for loops;\nif multiple nested iterators are used, only the outermost is affected by the transformation;\nexplicit expressions are required (i.e. when a Tuple is expected, an explicit tuple must be provided, a tuple variable won't be accepted);\nsplicing is not supported;\nmultidimensional loops (i.e. expressions such as for x in a, y in b) are not supportedThe @itr macro can be used with the following supported iterators:zip\nenumerate\ntake\ntakestrict\ndrop\nchain@itr"
-},
-
-{
     "location": "functionindex.html#",
     "page": "Function index",
     "title": "Function index",
