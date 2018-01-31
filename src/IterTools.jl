@@ -257,12 +257,12 @@ Iterate over all combinations in the Cartesian product of the inputs.
 julia> for p in product(1:3,4:5)
            @show p
        end
-p = (1,4)
-p = (2,4)
-p = (3,4)
-p = (1,5)
-p = (2,5)
-p = (3,5)
+p = (1, 4)
+p = (2, 4)
+p = (3, 4)
+p = (1, 5)
+p = (2, 5)
+p = (3, 5)
 ```
 """
 product(xss...) = Product(xss)
@@ -382,9 +382,9 @@ Group values into `n`-tuples.
 julia> for i in partition(1:9, 3)
            @show i
        end
-i = (1,2,3)
-i = (4,5,6)
-i = (7,8,9)
+i = (1, 2, 3)
+i = (4, 5, 6)
+i = (7, 8, 9)
 ```
 
 If the `step` parameter is set, each tuple is separated by `step` values.
@@ -393,24 +393,24 @@ If the `step` parameter is set, each tuple is separated by `step` values.
 julia> for i in partition(1:9, 3, 2)
            @show i
        end
-i = (1,2,3)
-i = (3,4,5)
-i = (5,6,7)
-i = (7,8,9)
+i = (1, 2, 3)
+i = (3, 4, 5)
+i = (5, 6, 7)
+i = (7, 8, 9)
 
 julia> for i in partition(1:9, 3, 3)
            @show i
        end
-i = (1,2,3)
-i = (4,5,6)
-i = (7,8,9)
+i = (1, 2, 3)
+i = (4, 5, 6)
+i = (7, 8, 9)
 
 julia> for i in partition(1:9, 2, 3)
            @show i
        end
-i = (1,2)
-i = (4,5)
-i = (7,8)
+i = (1, 2)
+i = (4, 5)
+i = (7, 8)
 ```
 """
 function partition(xs::I, n::Int) where I
@@ -498,8 +498,8 @@ Group consecutive values that share the same result of applying `f`.
 julia> for i in groupby(x -> x[1], ["face", "foo", "bar", "book", "baz", "zzz"])
            @show i
        end
-i = String["face","foo"]
-i = String["bar","book","baz"]
+i = String["face", "foo"]
+i = String["bar", "book", "baz"]
 i = String["zzz"]
 ```
 """
@@ -618,21 +618,21 @@ julia> for i in subsets([1, 2, 3])
 i = Int64[]
 i = [1]
 i = [2]
-i = [1,2]
+i = [1, 2]
 i = [3]
-i = [1,3]
-i = [2,3]
-i = [1,2,3]
+i = [1, 3]
+i = [2, 3]
+i = [1, 2, 3]
 
 julia> for i in subsets(1:4, 2)
           @show i
        end
-i = [1,2]
-i = [1,3]
-i = [1,4]
-i = [2,3]
-i = [2,4]
-i = [3,4]
+i = [1, 2]
+i = [1, 3]
+i = [1, 4]
+i = [2, 3]
+i = [2, 4]
+i = [3, 4]
 ```
 """
 function subsets(xs)
@@ -725,7 +725,7 @@ Return the `n`th element of `xs`. This is mostly useful for non-indexable collec
 
 ```jldoctest
 julia> mersenne = Set([3, 7, 31, 127])
-Set([7,31,3,127])
+Set([7, 31, 3, 127])
 
 julia> nth(mersenne, 3)
 3
@@ -818,10 +818,10 @@ iteratorsize(::Type{<:Iterate}) = IsInfinite()
 
 Iterate over successive applications of `f`, as in `x`, `f(x)`, `f(f(x))`, `f(f(f(x)))`, ...
 
-Use `Base.take()` to obtain the required number of elements.
+Use `Base.Iterators.take()` to obtain the required number of elements.
 
 ```jldoctest
-julia> for i in take(iterate(x -> 2x, 1), 5)
+julia> for i in Iterators.take(iterate(x -> 2x, 1), 5)
            @show i
        end
 i = 1
@@ -830,7 +830,7 @@ i = 4
 i = 8
 i = 16
 
-julia> for i in take(iterate(sqrt, 100), 6)
+julia> for i in Iterators.take(iterate(sqrt, 100), 6)
            @show i
        end
 i = 100
@@ -859,29 +859,25 @@ Lets you peek at the head element of an iterator without updating the state.
 
 ```jldoctest
 julia> it = peekiter(["face", "foo", "bar", "book", "baz", "zzz"])
-IterTools.PeekIter{Array{String,1}}(String["face","foo","bar","book","baz","zzz"])
+IterTools.PeekIter{Array{String,1}}(String["face", "foo", "bar", "book", "baz", "zzz"])
 
 julia> s = start(it)
-(2,Nullable{String}("face"))
+(2, Nullable{String}("face"))
 
-julia> @show peek(it, s)
-peek(it,s) = Nullable{String}("face")
-Nullable{String}("face")
+julia> @show peek(it, s);
+peek(it, s) = Nullable{String}("face")
 
-julia> @show peek(it, s)
-peek(it,s) = Nullable{String}("face")
-Nullable{String}("face")
+julia> @show peek(it, s);
+peek(it, s) = Nullable{String}("face")
 
 julia> x, s = next(it, s)
-("face",(3,Nullable{String}("foo"),false))
+("face", (3, Nullable{String}("foo"), false))
 
-julia> @show x
+julia> @show x;
 x = "face"
-"face"
 
-julia> @show peek(it, s)
-peek(it,s) = Nullable{String}("foo")
-Nullable{String}("foo")
+julia> @show peek(it, s);
+peek(it, s) = Nullable{String}("foo")
 ```
 """
 peekiter(itr) = PeekIter(itr)
