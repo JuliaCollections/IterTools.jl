@@ -32,7 +32,8 @@ export
     peekiter,
     peek,
     ncycle,
-    @itr
+    @itr,
+    along_axis
 
 function has_length(it)
     it_size = iteratorsize(it)
@@ -976,6 +977,69 @@ macro itr(ex)
     )
 
     return esc(ex)
+end
+
+# along_axis(arr,axis): iterate along axis of arr
+
+struct AlongAxis{I}
+    array::I
+    axis::Integer
+end
+iteratorsize(::Type{AlongAxis{I}}) where {I} = longest(HasLength(), iteratorsize(I))
+iteratoreltype(::Type{AlongAxis{I}}) where {I} = iteratoreltype(I)
+eltype(::Type{AlongAxis{I}}) where {I} = eltype(I)
+length(x::AlongAxis) = length(x.array) ÷ size(x.array, x.axis)
+function size(x::AlongAxis)
+    original_size = size(x.array) 
+    axis_size = size(x.array, x.axis)
+    (axis_size, original_size[1:x.axis-1]...,original_size[x.axis+1:ndims(x.array)]...)
+end
+
+"""
+    along_axis(array, axis)
+
+Iterate through `array` (array-like iterator) along `axis`
+Inspired off https://julialang.org/blog/2016/02/iteration#filtering-along-a-specified-dimension-exploiting-multiple-indexes
+
+```jldoctest
+julia> [sum(r) for r ∈ along_axis(reshape(1:9, (2,1)), 2)]
+3-element Array{Int64,1}:
+  6
+ 15
+ 24
+julia> [sum(r) for r ∈ along_axis(reshape(1:9, (2,1)), 2)]
+3-element Array{Int64,1}:
+  6
+ 15
+ 24
+```
+"""
+function along_axis(array, axis::Integer)
+    if axis ≤ 0 || axis > ndims(array)
+        throw(ArgumentError(string("expected 1 ≤ axis ≤ $(ndims(array)), ",
+                                   "got $axis")))
+    end
+    AlongAxis(array, axis)
+end
+
+function start(it::AlongAxis)
+    1
+end
+
+function next(it::AlongAxis, state)
+    # [:,:,…,index,:,…,:]
+    pre_axis=[Colon() for i ∈ 1:it.axis-1]
+    post_axis=[Colon() for i ∈ it.axis+1:size(it.array, it.axis)]
+    slice_argument=(pre_axis..., state, post_axis...)
+    if applicable(view, it.array, slice_argument...)
+        (view(it.array, slice_argument...), state + 1)
+    else
+        (it.array[slice_argument...], state + 1)
+    end
+end
+
+function done(it::AlongAxis, state)
+    size(it.array, it.axis) < state
 end
 
 end # module IterTools
