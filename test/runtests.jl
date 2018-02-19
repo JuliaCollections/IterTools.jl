@@ -361,6 +361,10 @@ end
         x, s = next(it, s)
         @test get(peek(it, s)) == 2
     end
+    @testset "along" begin
+        arr3by3 = reshape(1:9, (3,3))
+        @test [sum(row) for row ∈ along(arr3by3, 2)] == [ 6 15 24 ]
+    end
 end
 
 @testset "Deprecated @itr" begin
