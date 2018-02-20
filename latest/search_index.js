@@ -37,7 +37,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "IterTools.chain",
     "category": "Function",
-    "text": "chain(xs...)\n\nIterate through any number of iterators in sequence.\n\njulia> for i in chain(1:3, ['a', 'b', 'c'])\n           @show i\n       end\ni = 1\ni = 2\ni = 3\ni = 'a'\ni = 'b'\ni = 'c'\n\n\n\n"
+    "text": "chain(xs...)\n\nIterate through any number of iterators in sequence.\n\njulia> for i in chain(1:3, [\'a\', \'b\', \'c\'])\n           @show i\n       end\ni = 1\ni = 2\ni = 3\ni = \'a\'\ni = \'b\'\ni = \'c\'\n\n\n\n"
 },
 
 {
@@ -221,7 +221,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "takenth(xs, n)",
     "category": "section",
-    "text": "Iterate through every n'th element of xstakenth"
+    "text": "Iterate through every n\'th element of xstakenth"
 },
 
 {
