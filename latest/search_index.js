@@ -69,7 +69,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "IterTools.groupby",
     "category": "Function",
-    "text": "groupby(f, xs)\n\nGroup consecutive values that share the same result of applying f.\n\njulia> for i in groupby(x -> x[1], [\"face\", \"foo\", \"bar\", \"book\", \"baz\", \"zzz\"])\n           @show i\n       end\ni = String[\"face\",\"foo\"]\ni = String[\"bar\",\"book\",\"baz\"]\ni = String[\"zzz\"]\n\n\n\n"
+    "text": "groupby(f, xs)\n\nGroup consecutive values that share the same result of applying f.\n\njulia> for i in groupby(x -> x[1], [\"face\", \"foo\", \"bar\", \"book\", \"baz\", \"zzz\"])\n           @show i\n       end\ni = String[\"face\", \"foo\"]\ni = String[\"bar\", \"book\", \"baz\"]\ni = String[\"zzz\"]\n\n\n\n"
 },
 
 {
@@ -101,7 +101,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "IterTools.iterate",
     "category": "Function",
-    "text": "iterate(f, x)\n\nIterate over successive applications of f, as in x, f(x), f(f(x)), f(f(f(x))), ...\n\nUse Base.take() to obtain the required number of elements.\n\njulia> for i in take(iterate(x -> 2x, 1), 5)\n           @show i\n       end\ni = 1\ni = 2\ni = 4\ni = 8\ni = 16\n\njulia> for i in take(iterate(sqrt, 100), 6)\n           @show i\n       end\ni = 100\ni = 10.0\ni = 3.1622776601683795\ni = 1.7782794100389228\ni = 1.333521432163324\ni = 1.1547819846894583\n\n\n\n"
+    "text": "iterate(f, x)\n\nIterate over successive applications of f, as in x, f(x), f(f(x)), f(f(f(x))), ...\n\nUse Base.Iterators.take() to obtain the required number of elements.\n\njulia> for i in Iterators.take(iterate(x -> 2x, 1), 5)\n           @show i\n       end\ni = 1\ni = 2\ni = 4\ni = 8\ni = 16\n\njulia> for i in Iterators.take(iterate(sqrt, 100), 6)\n           @show i\n       end\ni = 100\ni = 10.0\ni = 3.1622776601683795\ni = 1.7782794100389228\ni = 1.333521432163324\ni = 1.1547819846894583\n\n\n\n"
 },
 
 {
@@ -133,7 +133,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "IterTools.nth",
     "category": "Function",
-    "text": "nth(xs, n)\n\nReturn the nth element of xs. This is mostly useful for non-indexable collections.\n\njulia> mersenne = Set([3, 7, 31, 127])\nSet([7,31,3,127])\n\njulia> nth(mersenne, 3)\n3\n\n\n\n"
+    "text": "nth(xs, n)\n\nReturn the nth element of xs. This is mostly useful for non-indexable collections.\n\njulia> mersenne = Set([3, 7, 31, 127])\nSet([7, 31, 3, 127])\n\njulia> nth(mersenne, 3)\n3\n\n\n\n"
 },
 
 {
@@ -149,7 +149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "IterTools.partition",
     "category": "Function",
-    "text": "partition(xs, n, [step])\n\nGroup values into n-tuples.\n\njulia> for i in partition(1:9, 3)\n           @show i\n       end\ni = (1,2,3)\ni = (4,5,6)\ni = (7,8,9)\n\nIf the step parameter is set, each tuple is separated by step values.\n\njulia> for i in partition(1:9, 3, 2)\n           @show i\n       end\ni = (1,2,3)\ni = (3,4,5)\ni = (5,6,7)\ni = (7,8,9)\n\njulia> for i in partition(1:9, 3, 3)\n           @show i\n       end\ni = (1,2,3)\ni = (4,5,6)\ni = (7,8,9)\n\njulia> for i in partition(1:9, 2, 3)\n           @show i\n       end\ni = (1,2)\ni = (4,5)\ni = (7,8)\n\n\n\n"
+    "text": "partition(xs, n, [step])\n\nGroup values into n-tuples.\n\njulia> for i in partition(1:9, 3)\n           @show i\n       end\ni = (1, 2, 3)\ni = (4, 5, 6)\ni = (7, 8, 9)\n\nIf the step parameter is set, each tuple is separated by step values.\n\njulia> for i in partition(1:9, 3, 2)\n           @show i\n       end\ni = (1, 2, 3)\ni = (3, 4, 5)\ni = (5, 6, 7)\ni = (7, 8, 9)\n\njulia> for i in partition(1:9, 3, 3)\n           @show i\n       end\ni = (1, 2, 3)\ni = (4, 5, 6)\ni = (7, 8, 9)\n\njulia> for i in partition(1:9, 2, 3)\n           @show i\n       end\ni = (1, 2)\ni = (4, 5)\ni = (7, 8)\n\n\n\n"
 },
 
 {
@@ -165,7 +165,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "IterTools.peekiter",
     "category": "Function",
-    "text": "peekiter(xs)\n\nLets you peek at the head element of an iterator without updating the state.\n\njulia> it = peekiter([\"face\", \"foo\", \"bar\", \"book\", \"baz\", \"zzz\"])\nIterTools.PeekIter{Array{String,1}}(String[\"face\",\"foo\",\"bar\",\"book\",\"baz\",\"zzz\"])\n\njulia> s = start(it)\n(2,Nullable{String}(\"face\"))\n\njulia> @show peek(it, s)\npeek(it,s) = Nullable{String}(\"face\")\nNullable{String}(\"face\")\n\njulia> @show peek(it, s)\npeek(it,s) = Nullable{String}(\"face\")\nNullable{String}(\"face\")\n\njulia> x, s = next(it, s)\n(\"face\",(3,Nullable{String}(\"foo\"),false))\n\njulia> @show x\nx = \"face\"\n\"face\"\n\njulia> @show peek(it, s)\npeek(it,s) = Nullable{String}(\"foo\")\nNullable{String}(\"foo\")\n\n\n\n"
+    "text": "peekiter(xs)\n\nLets you peek at the head element of an iterator without updating the state.\n\njulia> it = peekiter([\"face\", \"foo\", \"bar\", \"book\", \"baz\", \"zzz\"])\nIterTools.PeekIter{Array{String,1}}(String[\"face\", \"foo\", \"bar\", \"book\", \"baz\", \"zzz\"])\n\njulia> s = start(it)\n(2, Nullable{String}(\"face\"))\n\njulia> @show peek(it, s);\npeek(it, s) = Nullable{String}(\"face\")\n\njulia> @show peek(it, s);\npeek(it, s) = Nullable{String}(\"face\")\n\njulia> x, s = next(it, s)\n(\"face\", (3, Nullable{String}(\"foo\"), false))\n\njulia> @show x;\nx = \"face\"\n\njulia> @show peek(it, s);\npeek(it, s) = Nullable{String}(\"foo\")\n\n\n\n"
 },
 
 {
@@ -181,7 +181,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "IterTools.product",
     "category": "Function",
-    "text": "product(xs...)\n\nIterate over all combinations in the Cartesian product of the inputs.\n\njulia> for p in product(1:3,4:5)\n           @show p\n       end\np = (1,4)\np = (2,4)\np = (3,4)\np = (1,5)\np = (2,5)\np = (3,5)\n\n\n\n"
+    "text": "product(xs...)\n\nIterate over all combinations in the Cartesian product of the inputs.\n\njulia> for p in product(1:3,4:5)\n           @show p\n       end\np = (1, 4)\np = (2, 4)\np = (3, 4)\np = (1, 5)\np = (2, 5)\np = (3, 5)\n\n\n\n"
 },
 
 {
@@ -229,7 +229,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "IterTools.subsets",
     "category": "Function",
-    "text": "subsets(xs)\nsubsets(xs, k)\n\nIterate over every subset of the collection xs. You can restrict the subsets to a specific size k.\n\njulia> for i in subsets([1, 2, 3])\n          @show i\n       end\ni = Int64[]\ni = [1]\ni = [2]\ni = [1,2]\ni = [3]\ni = [1,3]\ni = [2,3]\ni = [1,2,3]\n\njulia> for i in subsets(1:4, 2)\n          @show i\n       end\ni = [1,2]\ni = [1,3]\ni = [1,4]\ni = [2,3]\ni = [2,4]\ni = [3,4]\n\n\n\n"
+    "text": "subsets(xs)\nsubsets(xs, k)\n\nIterate over every subset of the collection xs. You can restrict the subsets to a specific size k.\n\njulia> for i in subsets([1, 2, 3])\n          @show i\n       end\ni = Int64[]\ni = [1]\ni = [2]\ni = [1, 2]\ni = [3]\ni = [1, 3]\ni = [2, 3]\ni = [1, 2, 3]\n\njulia> for i in subsets(1:4, 2)\n          @show i\n       end\ni = [1, 2]\ni = [1, 3]\ni = [1, 4]\ni = [2, 3]\ni = [2, 4]\ni = [3, 4]\n\n\n\n"
 },
 
 {
