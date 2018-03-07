@@ -5,8 +5,16 @@ module IterTools
 import Base.Iterators: drop, take
 
 import Base: start, next, done, eltype, length, size
-import Base: iteratorsize, IteratorSize, SizeUnknown, IsInfinite, HasLength, HasShape
-import Base: iteratoreltype, IteratorEltype, HasEltype, EltypeUnknown
+import Base: IteratorSize, IteratorEltype
+import Base: SizeUnknown, IsInfinite, HasLength, HasShape
+import Base: HasEltype, EltypeUnknown
+
+@static if VERSION < v"0.7.0-DEV.3309"
+    import Base: iteratorsize, iteratoreltype
+else
+    const iteratorsize = IteratorSize
+    const iteratoreltype = IteratorEltype
+end
 
 export
     takestrict,
@@ -249,12 +257,12 @@ Iterate over all combinations in the Cartesian product of the inputs.
 julia> for p in product(1:3,4:5)
            @show p
        end
-p = (1,4)
-p = (2,4)
-p = (3,4)
-p = (1,5)
-p = (2,5)
-p = (3,5)
+p = (1, 4)
+p = (2, 4)
+p = (3, 4)
+p = (1, 5)
+p = (2, 5)
+p = (3, 5)
 ```
 """
 product(xss...) = Product(xss)
@@ -374,9 +382,9 @@ Group values into `n`-tuples.
 julia> for i in partition(1:9, 3)
            @show i
        end
-i = (1,2,3)
-i = (4,5,6)
-i = (7,8,9)
+i = (1, 2, 3)
+i = (4, 5, 6)
+i = (7, 8, 9)
 ```
 
 If the `step` parameter is set, each tuple is separated by `step` values.
@@ -385,24 +393,24 @@ If the `step` parameter is set, each tuple is separated by `step` values.
 julia> for i in partition(1:9, 3, 2)
            @show i
        end
-i = (1,2,3)
-i = (3,4,5)
-i = (5,6,7)
-i = (7,8,9)
+i = (1, 2, 3)
+i = (3, 4, 5)
+i = (5, 6, 7)
+i = (7, 8, 9)
 
 julia> for i in partition(1:9, 3, 3)
            @show i
        end
-i = (1,2,3)
-i = (4,5,6)
-i = (7,8,9)
+i = (1, 2, 3)
+i = (4, 5, 6)
+i = (7, 8, 9)
 
 julia> for i in partition(1:9, 2, 3)
            @show i
        end
-i = (1,2)
-i = (4,5)
-i = (7,8)
+i = (1, 2)
+i = (4, 5)
+i = (7, 8)
 ```
 """
 function partition(xs::I, n::Int) where I
@@ -490,8 +498,8 @@ Group consecutive values that share the same result of applying `f`.
 julia> for i in groupby(x -> x[1], ["face", "foo", "bar", "book", "baz", "zzz"])
            @show i
        end
-i = String["face","foo"]
-i = String["bar","book","baz"]
+i = String["face", "foo"]
+i = String["bar", "book", "baz"]
 i = String["zzz"]
 ```
 """
@@ -616,21 +624,21 @@ julia> for i in subsets([1, 2, 3])
 i = Int64[]
 i = [1]
 i = [2]
-i = [1,2]
+i = [1, 2]
 i = [3]
-i = [1,3]
-i = [2,3]
-i = [1,2,3]
+i = [1, 3]
+i = [2, 3]
+i = [1, 2, 3]
 
 julia> for i in subsets(1:4, 2)
           @show i
        end
-i = [1,2]
-i = [1,3]
-i = [1,4]
-i = [2,3]
-i = [2,4]
-i = [3,4]
+i = [1, 2]
+i = [1, 3]
+i = [1, 4]
+i = [2, 3]
+i = [2, 4]
+i = [3, 4]
 
 julia> for i in subsets(1:4, Val{2}())
            @show i
@@ -772,7 +780,7 @@ Return the `n`th element of `xs`. This is mostly useful for non-indexable collec
 
 ```jldoctest
 julia> mersenne = Set([3, 7, 31, 127])
-Set([7,31,3,127])
+Set([7, 31, 3, 127])
 
 julia> nth(mersenne, 3)
 3
@@ -863,12 +871,12 @@ iteratorsize(::Type{<:Iterate}) = IsInfinite()
 """
     iterate(f, x)
 
-Iterate over successive applications of `f`, as in `f(x)`, `f(f(x))`, `f(f(f(x)))`, ....
+Iterate over successive applications of `f`, as in `x`, `f(x)`, `f(f(x))`, `f(f(f(x)))`, ...
 
-Use `Base.take()` to obtain the required number of elements.
+Use `Base.Iterators.take()` to obtain the required number of elements.
 
 ```jldoctest
-julia> for i in take(iterate(x -> 2x, 1), 5)
+julia> for i in Iterators.take(iterate(x -> 2x, 1), 5)
            @show i
        end
 i = 1
@@ -877,7 +885,7 @@ i = 4
 i = 8
 i = 16
 
-julia> for i in take(iterate(sqrt, 100), 6)
+julia> for i in Iterators.take(iterate(sqrt, 100), 6)
            @show i
        end
 i = 100
@@ -906,29 +914,25 @@ Lets you peek at the head element of an iterator without updating the state.
 
 ```jldoctest
 julia> it = peekiter(["face", "foo", "bar", "book", "baz", "zzz"])
-IterTools.PeekIter{Array{String,1}}(String["face","foo","bar","book","baz","zzz"])
+IterTools.PeekIter{Array{String,1}}(String["face", "foo", "bar", "book", "baz", "zzz"])
 
 julia> s = start(it)
-(2,Nullable{String}("face"))
+(2, Nullable{String}("face"))
 
-julia> @show peek(it, s)
-peek(it,s) = Nullable{String}("face")
-Nullable{String}("face")
+julia> @show peek(it, s);
+peek(it, s) = Nullable{String}("face")
 
-julia> @show peek(it, s)
-peek(it,s) = Nullable{String}("face")
-Nullable{String}("face")
+julia> @show peek(it, s);
+peek(it, s) = Nullable{String}("face")
 
 julia> x, s = next(it, s)
-("face",(3,Nullable{String}("foo"),false))
+("face", (3, Nullable{String}("foo"), false))
 
-julia> @show x
+julia> @show x;
 x = "face"
-"face"
 
-julia> @show peek(it, s)
-peek(it,s) = Nullable{String}("foo")
-Nullable{String}("foo")
+julia> @show peek(it, s);
+peek(it, s) = Nullable{String}("foo")
 ```
 """
 peekiter(itr) = PeekIter(itr)
@@ -1015,216 +1019,14 @@ function next(nc::NCycle, state)
 end
 done(nc::NCycle, state) = state[2] == nc.n
 
-using Base.Meta
 
-## @itr macro for auto-inlining in for loops
-#
-# it dispatches on macros defined below
-
-"""
-    @itr(ex)
-
-The `@itr` macro automaticaly inlines some iterators in `for` loops, to produce faster code.
-
-The macro can be used with the following supported iterators: `zip()`, `enumerate()`,
-`take()`, `takestrict()`, `drop()`, and `chain()`.
-
-```jldoctest
-julia> for (x,y) in zip(1:3, 4:6)
-           @show x,y
-       end
-(x,y) = (1,4)
-(x,y) = (2,5)
-(x,y) = (3,6)
-
-julia> @itr for (x,y) in zip(1:3, 4:6)
-           @show x,y
-       end
-(x,y) = (1,4)
-(x,y) = (2,5)
-(x,y) = (3,6)
-```
-"""
 macro itr(ex)
-    isexpr(ex, :for) || throw(ArgumentError("@itr macro expects a for loop"))
-    isexpr(ex.args[1], :(=)) || throw(ArgumentError("malformed or unsupported for loop in @itr macro"))
-    isexpr(ex.args[1].args[2], :call) || throw(ArgumentError("@itr macro expects an iterator call, e.g. @itr for (x,y) = zip(a,b)"))
+    Base.depwarn(
+        "@itr is deprecated. Iterate without using the macro instead.",
+        Symbol("@itr"),
+    )
 
-    iterator = ex.args[1].args[2].args[1]
-
-    # fix for Julia v0.6
-    if isa(iterator, Expr) && iterator.head === :globalref
-        iterator = iterator.args[2]
-    end
-
-    ex.args[1].args[2] = Expr(:tuple, ex.args[1].args[2].args[2:end]...)
-
-    if iterator == :zip
-        rex = :(@zip($(esc(ex))))
-    elseif iterator == :enumerate
-        rex = :(@enumerate($(esc(ex))))
-    elseif iterator == :take
-        rex = :(@take($(esc(ex))))
-    elseif iterator == :takestrict
-        rex = :(@takestrict($(esc(ex))))
-    elseif iterator == :drop
-        rex = :(@drop($(esc(ex))))
-    elseif iterator == :chain
-        rex = :(@chain($(esc(ex))))
-    else
-        throw(ArgumentError("unknown or unsupported iterator $iterator in @itr macro"))
-    end
-    return rex
-end
-
-macro zip(ex)
-    @assert ex.head == :for
-    @assert ex.args[1].head == :(=)
-    isexpr(ex.args[1].args[1], :tuple) || throw(ArgumentError("@zip macro needs explicit tuple arguments"))
-    isexpr(ex.args[1].args[2], :tuple) || throw(ArgumentError("@zip macro needs explicit tuple arguments"))
-    n = length(ex.args[1].args[1].args)
-    length(ex.args[1].args[2].args) == n || throw(ArgumentError("unequal tuple sizes in @zip macro"))
-    body = esc(ex.args[2])
-    vars = map(esc, ex.args[1].args[1].args)
-    iters = map(esc, ex.args[1].args[2].args)
-    states = [gensym("s") for i=1:n]
-    as = Any[Expr(:call, :(Base.start), iters[i]) for i=1:n]
-    startex = Expr(:(=), Expr(:tuple, states...), Expr(:tuple, as...))
-    ad = Any[Expr(:call, :(Base.done), iters[i], states[i]) for i = 1:n]
-    notdoneex = Expr(:call, :(!), Expr(:||, ad...))
-    nextex = Expr(:(=), Expr(:tuple, Any[Expr(:tuple, vars[i], states[i]) for i=1:n]...),
-                        Expr(:tuple, Any[Expr(:call, :(Base.next), iters[i], states[i]) for i=1:n]...))
-    Expr(:let, Expr(:block,
-        startex,
-        Expr(:while, notdoneex, Expr(:block,
-            nextex,
-            body))),
-        states...)
-end
-
-macro enumerate(ex)
-    @assert ex.head == :for
-    @assert ex.args[1].head == :(=)
-    isexpr(ex.args[1].args[1], :tuple) || throw(ArgumentError("@enumerate macro needs an explicit tuple argument"))
-    length(ex.args[1].args[1].args) == 2 || throw(ArgumentError("lentgh of tuple must be 2 in @enumerate macro"))
-    body = esc(ex.args[2])
-    vars = map(esc, ex.args[1].args[1].args)
-    if isexpr(ex.args[1].args[2], :tuple) && length(ex.args[1].args[2].args) == 1
-        ex.args[1].args[2] = ex.args[1].args[2].args[1]
-    end
-    iter = esc(ex.args[1].args[2])
-    ind = gensym("i")
-    startex = Expr(:(=), ind, 0)
-    forex = Expr(:(=), vars[2], iter)
-    index = Expr(:(=), vars[1], ind)
-    increx = Expr(:(=), ind, Expr(:call, :(+), ind, 1))
-    Expr(:let, Expr(:block,
-        startex,
-        Expr(:for, forex, Expr(:block,
-            increx,
-            index,
-            body))),
-        ind)
-end
-
-# both @take and @takestrict use @_take
-
-macro _take(ex, strict)
-    mname = strict ? "takestrict" : "take"
-    @assert ex.head == :for
-    @assert ex.args[1].head == :(=)
-    isexpr(ex.args[1].args[2], :tuple) || throw(ArgumentError("@$(mname) macro needs an explicit tuple argument"))
-    length(ex.args[1].args[2].args) == 2 || throw(ArgumentError("length of tuple must be 2 in @$(mname) macro"))
-    body = esc(ex.args[2])
-    var = esc(ex.args[1].args[1])
-    iter = esc(ex.args[1].args[2].args[1])
-    n = esc(ex.args[1].args[2].args[2])
-    ind = gensym("i")
-    state = gensym("s")
-    startex = Expr(:block,
-        Expr(:(=), ind, 0),
-        Expr(:(=), state, Expr(:call, :(Base.start), iter)))
-    notdoneex = Expr(:call, :(!), Expr(:||,
-        Expr(:call, :(>=), ind, n),
-        Expr(:call, :(Base.done), iter, state)))
-    nextex = Expr(:block,
-        Expr(:(=), Expr(:tuple, var, state),
-                   Expr(:call, :(Base.next), iter, state)),
-        Expr(:(=), ind, Expr(:call, :(+), ind, 1)))
-    if strict
-        checkex = Expr(:if, Expr(:call, :(<), ind, n),
-            Expr(:call, :throw, ArgumentError("in takestrict(xs, n), xs had fewer than n items to take.")))
-    else
-        checkex = :nothing
-    end
-
-    Expr(:let, Expr(:block,
-        startex,
-        Expr(:while, notdoneex, Expr(:block,
-            nextex,
-            body)),
-        checkex),
-        ind, state)
-end
-
-macro take(ex)
-    :(@_take($(esc(ex)), false))
-end
-
-macro takestrict(ex)
-    :(@_take($(esc(ex)), true))
-end
-
-macro drop(ex)
-    @assert ex.head == :for
-    @assert ex.args[1].head == :(=)
-    isexpr(ex.args[1].args[2], :tuple) || throw(ArgumentError("@drop macro needs an explicit tuple argument"))
-    length(ex.args[1].args[2].args) == 2 || throw(ArgumentError("length of tuple must be 2 in @drop macro"))
-    body = esc(ex.args[2])
-    var = esc(ex.args[1].args[1])
-    iter = esc(ex.args[1].args[2].args[1])
-    n = esc(ex.args[1].args[2].args[2])
-    ind = gensym("i")
-    state = gensym("s")
-    startex = Expr(:block,
-        Expr(:(=), ind, 0),
-        Expr(:(=), state, Expr(:call, :(Base.start), iter)))
-    notdoneex1 = Expr(:call, :(!), Expr(:||,
-        Expr(:call, :(>=), ind, n),
-        Expr(:call, :(Base.done), iter, state)))
-    nextex1 = Expr(:block,
-        Expr(:(=), Expr(:tuple, var, state),
-                   Expr(:call, :(Base.next), iter, state)),
-        Expr(:(=), ind, Expr(:call, :(+), ind, 1)))
-    notdoneex2 = Expr(:call, :(!), Expr(:call, :(Base.done), iter, state))
-    nextex2 = Expr(:(=), Expr(:tuple, var, state), Expr(:call, :(Base.next), iter, state))
-
-    Expr(:let, Expr(:block,
-        startex,
-        Expr(:while, notdoneex1, nextex1),
-        Expr(:while, notdoneex2, Expr(:block,
-            nextex2,
-            body))),
-        ind, state)
-end
-
-macro chain(ex)
-    @assert ex.head == :for
-    @assert ex.args[1].head == :(=)
-    isexpr(ex.args[1].args[2], :tuple) || throw(ArgumentError("@chain macro needs explicit tuple arguments"))
-    n = length(ex.args[1].args[2].args)
-    body = esc(ex.args[2])
-    var = esc(ex.args[1].args[1])
-    iters = map(esc, ex.args[1].args[2].args)
-    states = [gensym("s") for i=1:n]
-
-    cycleex = [Expr(:block,
-        Expr(:(=), states[i], Expr(:call, :(Base.start), iters[i])),
-        Expr(:while, Expr(:call, :(!), Expr(:call, :(Base.done), iters[i], states[i])), Expr(:block,
-            Expr(:(=), Expr(:tuple, var, states[i]), Expr(:call, :(Base.next), iters[i], states[i])),
-            body))) for i = 1:n]
-
-    Expr(:let, Expr(:block, cycleex...), states...)
+    return esc(ex)
 end
 
 end # module IterTools

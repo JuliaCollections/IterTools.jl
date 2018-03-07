@@ -9,5 +9,6 @@ matrix:
     - julia: nightly
 notifications:
   email: false
-after_script:
+after_success:
+  - julia -e 'cd(Pkg.dir("IterTools")); Pkg.add("Documenter"); include(joinpath("docs", "make.jl"))'
   - julia -e 'cd(Pkg.dir("IterTools")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
