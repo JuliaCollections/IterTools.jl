@@ -294,6 +294,52 @@ end
                 @test length(collect(sk11)) == binomial(3, 2)
             end
         end
+
+        @testset "specific static length" begin
+            sk0 = subsets([:a, :b, :c], Val{0}())
+            @test collect(sk0) == [()]
+
+            sk1 = subsets([:a, :b, :c], Val{1}())
+            @test eltype(eltype(sk1)) == Symbol
+            @test collect(sk1) == [(:a,), (:b,), (:c,)]
+
+            sk2 = subsets([:a, :b, :c], Val{2}())
+            @test eltype(eltype(sk2)) == Symbol
+            @test collect(sk2) == [(:a, :b), (:a, :c), (:b, :c)]
+
+            sk3 = subsets([:a, :b, :c], Val{3}())
+            @test eltype(eltype(sk3)) == Symbol
+            @test collect(sk3) == [(:a, :b, :c)]
+
+            sk4 = subsets([:a, :b, :c], Val{4}())
+            @test eltype(eltype(sk4)) == Symbol
+            @test collect(sk4) == []
+
+            sk5 = subsets([:a, :b, :c], Val{5}())
+            @test eltype(eltype(sk5)) == Symbol
+            @test collect(sk5) == []
+
+            @testset for i in 1:6
+                sk5 = subsets(collect(1:4), Val{i}())
+                @test eltype(eltype(sk5)) == Int
+                @test length(collect(sk5)) == binomial(4, i)
+            end
+
+            function collect_pairs(x)
+                p = Vector{NTuple{2, eltype(x)}}(binomial(length(x), 2))
+                idx = 1
+                for i = 1:length(x)
+                    for j = i+1:length(x)
+                        p[idx] = (x[i], x[j])
+                        idx += 1
+                    end
+                end
+                return p
+            end
+            @testset for n = 1:10
+                @test collect(subsets(1:n, Val{2}())) == collect_pairs(1:n)
+            end
+        end
     end
 
     @testset "nth" begin
