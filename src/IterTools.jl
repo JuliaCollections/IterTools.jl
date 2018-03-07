@@ -755,9 +755,9 @@ next(it::StaticSizeBinomial{0}, _) = (), true
 done(it::StaticSizeBinomial{0}, d) = d
 
 # Generic case K >= 1
-@inline pop(t::NTuple) = reverse(Base.tail(reverse(t))), t[end]
+pop(t::NTuple) = reverse(Base.tail(reverse(t))), t[end]
 
-@inline function advance(it::StaticSizeBinomial{K}, idx) where {K}
+function advance(it::StaticSizeBinomial{K}, idx) where {K}
 	xs = it.xs
 	lidx, i = pop(idx)
     i += 1
@@ -767,11 +767,11 @@ done(it::StaticSizeBinomial{0}, d) = d
 	end
 	return (lidx..., i)
 end
-@inline advance(it::StaticSizeBinomial, idx::NTuple{1}) = (idx[end]+1,)
+advance(it::StaticSizeBinomial, idx::NTuple{1}) = (idx[end]+1,)
 
-@inline start(it::StaticSizeBinomial{K}) where {K} = ntuple(identity, Val{K}())
-@inline next(it::StaticSizeBinomial, idx) = map(i -> it.xs[i], idx), advance(it, idx)
-@inline done(it::StaticSizeBinomial, state) = state[end] > length(it.xs)
+start(it::StaticSizeBinomial{K}) where {K} = ntuple(identity, Val{K}())
+next(it::StaticSizeBinomial, idx) = map(i -> it.xs[i], idx), advance(it, idx)
+done(it::StaticSizeBinomial, state) = state[end] > length(it.xs)
 
 
 # nth : return the nth element in a collection
