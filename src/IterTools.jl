@@ -744,7 +744,6 @@ next(it::StaticSizeBinomial{0,<:Any},_) = (),true
 done(it::StaticSizeBinomial{0,<:Any},d) = d
 
 # Generic case K >= 1
-using Compat # To enable Val{k}() syntax
 @inline pop(t::NTuple) = reverse(Base.tail(reverse(t))), t[end]
 @inline function advance(it::StaticSizeBinomial{K,<:Any}, idx) where {K}
 	xs = it.xs
@@ -758,6 +757,7 @@ using Compat # To enable Val{k}() syntax
 end
 @inline advance(it::StaticSizeBinomial,idx::NTuple{1,<:Any}) = (idx[end]+1,)
 
+using Compat # To enable ntuple(f,Val{k}()) syntax
 @inline start(it::StaticSizeBinomial{K,<:Any}) where {K} = ntuple(identity,Val{K}())
 @inline next(it::StaticSizeBinomial,idx) = map(i->it.xs[i],idx),advance(it,idx)
 @inline done(it::StaticSizeBinomial,state) = state[end] > length(it.xs)
