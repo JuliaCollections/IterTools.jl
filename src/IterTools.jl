@@ -9,6 +9,8 @@ import Base: IteratorSize, IteratorEltype
 import Base: SizeUnknown, IsInfinite, HasLength, HasShape
 import Base: HasEltype, EltypeUnknown
 
+import Compat  # for ntuple with ::Val{N} arg
+
 @static if VERSION < v"0.7.0-DEV.3309"
     import Base: iteratorsize, iteratoreltype
 else
@@ -615,7 +617,7 @@ size `k`.
 Giving the subset size in the form `Val{k}()` allows the compiler to produce code optimized
 for the particular size requested. This leads to performance comparable to hand-written
 loops if `k` is small and known at compile time, but may or may not improve performance
-otherwise. 
+otherwise.
 
 ```jldoctest
 julia> for i in subsets([1, 2, 3])
@@ -683,19 +685,20 @@ end
 
 # Iterate over all subsets of a collection with a given size
 
-struct Binomial{T}
-    xs::Vector{T}
+struct Binomial{Collection}
+    xs::Collection
     n::Int64
     k::Int64
 end
-Binomial(xs::AbstractVector{T}, n::Integer, k::Integer) where {T} = Binomial{T}(xs, n, k)
+Binomial(xs::C, n::Integer, k::Integer) where {C} = Binomial{C}(xs, n, k)
 
 iteratorsize(::Type{<:Binomial}) = HasLength()
+iteratoreltype(::Type{Binomial{C}}) where {C} = iteratoreltype(C)
 
-eltype(::Type{Binomial{T}}) where {T} = Vector{T}
+eltype(::Type{Binomial{C}}) where {C} = Vector{eltype(C)}
 length(it::Binomial) = binomial(it.n,it.k)
 
-subsets(xs,k) = Binomial(xs,length(xs),k)
+subsets(xs, k) = Binomial(xs, length(xs), k)
 
 mutable struct BinomialIterState
     idx::Vector{Int64}
@@ -710,7 +713,7 @@ function next(it::Binomial, state::BinomialIterState)
     idx = state.idx
     set = it.xs[idx]
     i = it.k
-    while(i>0)
+    while i > 0
         if idx[i] < it.n - it.k + i
             idx[i] += 1
 
@@ -724,7 +727,7 @@ function next(it::Binomial, state::BinomialIterState)
         end
     end
 
-    state.done = i==0
+    state.done = i == 0
 
     return set, state
 end
@@ -734,41 +737,41 @@ done(it::Binomial, state::BinomialIterState) = state.done
 
 # Iterate over all subsets of a collection with a given *statically* known size
 
-struct StaticSizeBinomial{K,Container}
+struct StaticSizeBinomial{K, Container}
     xs::Container
 end
 
-iteratorsize(::Type{StaticSizeBinomial{K,C}}) where {K,C} = longest(HasLength(),iteratorsize(C))
-iteratoreltype(::Type{StaticSizeBinomial{K,C}}) where {K,C} = iteratoreltype(C)
+iteratorsize(::Type{StaticSizeBinomial{K, C}}) where {K, C} = HasLength()
+iteratoreltype(::Type{StaticSizeBinomial{K, C}}) where {K, C} = iteratoreltype(C)
 
-eltype(::Type{StaticSizeBinomial{K,C}}) where {K,C} = NTuple{K,eltype(C)}
-length(it::StaticSizeBinomial{K,<:Any}) where {K} = binomial(length(it.xs),K)
+eltype(::Type{StaticSizeBinomial{K, C}}) where {K, C} = NTuple{K, eltype(C)}
+length(it::StaticSizeBinomial{K}) where {K} = binomial(length(it.xs), K)
 
-subsets(xs,::Val{K}) where {K} = StaticSizeBinomial{K,typeof(xs)}(xs)
+subsets(xs::C, ::Val{K}) where {K, C} = StaticSizeBinomial{K, C}(xs)
 
 # Special cases for K == 0
-start(it::StaticSizeBinomial{0,<:Any}) = false
-next(it::StaticSizeBinomial{0,<:Any},_) = (),true
-done(it::StaticSizeBinomial{0,<:Any},d) = d
+start(it::StaticSizeBinomial{0}) = false
+next(it::StaticSizeBinomial{0}, _) = (), true
+done(it::StaticSizeBinomial{0}, d) = d
 
 # Generic case K >= 1
 @inline pop(t::NTuple) = reverse(Base.tail(reverse(t))), t[end]
-@inline function advance(it::StaticSizeBinomial{K,<:Any}, idx) where {K}
-	xs = it.xs
-	lidx,i = pop(idx)
-    i += 1
-	if i > length(xs)-K+length(idx)
-		lidx = advance(it,lidx)
-		i = lidx[end]+1
-	end
-	return (lidx...,i)
-end
-@inline advance(it::StaticSizeBinomial,idx::NTuple{1,<:Any}) = (idx[end]+1,)
 
-using Compat # To enable ntuple(f,Val{k}()) syntax
-@inline start(it::StaticSizeBinomial{K,<:Any}) where {K} = ntuple(identity,Val{K}())
-@inline next(it::StaticSizeBinomial,idx) = map(i->it.xs[i],idx),advance(it,idx)
-@inline done(it::StaticSizeBinomial,state) = state[end] > length(it.xs)
+@inline function advance(it::StaticSizeBinomial{K}, idx) where {K}
+	xs = it.xs
+	lidx, i = pop(idx)
+    i += 1
+	if i > length(xs) - K + length(idx)
+		lidx = advance(it, lidx)
+		i = lidx[end] + 1
+	end
+	return (lidx..., i)
+end
+@inline advance(it::StaticSizeBinomial, idx::NTuple{1}) = (idx[end]+1,)
+
+@inline start(it::StaticSizeBinomial{K}) where {K} = ntuple(identity, Val{K}())
+@inline next(it::StaticSizeBinomial, idx) = map(i -> it.xs[i], idx), advance(it, idx)
+@inline done(it::StaticSizeBinomial, state) = state[end] > length(it.xs)
 
 
 # nth : return the nth element in a collection
