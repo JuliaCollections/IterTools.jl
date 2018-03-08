@@ -596,7 +596,7 @@ function done(it::IMap, state)
 end
 
 
-# Iterate over all subsets of a collection
+# Iterate over all subsets of an indexable collection
 
 struct Subsets{C}
     xs::C
@@ -611,8 +611,8 @@ length(it::Subsets) = 1 << length(it.xs)
     subsets(xs, k)
     subsets(xs, Val{k}())
 
-Iterate over every subset of the collection `xs`. You can restrict the subsets to a specific
-size `k`.
+Iterate over every subset of the indexable collection `xs`. You can restrict the subsets to a
+specific size `k`.
 
 Giving the subset size in the form `Val{k}()` allows the compiler to produce code optimized
 for the particular size requested. This leads to performance comparable to hand-written
@@ -683,7 +683,7 @@ function done(it::Subsets, state)
 end
 
 
-# Iterate over all subsets of a collection with a given size
+# Iterate over all subsets of an indexable collection with a given size
 
 struct Binomial{Collection}
     xs::Collection
@@ -735,7 +735,7 @@ end
 done(it::Binomial, state::BinomialIterState) = state.done
 
 
-# Iterate over all subsets of a collection with a given *statically* known size
+# Iterate over all subsets of an indexable collection with a given *statically* known size
 
 struct StaticSizeBinomial{K, Container}
     xs::Container

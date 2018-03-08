@@ -110,7 +110,8 @@ takenth
 
 ## subsets(xs, [k])
 
-Iterate over every subset of a collection `xs`, or iterate over every subset of size `k` from a collection `xs`.
+Iterate over every subset of an indexable collection `xs`, or iterate over every subset of size `k`
+from an indexable collection `xs`.
 
 ```@docs
 subsets
