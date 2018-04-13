@@ -178,7 +178,6 @@ struct Chain{T<:Tuple}
     xss::T
 end
 
-# iteratorsize method defined at bottom because of how @generated functions work in 0.6 now
 
 """
     chain(xs...)
