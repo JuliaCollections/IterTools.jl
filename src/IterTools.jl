@@ -987,7 +987,7 @@ struct AlongAxis{I}
 end
 iteratorsize(::Type{AlongAxis{I}}) where {I} = longest(HasLength(), iteratorsize(I))
 iteratoreltype(::Type{AlongAxis{I}}) where {I} = iteratoreltype(I)
-eltype(::Type{AlongAxis{I}}) where {I} = eltype(I)
+eltype(::Type{AlongAxis{Array{T,N}}}) where {T,N} = Array{T,N-1}
 length(x::AlongAxis) = length(x.array) ÷ size(x.array, x.axis)
 function size(x::AlongAxis)
     original_size = size(x.array) 
@@ -1022,20 +1022,10 @@ function along_axis(array, axis::Integer)
     AlongAxis(array, axis)
 end
 
-function start(it::AlongAxis)
-    1
-end
+start(it::AlongAxis) = 1
 
 function next(it::AlongAxis, state)
-    # [:,:,…,index,:,…,:]
-    pre_axis=[Colon() for i ∈ 1:it.axis-1]
-    post_axis=[Colon() for i ∈ it.axis+1:size(it.array, it.axis)]
-    slice_argument=(pre_axis..., state, post_axis...)
-    if applicable(view, it.array, slice_argument...)
-        (view(it.array, slice_argument...), state + 1)
-    else
-        (it.array[slice_argument...], state + 1)
-    end
+    (slicedim(it.array, it.axis, state), state + 1)
 end
 
 function done(it::AlongAxis, state)
