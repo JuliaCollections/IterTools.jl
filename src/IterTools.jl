@@ -970,15 +970,6 @@ end
 done(nc::NCycle, state) = state[2] == nc.n
 
 
-macro itr(ex)
-    Base.depwarn(
-        "@itr is deprecated. Iterate without using the macro instead.",
-        Symbol("@itr"),
-    )
-
-    return esc(ex)
-end
-
 # along_axis(arr,axis): iterate along axis of arr
 
 struct AlongAxis{I}
@@ -1030,6 +1021,15 @@ end
 
 function done(it::AlongAxis, state)
     size(it.array, it.axis) < state
+end
+
+macro itr(ex)
+    Base.depwarn(
+        "@itr is deprecated. Iterate without using the macro instead.",
+        Symbol("@itr"),
+    )
+
+    return esc(ex)
 end
 
 end # module IterTools
