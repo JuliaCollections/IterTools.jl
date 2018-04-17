@@ -34,7 +34,10 @@ export
     peekiter,
     peek,
     ncycle,
-    @itr
+    @itr,
+    along_axis,
+    rows,
+    columns
 
 function has_length(it)
     it_size = iteratorsize(it)
@@ -1021,6 +1024,62 @@ function next(nc::NCycle, state)
 end
 done(nc::NCycle, state) = state[2] == nc.n
 
+
+# along_axis(arr,axis): iterate along axis of arr
+
+struct AlongAxis{A<:AbstractVecOrMat}
+    array::A
+    axis::Integer
+end
+iteratorsize(::Type{AlongAxis{A}}) where {A} = longest(HasLength(), iteratorsize(A))
+iteratoreltype(::Type{AlongAxis{A}}) where {A} = iteratoreltype(A)
+eltype(::Type{AlongAxis{Array{T,N}}}) where {T,N} = Array{T,N-1}
+length(x::AlongAxis) = length(x.array) ÷ size(x.array, x.axis)
+function size(x::AlongAxis)
+    original_size = size(x.array) 
+    axis_size = size(x.array, x.axis)
+    (axis_size, original_size[1:x.axis-1]...,original_size[x.axis+1:ndims(x.array)]...)
+end
+
+"""
+    along_axis(array, axis)
+
+Iterate through `array` (array-like iterator) along `axis`
+Inspired off https://julialang.org/blog/2016/02/iteration#filtering-along-a-specified-dimension-exploiting-multiple-indexes
+
+```jldoctest
+julia> [sum(r) for r ∈ along_axis(reshape(1:9, (2,1)), 2)]
+3-element Array{Int64,1}:
+  6
+ 15
+ 24
+julia> [sum(r) for r ∈ along_axis(reshape(1:9, (2,1)), 2)]
+3-element Array{Int64,1}:
+  6
+ 15
+ 24
+```
+"""
+function along_axis(array, axis::Integer)
+    if axis ≤ 0 || axis > ndims(array)
+        throw(ArgumentError(string("expected 1 ≤ axis ≤ $(ndims(array)), ",
+                                   "got $axis")))
+    end
+    AlongAxis(array, axis)
+end
+
+start(it::AlongAxis) = 1
+
+function next(it::AlongAxis, state)
+    (slicedim(it.array, it.axis, state), state + 1)
+end
+
+function done(it::AlongAxis, state)
+    size(it.array, it.axis) < state
+end
+
+rows(array) = along_axis(array,2)
+columns(array) = along_axis(array,1)
 
 macro itr(ex)
     Base.depwarn(
