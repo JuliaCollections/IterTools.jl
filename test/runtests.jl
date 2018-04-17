@@ -366,7 +366,7 @@ end
         @test [sum(row) for row ∈ along_axis(arr3by3, 2)] == [ 6, 15, 24]
         @test [sum(col) for col ∈ along_axis(arr3by3, 1)] == [12, 15, 18]
         @test collect(along_axis(arr3by3, 1)) == Any[[1, 4, 7], [2, 5, 8], [3, 6, 9]] 
-        @test hcat(collect(along_axis(arr3by3, 2))...) == arr3by3 
+        @test collect(along_axis(arr3by3, 2)) == Any[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
     end
 end
 
