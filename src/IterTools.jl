@@ -33,7 +33,9 @@ export
     peek,
     ncycle,
     @itr,
-    along_axis
+    along_axis,
+    rows,
+    columns
 
 function has_length(it)
     it_size = iteratorsize(it)
@@ -1022,6 +1024,9 @@ end
 function done(it::AlongAxis, state)
     size(it.array, it.axis) < state
 end
+
+rows(array) = along_axis(array,2)
+columns(array) = along_axis(array,1)
 
 macro itr(ex)
     Base.depwarn(
