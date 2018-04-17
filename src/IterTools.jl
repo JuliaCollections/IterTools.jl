@@ -972,12 +972,12 @@ done(nc::NCycle, state) = state[2] == nc.n
 
 # along_axis(arr,axis): iterate along axis of arr
 
-struct AlongAxis{I}
-    array::I
+struct AlongAxis{A<:AbstractVecOrMat}
+    array::A
     axis::Integer
 end
-iteratorsize(::Type{AlongAxis{I}}) where {I} = longest(HasLength(), iteratorsize(I))
-iteratoreltype(::Type{AlongAxis{I}}) where {I} = iteratoreltype(I)
+iteratorsize(::Type{AlongAxis{A}}) where {A} = longest(HasLength(), iteratorsize(A))
+iteratoreltype(::Type{AlongAxis{A}}) where {A} = iteratoreltype(A)
 eltype(::Type{AlongAxis{Array{T,N}}}) where {T,N} = Array{T,N-1}
 length(x::AlongAxis) = length(x.array) ÷ size(x.array, x.axis)
 function size(x::AlongAxis)
