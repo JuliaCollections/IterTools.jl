@@ -407,6 +407,21 @@ end
         x, s = next(it, s)
         @test get(peek(it, s)) == 2
     end
+
+    @testset "along_axis" begin
+        arr3by3 = reshape(1:9, (3,3))
+        @test [sum(row) for row ∈ along_axis(arr3by3, 2)] == [ 6, 15, 24]
+        @test [sum(col) for col ∈ along_axis(arr3by3, 1)] == [12, 15, 18]
+        @test collect(rows(arr3by3))    == Any[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        @test collect(columns(arr3by3)) == Any[[1, 4, 7], [2, 5, 8], [3, 6, 9]]
+
+        @test_throws ArgumentError along_axis(arr3by3, -1)
+        @test_throws ArgumentError along_axis(arr3by3, 80)
+
+        two_by_four = reshape(map(i->i^2, 1:2*4), 2, 4)
+        @test size(rows(two_by_four))    == (4,2)
+        @test size(columns(two_by_four)) == (2,4)
+    end
 end
 
 @testset "Deprecated @itr" begin
