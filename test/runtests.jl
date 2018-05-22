@@ -4,19 +4,7 @@ import Base: IsInfinite, SizeUnknown, HasLength, HasShape
 
 import Base.Iterators: take, countfrom, drop
 
-@static if VERSION < v"0.7.0-DEV.3309"
-    import Base: iteratorsize
-else
-    const iteratorsize = Base.IteratorSize
-end
-
 include("testing_macros.jl")
-
-@static if VERSION < v"0.7.0-DEV.3519"
-    has_shape(n) = HasShape()
-else
-    has_shape(n) = HasShape{n}()
-end
 
 
 @testset "IterTools" begin
@@ -63,22 +51,22 @@ end
         @test eltype(ch2) == typejoin(Int, Float64)
         @test collect(ch2) == [1:2:5; 0.2:0.1:1.6]
         @test length(ch2) == length(collect(ch2))
-        @test iteratorsize(ch2) == HasLength()
+        @test IteratorSize(ch2) == HasLength()
 
         ch3 = chain(1:10, 1:10, 1:10)
         @test length(ch3) == 30
-        @test iteratorsize(ch3) == HasLength()
+        @test IteratorSize(ch3) == HasLength()
 
         r = countfrom(1)
         ch4 = chain(1:10, countfrom(1))
         @test eltype(ch4) == Int
         @test_throws MethodError length(ch4)
-        @assert iteratorsize(r) == IsInfinite()
-        @test iteratorsize(ch4) == IsInfinite()
+        @assert IteratorSize(r) == IsInfinite()
+        @test IteratorSize(ch4) == IsInfinite()
 
         ch5 = chain()
         @test length(ch5) == 0
-        @test iteratorsize(ch5) == HasLength()
+        @test IteratorSize(ch5) == HasLength()
 
         c = chain(ch1, ch2, ch3)
         @test length(c) == length(ch1) + length(ch2) + length(ch3)
@@ -88,15 +76,15 @@ end
         c = chain(r, r)
         @test length(c) == 8
         @test collect(c) == [vec(r); vec(r)]
-        @test iteratorsize(r) == has_shape(2)
-        @test iteratorsize(c) == HasLength()
+        @test IteratorSize(r) == HasShape{2}()
+        @test IteratorSize(c) == HasLength()
 
         r = distinct(collect(1:10))
-        @test iteratorsize(r) == SizeUnknown() #lazy filtering
+        @test IteratorSize(r) == SizeUnknown() #lazy filtering
         c = chain(1:10, r)
         @test_throws MethodError length(c)
         @test length(collect(c)) == 20
-        @test iteratorsize(c) == SizeUnknown()
+        @test IteratorSize(c) == SizeUnknown()
     end
 
     @testset "product" begin

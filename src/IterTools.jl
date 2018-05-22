@@ -9,15 +9,6 @@ import Base: IteratorSize, IteratorEltype
 import Base: SizeUnknown, IsInfinite, HasLength, HasShape
 import Base: HasEltype, EltypeUnknown
 
-import Compat  # for ntuple with ::Val{N} arg
-
-@static if VERSION < v"0.7.0-DEV.3309"
-    import Base: iteratorsize, iteratoreltype
-else
-    const iteratorsize = IteratorSize
-    const iteratoreltype = IteratorEltype
-end
-
 export
     takestrict,
     repeatedly,
@@ -37,7 +28,7 @@ export
     @itr
 
 function has_length(it)
-    it_size = iteratorsize(it)
+    it_size = IteratorSize(it)
 
     return isa(it_size, HasLength) || isa(it_size, HasShape)
 end
@@ -80,8 +71,8 @@ struct TakeStrict{I}
     xs::I
     n::Int
 end
-iteratorsize(::Type{<:TakeStrict}) = HasLength()
-iteratoreltype(::Type{TakeStrict{I}}) where {I} = iteratoreltype(I)
+IteratorSize(::Type{<:TakeStrict}) = HasLength()
+IteratorEltype(::Type{TakeStrict{I}}) where {I} = IteratorEltype(I)
 eltype(::Type{TakeStrict{I}}) where {I} = eltype(I)
 
 """
@@ -133,7 +124,7 @@ struct RepeatCall{F<:Base.Callable}
     f::F
     n::Int
 end
-iteratorsize(::Type{<:RepeatCall}) = HasLength()
+IteratorSize(::Type{<:RepeatCall}) = HasLength()
 
 length(it::RepeatCall) = it.n
 
@@ -164,7 +155,7 @@ done(it::RepeatCall, state) = state <= 0
 struct RepeatCallForever{F<:Base.Callable}
     f::F
 end
-iteratorsize(::Type{<:RepeatCallForever}) = IsInfinite()
+IteratorSize(::Type{<:RepeatCallForever}) = IsInfinite()
 
 repeatedly(f) = RepeatCallForever(f)
 
@@ -200,11 +191,11 @@ chain(xss...) = Chain(xss)
 
 length(it::Chain{Tuple{}}) = 0
 length(it::Chain) = sum(length, it.xss)
-function iteratoreltype(::Type{Chain{T}}) where T
-    mapreduce_tt(iteratoreltype, promote_iteratoreltype, HasEltype(), T)
+function IteratorEltype(::Type{Chain{T}}) where T
+    mapreduce_tt(IteratorEltype, promote_iteratoreltype, HasEltype(), T)
 end
-function iteratorsize(::Type{Chain{T}}) where T
-    mapreduce_tt(iteratorsize, longest, HasLength(), T)
+function IteratorSize(::Type{Chain{T}}) where T
+    mapreduce_tt(IteratorSize, longest, HasLength(), T)
 end
 eltype(::Type{Chain{T}}) where {T} = mapreduce_tt(eltype, typejoin, Union{}, T)
 
@@ -243,8 +234,8 @@ struct Product{T<:Tuple}
     xss::T
 end
 
-function iteratorsize(::Type{Product{T}}) where T
-    mapreduce_tt(iteratorsize, longest, HasLength(), T)
+function IteratorSize(::Type{Product{T}}) where T
+    mapreduce_tt(IteratorSize, longest, HasLength(), T)
 end
 eltype(::Type{Product{T}}) where {T} = map_tt_t(eltype, T)
 length(p::Product) = mapreduce(length, *, 1, p.xss)
@@ -314,7 +305,7 @@ struct Distinct{I, J}
     seen::Dict{J, Int}
 end
 
-iteratorsize(::Type{<:Distinct}) = SizeUnknown()
+IteratorSize(::Type{<:Distinct}) = SizeUnknown()
 
 eltype(::Type{Distinct{I, J}}) where {I, J} = J
 
@@ -334,7 +325,7 @@ i = 3
 ```
 """
 distinct(xs::I) where {I} = Distinct{I, eltype(xs)}(xs, Dict{eltype(xs), Int}())
-# TODO: only use eltype when I has iteratoreltype?
+# TODO: only use eltype when I has IteratorEltype?
 function start(it::Distinct)
     start(it.xs), 1
 end
@@ -370,7 +361,7 @@ struct Partition{I, N}
     xs::I
     step::Int
 end
-iteratorsize(::Type{<:Partition}) = SizeUnknown()
+IteratorSize(::Type{<:Partition}) = SizeUnknown()
 
 eltype(::Type{Partition{I, N}}) where {I, N} = NTuple{N, eltype(I)}
 
@@ -485,7 +476,7 @@ struct GroupBy{I, F<:Base.Callable}
     keyfunc::F
     xs::I
 end
-iteratorsize(::Type{<:GroupBy}) = SizeUnknown()
+IteratorSize(::Type{<:GroupBy}) = SizeUnknown()
 
 # eltype{I}(it::GroupBy{I}) = I
 eltype(::Type{GroupBy{I, F}}) where {I, F} = Vector{eltype(I)}
@@ -554,10 +545,10 @@ struct IMap{F<:Base.Callable, T<:Tuple}
     xs::T
 end
 
-function iteratorsize(::Type{IMap{F, T}}) where {F, T}
-    mapreduce_tt(iteratorsize, shortest, HasLength(), T)
+function IteratorSize(::Type{IMap{F, T}}) where {F, T}
+    mapreduce_tt(IteratorSize, shortest, HasLength(), T)
 end
-iteratoreltype(::Type{<:IMap}) = EltypeUnknown()
+IteratorEltype(::Type{<:IMap}) = EltypeUnknown()
 length(it::IMap) = minimum(length(x) for x in it.xs if has_length(x))
 
 """
@@ -600,7 +591,7 @@ end
 struct Subsets{C}
     xs::C
 end
-iteratorsize(::Type{Subsets{C}}) where {C} = longest(HasLength(), iteratorsize(C))
+IteratorSize(::Type{Subsets{C}}) where {C} = longest(HasLength(), IteratorSize(C))
 
 eltype(::Type{Subsets{C}}) where {C} = Vector{eltype(C)}
 length(it::Subsets) = 1 << length(it.xs)
@@ -691,8 +682,8 @@ struct Binomial{Collection}
 end
 Binomial(xs::C, n::Integer, k::Integer) where {C} = Binomial{C}(xs, n, k)
 
-iteratorsize(::Type{<:Binomial}) = HasLength()
-iteratoreltype(::Type{Binomial{C}}) where {C} = iteratoreltype(C)
+IteratorSize(::Type{<:Binomial}) = HasLength()
+IteratorEltype(::Type{Binomial{C}}) where {C} = IteratorEltype(C)
 
 eltype(::Type{Binomial{C}}) where {C} = Vector{eltype(C)}
 length(it::Binomial) = binomial(it.n,it.k)
@@ -740,8 +731,8 @@ struct StaticSizeBinomial{K, Container}
     xs::Container
 end
 
-iteratorsize(::Type{StaticSizeBinomial{K, C}}) where {K, C} = HasLength()
-iteratoreltype(::Type{StaticSizeBinomial{K, C}}) where {K, C} = iteratoreltype(C)
+IteratorSize(::Type{StaticSizeBinomial{K, C}}) where {K, C} = HasLength()
+IteratorEltype(::Type{StaticSizeBinomial{K, C}}) where {K, C} = IteratorEltype(C)
 
 eltype(::Type{StaticSizeBinomial{K, C}}) where {K, C} = NTuple{K, eltype(C)}
 length(it::StaticSizeBinomial{K}) where {K} = binomial(length(it.xs), K)
@@ -812,8 +803,8 @@ struct TakeNth{I}
     xs::I
     interval::UInt
 end
-iteratorsize(::Type{TakeNth{I}}) where {I} = longest(HasLength(), iteratorsize(I))
-iteratoreltype(::Type{TakeNth{I}}) where {I} = iteratoreltype(I)
+IteratorSize(::Type{TakeNth{I}}) where {I} = longest(HasLength(), IteratorSize(I))
+IteratorEltype(::Type{TakeNth{I}}) where {I} = IteratorEltype(I)
 eltype(::Type{TakeNth{I}}) where {I} = eltype(I)
 length(x::TakeNth) = div(length(x.xs), x.interval)
 size(x::TakeNth) = (length(x),)
@@ -868,7 +859,7 @@ struct Iterate{T}
     f::Function
     seed::T
 end
-iteratorsize(::Type{<:Iterate}) = IsInfinite()
+IteratorSize(::Type{<:Iterate}) = IsInfinite()
 
 """
     iterate(f, x)
@@ -940,8 +931,8 @@ peek(it, s) = Nullable{String}("foo")
 peekiter(itr) = PeekIter(itr)
 
 eltype(::Type{PeekIter{I}}) where {I} = eltype(I)
-iteratorsize(::Type{PeekIter{I}}) where {I} = iteratorsize(I)
-iteratoreltype(::Type{PeekIter{I}}) where {I} = iteratoreltype(I)
+IteratorSize(::Type{PeekIter{I}}) where {I} = IteratorSize(I)
+IteratorEltype(::Type{PeekIter{I}}) where {I} = IteratorEltype(I)
 length(f::PeekIter) = length(f.it)
 size(f::PeekIter) = size(f.it)
 
@@ -1007,8 +998,8 @@ ncycle(iter, n::Int) = NCycle(iter, n)
 
 eltype(nc::NCycle{I}) where {I} = eltype(I)
 length(nc::NCycle) = nc.n*length(nc.iter)
-iteratorsize(::Type{NCycle{I}}) where {I} = longest(HasLength(), iteratorsize(I))
-iteratoreltype(::Type{NCycle{I}}) where {I} = iteratoreltype(I)
+IteratorSize(::Type{NCycle{I}}) where {I} = longest(HasLength(), IteratorSize(I))
+IteratorEltype(::Type{NCycle{I}}) where {I} = IteratorEltype(I)
 
 start(nc::NCycle) = (start(nc.iter), 0)
 function next(nc::NCycle, state)
