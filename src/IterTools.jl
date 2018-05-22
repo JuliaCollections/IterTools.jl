@@ -24,8 +24,7 @@ export
     takenth,
     peekiter,
     peek,
-    ncycle,
-    @itr
+    ncycle
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -1011,15 +1010,5 @@ function next(nc::NCycle, state)
     end
 end
 done(nc::NCycle, state) = state[2] == nc.n
-
-
-macro itr(ex)
-    Base.depwarn(
-        "@itr is deprecated. Iterate without using the macro instead.",
-        Symbol("@itr"),
-    )
-
-    return esc(ex)
-end
 
 end # module IterTools

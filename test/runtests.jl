@@ -396,8 +396,4 @@ include("testing_macros.jl")
         @test get(peek(it, s)) == 2
     end
 end
-
-@testset "Deprecated @itr" begin
-    @test_take [:a, :b, :c] 2
-end
 end
