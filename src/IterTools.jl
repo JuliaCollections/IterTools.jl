@@ -19,7 +19,7 @@ export
     groupby,
     imap,
     subsets,
-    iterate,
+    iterated,
     nth,
     takenth,
     peekiter,
@@ -854,21 +854,21 @@ end
 
 done(it::TakeNth, state) = done(it.xs, state)
 
-struct Iterate{T}
+struct Iterated{T}
     f::Function
     seed::T
 end
-IteratorSize(::Type{<:Iterate}) = IsInfinite()
+IteratorSize(::Type{<:Iterated}) = IsInfinite()
 
 """
-    iterate(f, x)
+    iterated(f, x)
 
 Iterate over successive applications of `f`, as in `x`, `f(x)`, `f(f(x))`, `f(f(f(x)))`, ...
 
 Use `Base.Iterators.take()` to obtain the required number of elements.
 
 ```jldoctest
-julia> for i in Iterators.take(iterate(x -> 2x, 1), 5)
+julia> for i in Iterators.take(iterated(x -> 2x, 1), 5)
            @show i
        end
 i = 1
@@ -877,7 +877,7 @@ i = 4
 i = 8
 i = 16
 
-julia> for i in Iterators.take(iterate(sqrt, 100), 6)
+julia> for i in Iterators.take(iterated(sqrt, 100), 6)
            @show i
        end
 i = 100
@@ -888,10 +888,10 @@ i = 1.333521432163324
 i = 1.1547819846894583
 ```
 """
-iterate(f, seed) = Iterate(f, seed)
-start(it::Iterate) = it.seed
-next(it::Iterate, state) = (state, it.f(state))
-done(it::Iterate, state) = (state==Union{})
+iterated(f, seed) = Iterated(f, seed)
+start(it::Iterated) = it.seed
+next(it::Iterated, state) = (state, it.f(state))
+done(it::Iterated, state) = (state==Union{})
 
 # peekiter(iter): possibility to peek the head of an iterator
 
