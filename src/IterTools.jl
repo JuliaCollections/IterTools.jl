@@ -4,7 +4,7 @@ module IterTools
 
 import Base.Iterators: drop, take
 
-import Base: start, next, done, eltype, length, size
+import Base: start, next, done, iterate, eltype, length, size, peek
 import Base: IteratorSize, IteratorEltype
 import Base: SizeUnknown, IsInfinite, HasLength, HasShape
 import Base: HasEltype, EltypeUnknown
@@ -935,39 +935,13 @@ IteratorEltype(::Type{PeekIter{I}}) where {I} = IteratorEltype(I)
 length(f::PeekIter) = length(f.it)
 size(f::PeekIter) = size(f.it)
 
-function start(f::PeekIter{I}) where I
-    s = start(f.it)
-    if done(f.it, s)
-        val = Nullable{eltype(I)}()
-    else
-        el, s = next(f.it, s)
-        val = Nullable{eltype(I)}(el)
-    end
-    return s, val
+function iterate(pit::PeekIter, state=iterate(pit.it))  # maybe state=iterate(pit.it)?
+    state === nothing && return nothing
+    val, it_state = state
+    return (val, iterate(pit.it, it_state))
 end
 
-function next(f::PeekIter, state)
-    s, val = state
-    # done() should prevent condition `isnull(val) && done(state)`
-    !isnull(val) && done(f.it, s) && return get(val), (s, Nullable{typeof(val)}())
-    el, s = next(f.it, s)
-    return get(val), (s, Nullable(el), done(f.it, s))
-end
-
-@inline function done(f::PeekIter, state)
-    s, val = state
-    return done(f.it, s) && isnull(val)
-end
-
-peek(f::PeekIter{I}, state) where {I} = done(f, state) ? Nullable{eltype(I)}() : state[2]
-
-
-start(r::PeekIter{<:UnitRange}) = start(r.it)
-next(r::PeekIter{<:UnitRange}, i) = next(r.it, i)
-done(r::PeekIter{<:UnitRange}, i) = done(r.it, i)
-function peek(r::PeekIter{UnitRange{T}}, i) where T
-    done(r.it, i) ? Nullable{T}() : Nullable{T}(next(r.it, i)[1])
-end
+peek(pit::PeekIter, state) = state === nothing ? nothing : Some{eltype(pit)}(first(state))
 
 #NCycle - cycle through an object N times
 
