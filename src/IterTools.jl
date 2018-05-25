@@ -944,7 +944,7 @@ struct NCycle{I}
 end
 
 """
-    ncycle(xs, n)
+    ncycle(iter, n)
 
 Cycle through `iter` `n` times.
 
@@ -967,15 +967,25 @@ length(nc::NCycle) = nc.n*length(nc.iter)
 IteratorSize(::Type{NCycle{I}}) where {I} = longest(HasLength(), IteratorSize(I))
 IteratorEltype(::Type{NCycle{I}}) where {I} = IteratorEltype(I)
 
-start(nc::NCycle) = (start(nc.iter), 0)
-function next(nc::NCycle, state)
-    nv, ns = next(nc.iter,state[1])
-    if done(nc.iter, ns)
-        return (nv, (start(nc.iter), state[2]+1))
-    else
-        return (nv, (ns, state[2]))
+function iterate(nc::NCycle, state=(nc.n,))
+    nc.n <= 0 && return nothing  # don't do anything if we aren't iterating
+
+    n, inner_state = first(state), tail(state)
+    inner_iter = iterate(nc.iter, inner_state...)
+
+    if inner_iter === nothing
+        if n <= 1
+            return nothing
+        else
+            inner_iter = iterate(nc.iter)
+            inner_iter === nothing && return nothing
+
+            n -= 1
+        end
     end
+
+    v, inner_state = inner_iter
+    return v, (n, inner_state)
 end
-done(nc::NCycle, state) = state[2] == nc.n
 
 end # module IterTools
