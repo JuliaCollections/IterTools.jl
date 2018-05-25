@@ -10,6 +10,17 @@ include("testing_macros.jl")
 
 @testset "IterTools" begin
 @testset "iterators" begin
+    @testset "takestrict" begin
+        itr = 1:10
+        take_itr = takestrict(itr, 5)
+        @test eltype(take_itr) == Int
+        @test IteratorEltype(take_itr) isa HasEltype
+        @test IteratorSize(take_itr) isa HasLength
+        @test length(take_itr) == 5
+        @test collect(take_itr) == collect(1:5)
+
+    end
+
     @testset "ncycle" begin
         ncy1 = ncycle(0:3,3)
 
