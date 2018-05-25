@@ -1,8 +1,9 @@
-using IterTools, Base.Test
+using IterTools, Test
 
-import Base: IsInfinite, SizeUnknown, HasLength, HasShape
+import Base: IteratorSize, IteratorEltype
+import Base: IsInfinite, SizeUnknown, HasLength, HasShape, HasEltype, EltypeUnknown
 
-import Base.Iterators: take, countfrom, drop
+import Base.Iterators: take, countfrom, drop, peek
 
 include("testing_macros.jl")
 
@@ -374,26 +375,34 @@ include("testing_macros.jl")
 
     @testset "peekiter" begin
         pi0 = peekiter(1:10)
+        @test IteratorEltype(pi0) isa HasEltype
         @test eltype(pi0) == Int
         @test collect(pi0) == collect(1:10)
 
         pi1 = peekiter([])
+        @test IteratorEltype(pi1) isa HasEltype
         @test eltype(pi1) == eltype([])
         @test collect(pi1) == collect([])
 
         it = peekiter([:a, :b, :c])
+        @test IteratorEltype(it) isa HasEltype
         @test eltype(it) == Symbol
-        s = start(it)
-        @test get(peek(it, s)) == :a
+        x, s = iterate(it)
+        @test x == :a
+        @test peek(it, s) == Some(:b)
 
-        it = peekiter([])
-        s = start(it)
-        @test isnull(peek(it, s))
+        @test iterate(peekiter([])) === nothing
 
         it = peekiter(1:10)
-        s = start(it)
-        x, s = next(it, s)
-        @test get(peek(it, s)) == 2
+        x, s = iterate(it)
+        @test x == 1
+        @test peek(it, s) == Some(2)
+
+        it = peekiter(1:1)
+        x, s = iterate(it)
+        @test x == 1
+        @test peek(it, s) === nothing
+        @test iterate(it, s) === nothing
     end
 end
 end
