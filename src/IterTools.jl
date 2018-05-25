@@ -5,6 +5,7 @@ module IterTools
 import Base.Iterators: drop, take
 
 import Base: start, next, done, iterate, eltype, length, size, peek
+import Base: tail
 import Base: IteratorSize, IteratorEltype
 import Base: SizeUnknown, IsInfinite, HasLength, HasShape
 import Base: HasEltype, EltypeUnknown
@@ -93,28 +94,20 @@ julia> collect(takestrict(a, 3))
 """
 takestrict(xs, n::Int) = TakeStrict(xs, n)
 
-start(it::TakeStrict) = (it.n, start(it.xs))
+function iterate(it::TakeStrict, state=(it.n,))
+    n, xs_state = first(state), tail(state)
+    n <= 0 && return nothing
+    xs_iter = iterate(it.xs, xs_state...)
 
-function next(it::TakeStrict, state)
-    n, xs_state = state
-    v, xs_state = next(it.xs, xs_state)
+    if xs_iter === nothing
+        throw(ArgumentError("In takestrict(xs, n), xs had fewer than n items to take."))
+    end
+
+    v, xs_state = xs_iter
     return v, (n - 1, xs_state)
 end
 
-function done(it::TakeStrict, state)
-    n, xs_state = state
-    if n <= 0
-        return true
-    elseif done(it.xs, xs_state)
-        throw(ArgumentError("In takestrict(xs, n), xs had fewer than n items to take."))
-    else
-        return false
-    end
-end
-
-function length(it::TakeStrict)
-    return it.n
-end
+length(it::TakeStrict) = it.n
 
 
 # Repeat a function application n (or infinitely many) times.
