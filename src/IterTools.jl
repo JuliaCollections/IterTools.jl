@@ -760,20 +760,24 @@ julia> nth(mersenne, 3)
 """
 function nth(xs, n::Integer)
     n > 0 || throw(BoundsError(xs, n))
+
     # catch, if possible
     has_length(xs) && (n ≤ length(xs) || throw(BoundsError(xs, n)))
-    s = start(xs)
-    i = 0
-    while !done(xs, s)
-        (val, s) = next(xs, s)
-        i += 1
-        i == n && return val
+
+    for (i, val) in enumerate(xs)
+        i >= n && return val
     end
+
     # catch iterators with no length but actual finite size less then n
     throw(BoundsError(xs, n))
 end
 
-nth(xs::Union{Tuple, AbstractArray}, n::Integer) = xs[n]
+nth(xs::Union{Tuple, Array}, n::Integer) = xs[n]
+
+function nth(xs::AbstractArray, n::Integer)
+    idx = eachindex(xs)[n]
+    return @inbounds xs[idx]
+end
 
 
 # takenth(xs,n): take every n'th element from xs
