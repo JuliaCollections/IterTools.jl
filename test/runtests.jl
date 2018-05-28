@@ -393,6 +393,22 @@ include("testing_macros.jl")
     end
 
 
+    @testset "iterated" begin
+        times_called = Ref(0)
+
+        function iter_func(x)
+            times_called[] += 1
+            x + 1
+        end
+
+        itd = iterated(iter_func, 3)
+        @test IteratorSize(itd) isa IsInfinite
+        @test collect(take(itd, 4)) == 3:6
+        # the first item is just the seed so iter_func isn't called
+        @test times_called[] == 3
+    end
+
+
     @testset "peekiter" begin
         pi0 = peekiter(1:10)
         @test IteratorEltype(pi0) isa HasEltype
