@@ -259,7 +259,7 @@ function start(it::Product)
             return js, nothing
         end
     end
-    vs = Vector{Any}(n)
+    vs = Vector{Any}(undef, n)
     for i = 1:n
         vs[i], js[i] = next(it.xss[i], js[i])
     end
@@ -410,7 +410,7 @@ function partition(xs::I, n::Int, step::Int) where I
 end
 
 function start(it::Partition{I, N}) where {I, N}
-    p = Vector{eltype(I)}(N)
+    p = Vector{eltype(I)}(undef, N)
     s = start(it.xs)
     for i in 1:(N - 1)
         if done(it.xs, s)
@@ -500,7 +500,7 @@ end
 
 function next(it::GroupBy{I}, state) where I
     (s, (prev_key, prev_value)) = state
-    values = Vector{eltype(I)}(0)
+    values = Vector{eltype(I)}()
     # We had a left over value from the last time the key changed.
     if prev_value != nothing || prev_key != nothing
         push!(values, prev_value)

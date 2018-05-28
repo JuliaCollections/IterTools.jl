@@ -326,7 +326,7 @@ include("testing_macros.jl")
             end
 
             function collect_pairs(x)
-                p = Vector{NTuple{2, eltype(x)}}(binomial(length(x), 2))
+                p = Vector{NTuple{2, eltype(x)}}(undef, binomial(length(x), 2))
                 idx = 1
                 for i = 1:length(x)
                     for j = i+1:length(x)
