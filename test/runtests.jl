@@ -1,4 +1,4 @@
-using IterTools, Test
+using IterTools, SparseArrays, Test
 
 import Base: IteratorSize, IteratorEltype
 import Base: IsInfinite, SizeUnknown, HasLength, HasShape, HasEltype, EltypeUnknown
@@ -347,7 +347,12 @@ include("testing_macros.jl")
     end
 
     @testset "nth" begin
-        @testset for xs in Any[[1, 2, 3], 1:3, reshape(1:3, 3, 1)]
+        @testset for xs in Any[
+            [1, 2, 3],
+            1:3,
+            reshape(1:3, 3, 1),
+            sparse(reshape(1:3, 1, 3)),
+        ]
             @test nth(xs, 3) == 3
             @test_throws BoundsError nth(xs, 0)
             @test_throws BoundsError nth(xs, 4)
