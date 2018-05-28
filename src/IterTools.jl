@@ -313,30 +313,21 @@ i = 3
 ```
 """
 distinct(xs::I) where {I} = Distinct{I, eltype(xs)}(xs, Dict{eltype(xs), Int}())
-# TODO: only use eltype when I has IteratorEltype?
-function start(it::Distinct)
-    start(it.xs), 1
-end
 
-function next(it::Distinct, state)
-    s, i = state
-    x, s = next(it.xs, s)
-    it.seen[x] = i
-    i += 1
+function iterate(it::Distinct, state=(1,))
+    idx, xs_state = first(state), tail(state)
+    xs_iter = iterate(it.xs, xs_state...)
 
-    while !done(it.xs, s)
-        y, t = next(it.xs, s)
-        if !haskey(it.seen, y) || it.seen[y] >= i
-            break
-        end
-        s = t
-        i += 1
+    while xs_iter !== nothing
+        val, xs_state = xs_iter
+        get!(it.seen, val, idx) >= idx && return (val, (idx + 1, xs_state))
+
+        xs_iter = iterate(it.xs, xs_state)
+        idx += 1
     end
 
-    x, (s, i)
+    return nothing
 end
-
-done(it::Distinct, state) = done(it.xs, state[1])
 
 
 # Group output from at iterator into tuples.
