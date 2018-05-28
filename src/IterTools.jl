@@ -117,10 +117,11 @@ struct RepeatCall{F<:Base.Callable}
     n::Int
 end
 IteratorSize(::Type{<:RepeatCall}) = HasLength()
-
+IteratorEltype(::Type{<:RepeatCall}) = EltypeUnknown()
 length(it::RepeatCall) = it.n
 
 """
+    repeatedly(f)
     repeatedly(f, n)
 
 Call function `f` `n` times, or infinitely if `n` is omitted.
@@ -139,21 +140,16 @@ julia> collect(repeatedly(t, 5))
 ```
 """
 repeatedly(f, n) = RepeatCall(f, n)
-
-start(it::RepeatCall) = it.n
-next(it::RepeatCall, state) = (it.f(), state - 1)
-done(it::RepeatCall, state) = state <= 0
+iterate(it::RepeatCall, state=it.n) = state <= 0 ? nothing : (it.f(), state - 1)
 
 struct RepeatCallForever{F<:Base.Callable}
     f::F
 end
 IteratorSize(::Type{<:RepeatCallForever}) = IsInfinite()
+IteratorEltype(::Type{<:RepeatCallForever}) = EltypeUnknown()
 
 repeatedly(f) = RepeatCallForever(f)
-
-start(it::RepeatCallForever) = nothing
-next(it::RepeatCallForever, state) = (it.f(), nothing)
-done(it::RepeatCallForever, state) = false
+iterate(it::RepeatCallForever, state=nothing) = (it.f(), nothing)
 
 
 # Concatenate the output of n iterators
