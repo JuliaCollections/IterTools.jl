@@ -117,9 +117,13 @@ include("testing_macros.jl")
 
     @testset "distinct" begin
         x = [5, 2, 2, 1, 2, 1, 1, 2, 4, 2]
+        unique_x = unique(x)
         di0 = distinct(x)
         @test eltype(di0) == Int
-        @test collect(di0) == unique(x)
+        @test collect(di0) == unique_x
+
+        # repeated operations on the same Distinct iterator should function identically
+        @test collect(di0) == unique_x
     end
 
     @testset "partition" begin
