@@ -843,6 +843,7 @@ struct Iterated{T}
     seed::T
 end
 IteratorSize(::Type{<:Iterated}) = IsInfinite()
+IteratorEltype(::Type{<:Iterated}) = EltypeUnknown()
 
 """
     iterated(f, x)
@@ -873,9 +874,12 @@ i = 1.1547819846894583
 ```
 """
 iterated(f, seed) = Iterated(f, seed)
-start(it::Iterated) = it.seed
-next(it::Iterated, state) = (state, it.f(state))
-done(it::Iterated, state) = (state==Union{})
+
+iterate(it::Iterated) = (it.seed, it.seed)
+function iterate(it::Iterated, state)
+    newval = it.f(state)
+    return (newval, newval)
+end
 
 # peekiter(iter): possibility to peek the head of an iterator
 
