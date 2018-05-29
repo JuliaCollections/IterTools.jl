@@ -626,12 +626,10 @@ function subsets(xs)
     Subsets(xs)
 end
 
-function start(it::Subsets)
-    # one extra bit to indicated that we are at the end
-    fill(false, length(it.xs) + 1)
-end
+# state has one extra bit to indicate that we are at the end
+function iterate(it::Subsets, state=fill(false, length(it.xs) + 1))
+    state[end] && return nothing
 
-function next(it::Subsets, state)
     ss = it.xs[state[1:end-1]]
 
     state = copy(state)
@@ -644,11 +642,7 @@ function next(it::Subsets, state)
         end
     end
 
-    (ss, state)
-end
-
-function done(it::Subsets, state)
-    state[end]
+    return (ss, state)
 end
 
 
