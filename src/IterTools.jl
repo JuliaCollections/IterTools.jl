@@ -790,7 +790,6 @@ IteratorSize(::Type{TakeNth{I}}) where {I} = longest(HasLength(), IteratorSize(I
 IteratorEltype(::Type{TakeNth{I}}) where {I} = IteratorEltype(I)
 eltype(::Type{TakeNth{I}}) where {I} = eltype(I)
 length(x::TakeNth) = div(length(x.xs), x.interval)
-size(x::TakeNth) = (length(x),)
 
 """
     takenth(xs, n)
@@ -814,29 +813,19 @@ function takenth(xs, interval::Integer)
 end
 
 
-function start(it::TakeNth)
-    i = 1
-    state = start(it.xs)
-    while i < it.interval && !done(it.xs, state)
-        _, state = next(it.xs, state)
-        i += 1
+function iterate(it::TakeNth, state=())
+    xs_iter = nothing
+
+    for i = 1:it.interval
+        xs_iter = iterate(it.xs, state...)
+        xs_iter === nothing && return nothing
+        state = tail(xs_iter)
     end
-    return state
+
+    val, xs_state = xs_iter
+    return (val, (xs_state,))
 end
 
-
-function next(it::TakeNth, state)
-    value, state = next(it.xs, state)
-    i = 1
-    while i < it.interval && !done(it.xs, state)
-        _, state = next(it.xs, state)
-        i += 1
-    end
-    return value, state
-end
-
-
-done(it::TakeNth, state) = done(it.xs, state)
 
 struct Iterated{T}
     f::Function
