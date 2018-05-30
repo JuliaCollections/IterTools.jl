@@ -64,6 +64,14 @@ shortest(::SizeUnknown, ::IsInfinite) = SizeUnknown()
 
 include("tuple_types.jl")
 
+macro something(ex)
+    quote
+        result = $(esc(ex))
+        result === nothing && return nothing
+        result
+    end
+end
+
 # Iterate through the first n elements, throwing an exception if
 # fewer than n items ar encountered.
 
@@ -811,8 +819,7 @@ function iterate(it::TakeNth, state=())
     xs_iter = nothing
 
     for i = 1:it.interval
-        xs_iter = iterate(it.xs, state...)
-        xs_iter === nothing && return nothing
+        xs_iter = @something iterate(it.xs, state...)
         state = tail(xs_iter)
     end
 
@@ -906,13 +913,12 @@ IteratorEltype(::Type{PeekIter{I}}) where {I} = IteratorEltype(I)
 length(f::PeekIter) = length(f.it)
 size(f::PeekIter) = size(f.it)
 
-function iterate(pit::PeekIter, state=iterate(pit.it))  # maybe state=iterate(pit.it)?
-    state === nothing && return nothing
-    val, it_state = state
+function iterate(pit::PeekIter, state=iterate(pit.it))
+    val, it_state = @something state
     return (val, iterate(pit.it, it_state))
 end
 
-peek(pit::PeekIter, state) = state === nothing ? nothing : Some{eltype(pit)}(first(state))
+peek(pit::PeekIter, state) = Some{eltype(pit)}(first(@something state))
 
 #NCycle - cycle through an object N times
 
@@ -955,8 +961,7 @@ function iterate(nc::NCycle, state=(nc.n,))
         if n <= 1
             return nothing
         else
-            inner_iter = iterate(nc.iter)
-            inner_iter === nothing && return nothing
+            inner_iter = @something iterate(nc.iter)
 
             n -= 1
         end
