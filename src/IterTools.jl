@@ -465,8 +465,7 @@ struct GroupBy{I, F<:Base.Callable}
 end
 IteratorSize(::Type{<:GroupBy}) = SizeUnknown()
 
-# eltype{I}(it::GroupBy{I}) = I
-eltype(::Type{GroupBy{I, F}}) where {I, F} = Vector{eltype(I)}
+eltype(::Type{<:GroupBy{I}}) where {I} = Vector{eltype(I)}
 
 """
     groupby(f, xs)
@@ -482,45 +481,43 @@ i = String["bar", "book", "baz"]
 i = String["zzz"]
 ```
 """
-function groupby(keyfunc::Base.Callable, xs)
-    GroupBy(keyfunc, xs)
+function groupby(keyfunc::F, xs::I) where {F<:Base.Callable, I}
+    GroupBy{I, F}(keyfunc, xs)
 end
 
-function start(it::GroupBy)
-    s = start(it.xs)
-    prev_value = nothing
-    prev_key = nothing
-    return (s, (prev_key, prev_value))
-end
-
-function next(it::GroupBy{I}, state) where I
-    (s, (prev_key, prev_value)) = state
+function iterate(it::GroupBy{I, F}, state=nothing) where {I, F<:Base.Callable}
+    if state === nothing
+        prev_val, xs_state = @something iterate(it.xs)
+        prev_key = it.keyfunc(prev_val)
+        keep_going = true
+    else
+        keep_going, prev_key, prev_val, xs_state = state
+        keep_going || return nothing
+    end
     values = Vector{eltype(I)}()
-    # We had a left over value from the last time the key changed.
-    if prev_value != nothing || prev_key != nothing
-        push!(values, prev_value)
-    end
-    prev_value = nothing
-    while !done(it.xs, s)
-        (x, s) = next(it.xs, s)
-        key = it.keyfunc(x)
-        # Did the key change?
-        if prev_key != nothing && key != prev_key
-            prev_key = key
-            prev_value = x
-            break
-        else
-            push!(values, x)
-        end
-        prev_key = key
-    end
-    # We either reached the end of the input or the key changed,
-    # either way emit what we have so far.
-    return (values, (s, (prev_key, prev_value)))
-end
+    push!(values, prev_val)
 
-function done(it::GroupBy, state)
-    return state[2][2] == nothing && done(it.xs, state[1])
+    while true
+        xs_iter = iterate(it.xs, xs_state)
+
+        if xs_iter === nothing
+            keep_going = false
+            break
+        end
+
+        val, xs_state = xs_iter
+        key = it.keyfunc(val)
+
+        if key == prev_key
+            push!(values, val)
+        else
+            prev_key = key
+            prev_val = val
+            break
+        end
+    end
+
+    return (values, (keep_going, prev_key, prev_val, xs_state))
 end
 
 # Like map, except returns the output as an iterator.  The iterator
