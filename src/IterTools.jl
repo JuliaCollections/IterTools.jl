@@ -666,11 +666,9 @@ mutable struct BinomialIterState
     done::Bool
 end
 
-function start(it::Binomial)
-    BinomialIterState(collect(Int64, 1:it.k), (it.k > it.n) ? true : false)
-end
+function iterate(it::Binomial, state=BinomialIterState(collect(Int64, 1:it.k), it.k > it.n))
+    state.done && return nothing
 
-function next(it::Binomial, state::BinomialIterState)
     idx = state.idx
     set = it.xs[idx]
     i = it.k
@@ -692,8 +690,6 @@ function next(it::Binomial, state::BinomialIterState)
 
     return set, state
 end
-
-done(it::Binomial, state::BinomialIterState) = state.done
 
 
 # Iterate over all subsets of an indexable collection with a given *statically* known size
