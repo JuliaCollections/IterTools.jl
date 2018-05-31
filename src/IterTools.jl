@@ -392,62 +392,55 @@ i = (4, 5)
 i = (7, 8)
 ```
 """
-function partition(xs::I, n::Int) where I
-    Partition{I, n}(xs, n)
-end
+@inline partition(xs, n::Int) = partition(xs, n, n)
 
 function partition(xs::I, n::Int, step::Int) where I
     if step < 1
         throw(ArgumentError("Partition step must be at least 1."))
     end
 
+    if n < 1
+        throw(ArgumentError("Partition size n must be at least 1"))
+    end
+
     Partition{I, n}(xs, step)
 end
 
-function start(it::Partition{I, N}) where {I, N}
-    p = Vector{eltype(I)}(undef, N)
-    s = start(it.xs)
-    for i in 1:(N - 1)
-        if done(it.xs, s)
-            break
+function iterate(it::Partition{I, N}, state=nothing) where {I, N}
+    if state === nothing
+        result = Vector{eltype(I)}(undef, N)
+
+        result[1], xs_state = @something iterate(it.xs)
+
+        for i in 2:N
+            result[i], xs_state = @something iterate(it.xs, xs_state)
         end
-        (p[i], s) = next(it.xs, s)
+    else
+        (xs_state, result) = state
+        result[end], xs_state = @something iterate(it.xs, xs_state)
     end
-    (s, p)
-end
 
-function next(it::Partition{I, N}, state) where {I, N}
-    (s, p0) = state
-    (x, s) = next(it.xs, s)
-    ans = p0; ans[end] = x
-
-    p = similar(p0)
+    p = similar(result)
     overlap = max(0, N - it.step)
-    for i in 1:overlap
-        p[i] = ans[it.step + i]
-    end
+    p[1:overlap] .= result[it.step .+ (1:overlap)]
 
     # when step > n, skip over some elements
     for i in 1:max(0, it.step - N)
-        if done(it.xs, s)
-            break
-        end
-        (x, s) = next(it.xs, s)
+        xs_iter = iterate(it.xs, xs_state)
+        xs_iter === nothing && break
+        _, xs_state = xs_iter
     end
 
     for i in (overlap + 1):(N - 1)
-        if done(it.xs, s)
-            break
-        end
+        xs_iter = iterate(it.xs, xs_state)
+        xs_iter === nothing && break
 
-        (x, s) = next(it.xs, s)
-        p[i] = x
+        p[i], xs_state = xs_iter
     end
 
-    (tuple(ans...), (s, p))
+    return (tuple(result...)::eltype(Partition{I, N}), (xs_state, p))
 end
 
-done(it::Partition, state) = done(it.xs, state[1])
 
 # Group output from an iterator based on a key function.
 # Consecutive entries from the iterator with the same

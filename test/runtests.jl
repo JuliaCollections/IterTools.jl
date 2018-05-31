@@ -143,6 +143,10 @@ include("testing_macros.jl")
         @test eltype(pa3) == Tuple{Int, Int}
         @test collect(pa3) == []
 
+        pa4 = partition(1:8, 1)
+        @test eltype(pa4) == Tuple{Int}
+        @test collect(pa4) == [(1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,)]
+
         @test_throws ArgumentError partition(take(countfrom(1), 8), 2, 0)
     end
 
