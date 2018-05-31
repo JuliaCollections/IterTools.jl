@@ -4,7 +4,7 @@ module IterTools
 
 import Base.Iterators: drop, take
 
-import Base: start, next, done, iterate, eltype, length, size, peek
+import Base: iterate, eltype, length, size, peek
 import Base: tail
 import Base: IteratorSize, IteratorEltype
 import Base: SizeUnknown, IsInfinite, HasLength, HasShape
