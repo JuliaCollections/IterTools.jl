@@ -12,14 +12,6 @@ Install this package with `Pkg.add("IterTools")`
 
 # Usage
 
-## chain(xs...)
-
-Iterate through any number of iterators in sequence.
-
-```@docs
-chain
-```
-
 ## distinct(xs)
 
 Iterate through values skipping over those already encountered.

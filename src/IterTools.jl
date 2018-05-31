@@ -160,68 +160,7 @@ repeatedly(f) = RepeatCallForever(f)
 iterate(it::RepeatCallForever, state=nothing) = (it.f(), nothing)
 
 
-# Concatenate the output of n iterators
-struct Chain{T<:Tuple}
-    xss::T
-end
-
-
-"""
-    chain(xs...)
-
-Iterate through any number of iterators in sequence.
-
-```jldoctest
-julia> for i in chain(1:3, ['a', 'b', 'c'])
-           @show i
-       end
-i = 1
-i = 2
-i = 3
-i = 'a'
-i = 'b'
-i = 'c'
-```
-"""
-chain(xss...) = Chain(xss)
-
-length(it::Chain{Tuple{}}) = 0
-length(it::Chain) = sum(length, it.xss)
-function IteratorEltype(::Type{Chain{T}}) where T
-    mapreduce_tt(IteratorEltype, promote_iteratoreltype, HasEltype(), T)
-end
-function IteratorSize(::Type{Chain{T}}) where T
-    mapreduce_tt(IteratorSize, longest, HasLength(), T)
-end
-eltype(::Type{Chain{T}}) where {T} = mapreduce_tt(eltype, typejoin, Union{}, T)
-
-function start(it::Chain)
-    i = 1
-    xs_state = nothing
-    while i <= length(it.xss)
-        xs_state = start(it.xss[i])
-        if !done(it.xss[i], xs_state)
-            break
-        end
-        i += 1
-    end
-    return i, xs_state
-end
-
-function next(it::Chain, state)
-    i, xs_state = state
-    v, xs_state = next(it.xss[i], xs_state)
-    while done(it.xss[i], xs_state)
-        i += 1
-        if i > length(it.xss)
-            break
-        end
-        xs_state = start(it.xss[i])
-    end
-    return v, (i, xs_state)
-end
-
-done(it::Chain, state) = state[1] > length(it.xss)
+@deprecate chain(xss...) Iterators.flatten(xss)
 
 
 # Cartesian product as a sequence of tuples
