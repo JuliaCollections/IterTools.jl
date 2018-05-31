@@ -386,25 +386,13 @@ function iterate(it::GroupBy{I, F}, state=nothing) where {I, F<:Base.Callable}
     return (values, (keep_going, prev_key, prev_val, xs_state))
 end
 
-# Like map, except returns the output as an iterator.  The iterator
-# is done when any of the input iterators have been exhausted.
-# E.g.,
-#   imap(+, count(), [1, 2, 3]) = 1, 3, 5 ...
-struct IMap{F<:Base.Callable, T<:Tuple}
-    mapfunc::F
-    xs::T
-end
-
-function IteratorSize(::Type{IMap{F, T}}) where {F, T}
-    mapreduce_tt(IteratorSize, shortest, HasLength(), T)
-end
-IteratorEltype(::Type{<:IMap}) = EltypeUnknown()
-length(it::IMap) = minimum(length(x) for x in it.xs if has_length(x))
 
 """
     imap(f, xs1, [xs2, ...])
 
 Iterate over values of a function applied to successive values from one or more iterators.
+Like `Iterators.zip`, the iterator is done when any of the input iterators have been
+exhausted.
 
 ```jldoctest
 julia> for i in imap(+, [1,2,3], [4,5,6])
@@ -415,25 +403,7 @@ i = 7
 i = 9
 ```
 """
-function imap(mapfunc, it1, its...)
-    IMap(mapfunc, (it1, its...))
-end
-
-function start(it::IMap)
-    map(start, it.xs)
-end
-
-function next(it::IMap, state)
-    next_result = map(next, it.xs, state)
-    return (
-        it.mapfunc(map(first, next_result)...),
-        map(last, next_result)
-    )
-end
-
-function done(it::IMap, state)
-    any(map(done, it.xs, state))
-end
+imap(mapfunc, it1, its...) = (mapfunc(xs...) for xs in zip(it1, its...))
 
 
 # Iterate over all subsets of an indexable collection
