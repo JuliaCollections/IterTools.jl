@@ -33,9 +33,6 @@ function has_length(it)
     return isa(it_size, HasLength) || isa(it_size, HasShape)
 end
 
-promote_iteratoreltype(::HasEltype, ::HasEltype) = HasEltype()
-promote_iteratoreltype(::IteratorEltype, ::IteratorEltype) = EltypeUnknown()
-
 # return the size for methods depending on the longest iterator
 longest(::T, ::T) where {T<:IteratorSize} = T()
 function longest(::S, ::T) where {T<:IteratorSize, S<:IteratorSize}
@@ -61,8 +58,6 @@ shortest(::IsInfinite, ::HasLength) = HasLength()
 shortest(::SizeUnknown, ::HasShape) = SizeUnknown()
 shortest(::SizeUnknown, ::HasLength) = SizeUnknown()
 shortest(::SizeUnknown, ::IsInfinite) = SizeUnknown()
-
-include("tuple_types.jl")
 
 macro something(ex)
     quote
