@@ -161,73 +161,7 @@ iterate(it::RepeatCallForever, state=nothing) = (it.f(), nothing)
 
 
 @deprecate chain(xss...) Iterators.flatten(xss)
-
-
-# Cartesian product as a sequence of tuples
-
-struct Product{T<:Tuple}
-    xss::T
-end
-
-function IteratorSize(::Type{Product{T}}) where T
-    mapreduce_tt(IteratorSize, longest, HasLength(), T)
-end
-eltype(::Type{Product{T}}) where {T} = map_tt_t(eltype, T)
-length(p::Product) = mapreduce(length, *, 1, p.xss)
-
-"""
-    product(xs...)
-
-Iterate over all combinations in the Cartesian product of the inputs.
-
-```jldoctest
-julia> for p in product(1:3,4:5)
-           @show p
-       end
-p = (1, 4)
-p = (2, 4)
-p = (3, 4)
-p = (1, 5)
-p = (2, 5)
-p = (3, 5)
-```
-"""
-product(xss...) = Product(xss)
-
-function start(it::Product)
-    n = length(it.xss)
-    js = Any[start(xs) for xs in it.xss]
-    for i = 1:n
-        if done(it.xss[i], js[i])
-            return js, nothing
-        end
-    end
-    vs = Vector{Any}(undef, n)
-    for i = 1:n
-        vs[i], js[i] = next(it.xss[i], js[i])
-    end
-    return js, vs
-end
-
-function next(it::Product, state)
-    js = copy(state[1])
-    vs = copy(state[2])
-    ans = tuple(vs...)
-
-    n = length(it.xss)
-    for i in 1:n
-        if !done(it.xss[i], js[i])
-            vs[i], js[i] = next(it.xss[i], js[i])
-            return ans, (js, vs)
-        end
-
-        js[i] = start(it.xss[i])
-        vs[i], js[i] = next(it.xss[i], js[i])
-    end
-    ans, (js, nothing)
-end
-
-done(it::Product, state) = state[2] === nothing
+@deprecate product(xss...) Iterators.product(xss...)
 
 
 # Filter out reccuring elements.

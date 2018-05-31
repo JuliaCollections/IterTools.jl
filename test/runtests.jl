@@ -52,22 +52,6 @@ include("testing_macros.jl")
         end
     end
 
-    @testset "product" begin
-        x1 = 1:2:10
-        x2 = 1:5
-
-        p0 = product(x1, x2)
-
-        @test eltype(p0) == Tuple{Int, Int}
-        @test collect(p0) == vec([(y1, y2) for y1 in x1, y2 in x2])
-
-        p1 = product()
-
-        @test eltype(p1) == Tuple{}
-        @test length(p1) == 1
-        @test collect(p1) == [()]
-    end
-
     @testset "distinct" begin
         x = [5, 2, 2, 1, 2, 1, 1, 2, 4, 2]
         unique_x = unique(x)

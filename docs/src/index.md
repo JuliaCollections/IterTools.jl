@@ -76,14 +76,6 @@ Peek at the head element of an iterator without updating the state.
 peekiter
 ```
 
-## product(xs...)
-
-Iterate over all combinations in the Cartesian product of the inputs.
-
-```@docs
-product
-```
-
 ## repeatedly(f, [n])
 
 Call a function `n` times, or infinitely if `n` is omitted.
