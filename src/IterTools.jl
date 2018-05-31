@@ -710,13 +710,11 @@ length(it::StaticSizeBinomial{K}) where {K} = binomial(length(it.xs), K)
 
 subsets(xs::C, ::Val{K}) where {K, C} = StaticSizeBinomial{K, C}(xs)
 
-# Special cases for K == 0
-start(it::StaticSizeBinomial{0}) = false
-next(it::StaticSizeBinomial{0}, _) = (), true
-done(it::StaticSizeBinomial{0}, d) = d
+# Special case for K == 0
+iterate(it::StaticSizeBinomial{0}, state=false) = state ? nothing : ((), true)
 
 # Generic case K >= 1
-pop(t::NTuple) = reverse(Base.tail(reverse(t))), t[end]
+pop(t::NTuple) = reverse(tail(reverse(t))), t[end]
 
 function advance(it::StaticSizeBinomial{K}, idx) where {K}
 	xs = it.xs
@@ -730,9 +728,10 @@ function advance(it::StaticSizeBinomial{K}, idx) where {K}
 end
 advance(it::StaticSizeBinomial, idx::NTuple{1}) = (idx[end]+1,)
 
-start(it::StaticSizeBinomial{K}) where {K} = ntuple(identity, Val{K}())
-next(it::StaticSizeBinomial, idx) = map(i -> it.xs[i], idx), advance(it, idx)
-done(it::StaticSizeBinomial, state) = state[end] > length(it.xs)
+function iterate(it::StaticSizeBinomial{K}, idx=ntuple(identity, Val{K}())) where K
+    idx[end] > length(it.xs) && return nothing
+    return (map(i -> it.xs[i], idx), advance(it, idx))
+end
 
 
 # nth : return the nth element in a collection
