@@ -36,12 +36,12 @@ Iterate over values of a function applied to successive values from one or more 
 imap
 ```
 
-## iterate(f, x)
+## iterated(f, x)
 
 Iterate over successive applications of `f`, as in `x, f(x), f(f(x)), f(f(f(x))), ...`.
 
 ```@docs
-iterate
+iterated
 ```
 
 ## ncycle(xs, n)
