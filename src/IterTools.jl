@@ -638,7 +638,7 @@ function takenth(xs, interval::Integer)
 end
 
 
-function iterate(it::TakeNth, state=())
+function iterate(it::TakeNth, state...)
     xs_iter = nothing
 
     for i = 1:it.interval
@@ -646,8 +646,7 @@ function iterate(it::TakeNth, state=())
         state = tail(xs_iter)
     end
 
-    val, xs_state = xs_iter
-    return (val, (xs_state,))
+    return xs_iter
 end
 
 
