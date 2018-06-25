@@ -59,7 +59,7 @@ shortest(::SizeUnknown, ::HasShape) = SizeUnknown()
 shortest(::SizeUnknown, ::HasLength) = SizeUnknown()
 shortest(::SizeUnknown, ::IsInfinite) = SizeUnknown()
 
-macro something(ex)
+macro ifsomething(ex)
     quote
         result = $(esc(ex))
         result === nothing && return nothing
@@ -278,14 +278,14 @@ function iterate(it::Partition{I, N}, state=nothing) where {I, N}
     if state === nothing
         result = Vector{eltype(I)}(undef, N)
 
-        result[1], xs_state = @something iterate(it.xs)
+        result[1], xs_state = @ifsomething iterate(it.xs)
 
         for i in 2:N
-            result[i], xs_state = @something iterate(it.xs, xs_state)
+            result[i], xs_state = @ifsomething iterate(it.xs, xs_state)
         end
     else
         (xs_state, result) = state
-        result[end], xs_state = @something iterate(it.xs, xs_state)
+        result[end], xs_state = @ifsomething iterate(it.xs, xs_state)
     end
 
     p = similar(result)
@@ -348,7 +348,7 @@ end
 
 function iterate(it::GroupBy{I, F}, state=nothing) where {I, F<:Base.Callable}
     if state === nothing
-        prev_val, xs_state = @something iterate(it.xs)
+        prev_val, xs_state = @ifsomething iterate(it.xs)
         prev_key = it.keyfunc(prev_val)
         keep_going = true
     else
@@ -642,7 +642,7 @@ function iterate(it::TakeNth, state=())
     xs_iter = nothing
 
     for i = 1:it.interval
-        xs_iter = @something iterate(it.xs, state...)
+        xs_iter = @ifsomething iterate(it.xs, state...)
         state = tail(xs_iter)
     end
 
@@ -737,11 +737,11 @@ length(f::PeekIter) = length(f.it)
 size(f::PeekIter) = size(f.it)
 
 function iterate(pit::PeekIter, state=iterate(pit.it))
-    val, it_state = @something state
+    val, it_state = @ifsomething state
     return (val, iterate(pit.it, it_state))
 end
 
-peek(pit::PeekIter, state) = Some{eltype(pit)}(first(@something state))
+peek(pit::PeekIter, state) = Some{eltype(pit)}(first(@ifsomething state))
 
 #NCycle - cycle through an object N times
 
@@ -784,7 +784,7 @@ function iterate(nc::NCycle, state=(nc.n,))
         if n <= 1
             return nothing
         else
-            inner_iter = @something iterate(nc.iter)
+            inner_iter = @ifsomething iterate(nc.iter)
 
             n -= 1
         end
