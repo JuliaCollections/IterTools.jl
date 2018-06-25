@@ -337,9 +337,9 @@ Group consecutive values that share the same result of applying `f`.
 julia> for i in groupby(x -> x[1], ["face", "foo", "bar", "book", "baz", "zzz"])
            @show i
        end
-i = String["face", "foo"]
-i = String["bar", "book", "baz"]
-i = String["zzz"]
+i = ["face", "foo"]
+i = ["bar", "book", "baz"]
+i = ["zzz"]
 ```
 """
 function groupby(keyfunc::F, xs::I) where {F<:Base.Callable, I}
