@@ -1,6 +1,7 @@
 # IterTools.jl
 
 [![IterTools](http://pkg.julialang.org/badges/IterTools_0.6.svg)](http://pkg.julialang.org/?pkg=IterTools&ver=0.6)
+[![IterTools](http://pkg.julialang.org/badges/IterTools_0.7.svg)](http://pkg.julialang.org/?pkg=IterTools&ver=0.7)
 
 [![Build Status](https://travis-ci.org/JuliaCollections/IterTools.jl.svg?branch=master)](https://travis-ci.org/JuliaCollections/IterTools.jl)
 [![Coverage Status](https://codecov.io/gh/JuliaCollections/IterTools.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaCollections/IterTools.jl)
