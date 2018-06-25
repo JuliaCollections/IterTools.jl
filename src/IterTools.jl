@@ -706,25 +706,22 @@ Lets you peek at the head element of an iterator without updating the state.
 
 ```jldoctest
 julia> it = peekiter(["face", "foo", "bar", "book", "baz", "zzz"])
-IterTools.PeekIter{Array{String,1}}(String["face", "foo", "bar", "book", "baz", "zzz"])
+IterTools.PeekIter{Array{String,1}}(["face", "foo", "bar", "book", "baz", "zzz"])
 
-julia> s = start(it)
-(2, Nullable{String}("face"))
+julia> @show peek(it);
+peek(it) = Some("face")
 
-julia> @show peek(it, s);
-peek(it, s) = Nullable{String}("face")
+julia> @show peek(it);
+peek(it) = Some("face")
 
-julia> @show peek(it, s);
-peek(it, s) = Nullable{String}("face")
-
-julia> x, s = next(it, s)
-("face", (3, Nullable{String}("foo"), false))
+julia> x, s = iterate(it)
+("face", ("foo", 3))
 
 julia> @show x;
 x = "face"
 
 julia> @show peek(it, s);
-peek(it, s) = Nullable{String}("foo")
+peek(it, s) = Some("foo")
 ```
 """
 peekiter(itr) = PeekIter(itr)
@@ -740,7 +737,7 @@ function iterate(pit::PeekIter, state=iterate(pit.it))
     return (val, iterate(pit.it, it_state))
 end
 
-peek(pit::PeekIter, state) = Some{eltype(pit)}(first(@ifsomething state))
+peek(pit::PeekIter, state=iterate(pit)) = Some{eltype(pit)}(first(@ifsomething state))
 
 #NCycle - cycle through an object N times
 
