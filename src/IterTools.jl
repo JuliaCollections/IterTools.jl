@@ -650,8 +650,8 @@ function iterate(it::TakeNth, state...)
 end
 
 
-struct Iterated{T}
-    f::Function
+struct Iterated{T, F}
+    f::F
     seed::T
 end
 IteratorSize(::Type{<:Iterated}) = IsInfinite()
@@ -688,7 +688,7 @@ i = 1.1547819846894583
 iterated(f, seed) = Iterated(f, seed)
 
 iterate(it::Iterated) = (it.seed, it.seed)
-function iterate(it::Iterated, state)
+function iterate(it::Iterated{T, F}, state) where {T, F}
     newval = it.f(state)
     return (newval, newval)
 end
