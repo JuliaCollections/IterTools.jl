@@ -59,6 +59,19 @@ shortest(::SizeUnknown, ::HasShape) = SizeUnknown()
 shortest(::SizeUnknown, ::HasLength) = SizeUnknown()
 shortest(::SizeUnknown, ::IsInfinite) = SizeUnknown()
 
+"""
+    IterTools.@ifsomething expr
+
+If `expr` evaluates to `nothing`, equivalent to `return nothing`, otherwise the macro
+evaluates to the value of `expr`. Not exported, useful for implementing iterators.
+
+```jldoctest
+julia> IterTools.@ifsomething iterate(1:2)
+(1, 1)
+
+julia> let elt, state = IterTools.@ifsomething iterate(1:2, 2); println("not reached"); end
+```
+"""
 macro ifsomething(ex)
     quote
         result = $(esc(ex))
