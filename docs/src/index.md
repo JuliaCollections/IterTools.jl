@@ -108,3 +108,11 @@ Equivalent to `take`, but will throw an exception if fewer than `n` items are en
 ```@docs
 takestrict
 ```
+
+## IterTools.@ifsomething
+
+Helper macro for returning from the enclosing block when there are no more elements.
+
+```@docs
+IterTools.@ifsomething
+```
