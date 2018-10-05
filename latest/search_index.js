@@ -225,6 +225,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#IterTools.@ifsomething",
+    "page": "Introduction",
+    "title": "IterTools.@ifsomething",
+    "category": "macro",
+    "text": "IterTools.@ifsomething expr\n\nIf expr evaluates to nothing, equivalent to return nothing, otherwise the macro evaluates to the value of expr. Not exported, useful for implementing iterators.\n\njulia> IterTools.@ifsomething iterate(1:2)\n(1, 1)\n\njulia> let elt, state = IterTools.@ifsomething iterate(1:2, 2); println(\"not reached\"); end\n\n\n\n\n\n"
+},
+
+{
+    "location": "index.html#IterTools.@ifsomething-1",
+    "page": "Introduction",
+    "title": "IterTools.@ifsomething",
+    "category": "section",
+    "text": "Helper macro for returning from the enclosing block when there are no more elements.IterTools.@ifsomething"
+},
+
+{
     "location": "functionindex.html#",
     "page": "Function index",
     "title": "Function index",
