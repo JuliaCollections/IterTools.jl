@@ -7,5 +7,5 @@ julia:
 notifications:
   email: false
 after_success:
-  - julia -e 'using Pkg; cd(Pkg.dir("IterTools")); Pkg.add("Documenter"); include(joinpath("docs", "make.jl"))'
+  - julia -e 'using Pkg; cd(Pkg.dir("IterTools")); ps=Pkg.PackageSpec(name="Documenter", version="0.19"); Pkg.add(ps); Pkg.pin(ps); include(joinpath("docs", "make.jl"))'
   - julia -e 'using Pkg; cd(Pkg.dir("IterTools")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
