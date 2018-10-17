@@ -1,5 +1,5 @@
 using Coverage
 
-cd(joinpath(dirname(@__FILE__), "..")) do
+cd(joinpath(@__DIR__, "..")) do
     Codecov.submit(Codecov.process_folder())
 end
