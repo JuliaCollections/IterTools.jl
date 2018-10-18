@@ -3,9 +3,19 @@ os:
   - linux
 julia:
   - 0.7
+  - 1.0
   - nightly
 notifications:
   email: false
 after_success:
-  - julia -e 'using Pkg; cd(Pkg.dir("IterTools")); ps=Pkg.PackageSpec(name="Documenter", version="0.19"); Pkg.add(ps); Pkg.pin(ps); include(joinpath("docs", "make.jl"))'
-  - julia -e 'using Pkg; cd(Pkg.dir("IterTools")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
+  - julia --project=coverage/ -e 'using Pkg; Pkg.instantiate()'
+  - julia --project=coverage/ coverage/coverage.jl
+jobs:
+  include:
+    - stage: "Documentation"
+      julia: 1.0
+      os: linux
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
+        - julia --project=docs/ docs/make.jl
+      after_success: skip

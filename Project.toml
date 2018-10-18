@@ -1,0 +1,16 @@
+desc = "Common functional iterator patterns"
+keywords = ["iterators", "itertools", "iteration"]
+license = "MIT"
+name = "IterTools"
+version = "1.1.1"
+uuid = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
+
+[compat]
+julia = "0.7, 1.0"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+
+[targets]
+test = ["Test", "SparseArrays"]
