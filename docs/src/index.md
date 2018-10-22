@@ -109,6 +109,14 @@ Equivalent to `take`, but will throw an exception if fewer than `n` items are en
 takestrict
 ```
 
+## fieldvalues(x)
+
+Like `(getfield(x, i) for i in 1:nfields(x))` but faster.
+
+```@docs
+fieldvalues
+```
+
 ## IterTools.@ifsomething
 
 Helper macro for returning from the enclosing block when there are no more elements.

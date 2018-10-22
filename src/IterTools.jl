@@ -25,7 +25,8 @@ export
     takenth,
     peekiter,
     peek,
-    ncycle
+    ncycle,
+    fieldvalues
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -801,6 +802,32 @@ function iterate(nc::NCycle, state=(nc.n,))
 
     v, inner_state = inner_iter
     return v, (n, inner_state)
+end
+
+struct FieldValues{T}
+    x::T
+end
+
+"""
+    fieldvalues(x)
+
+Iterate through the values of the fields of `x`.
+
+```jldoctest
+julia> collect(fieldvalues(1 + 2im))
+2-element Array{Any,1}:
+ 1
+ 2
+```
+"""
+fieldvalues(x::T) where {T} = FieldValues{T}(x)
+length(fs::FieldValues{T}) where {T} = fieldcount(T)
+IteratorSize(::Type{<:FieldValues}) = HasLength()
+
+function iterate(fs::FieldValues, state=1)
+    state > length(fs) && return nothing
+
+    return (getfield(fs.x, state), state + 1)
 end
 
 end # module IterTools
