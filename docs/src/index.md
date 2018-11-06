@@ -68,6 +68,14 @@ Group values into `n`-tuples.
 partition
 ```
 
+## ivec(xs)
+
+Iterate over `xs` but do not preserve shape information.
+
+```@docs
+ivec
+```
+
 ## peekiter(xs)
 
 Peek at the head element of an iterator without updating the state.
