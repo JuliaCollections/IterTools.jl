@@ -145,6 +145,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#IterTools.ivec",
+    "page": "Introduction",
+    "title": "IterTools.ivec",
+    "category": "function",
+    "text": "ivec(iter)\n\nDrops all shape from iter while iterating. Like a non-materializing version of vec.\n\njulia> m = collect(reshape(1:6, 2, 3))\n2×3 Array{Int64,2}:\n 1  3  5\n 2  4  6\n\njulia> collect(ivec(m))\n6-element Array{Int64,1}:\n 1\n 2\n 3\n 4\n 5\n 6\n\n\n\n\n\n"
+},
+
+{
+    "location": "index.html#ivec(xs)-1",
+    "page": "Introduction",
+    "title": "ivec(xs)",
+    "category": "section",
+    "text": "Iterate over xs but do not preserve shape information.ivec"
+},
+
+{
     "location": "index.html#IterTools.peekiter",
     "page": "Introduction",
     "title": "IterTools.peekiter",
