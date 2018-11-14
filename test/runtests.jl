@@ -381,5 +381,18 @@ include("testing_macros.jl")
         @test peek(it, s) === nothing
         @test iterate(it, s) === nothing
     end
+
+    @testset "ivec" begin
+        irange = 1:12
+        vector = collect(irange)
+        @test collect(ivec(irange)) == vector
+        @test collect(ivec(vector)) == vector
+
+        matrix = reshape(vector, 3, 4)
+        @test collect(ivec(matrix)) == vector
+
+        ndarray = reshape(vector, 2, 2, 3)
+        @test collect(ivec(ndarray)) == vector
+    end
 end
 end

@@ -25,7 +25,8 @@ export
     takenth,
     peekiter,
     peek,
-    ncycle
+    ncycle,
+    ivec
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -802,5 +803,42 @@ function iterate(nc::NCycle, state=(nc.n,))
     v, inner_state = inner_iter
     return v, (n, inner_state)
 end
+
+# IVec - lazy `vec`-like iterator that drops shape
+
+struct IVec{I}
+    iter::I
+end
+
+"""
+    ivec(iter)
+
+Drops all shape from `iter` while iterating.
+Like a non-materializing version of [`vec`](https://docs.julialang.org/en/stable/base/arrays/#Base.vec).
+
+```jldoctest
+julia> m = collect(reshape(1:6, 2, 3))
+2×3 Array{Int64,2}:
+ 1  3  5
+ 2  4  6
+
+julia> collect(ivec(m))
+6-element Array{Int64,1}:
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+```
+"""
+ivec(iter) = IVec(iter)
+
+eltype(iv::IVec) = eltype(iv.iter)
+length(iv::IVec) = length(iv.iter)
+IteratorSize(::Type{IVec{I}}) where {I} = longest(HasLength(), IteratorSize(I))
+IteratorEltype(::Type{IVec{I}}) where {I} = IteratorEltype(I)
+
+iterate(iv::IVec, state...) = iterate(iv.iter, state...)
 
 end # module IterTools
