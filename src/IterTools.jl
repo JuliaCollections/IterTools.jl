@@ -26,7 +26,8 @@ export
     peekiter,
     peek,
     ncycle,
-    ivec
+    ivec,
+    flagfirst
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -840,5 +841,31 @@ IteratorSize(::Type{IVec{I}}) where {I} = longest(HasLength(), IteratorSize(I))
 IteratorEltype(::Type{IVec{I}}) where {I} = IteratorEltype(I)
 
 iterate(iv::IVec, state...) = iterate(iv.iter, state...)
+
+# FlagFirst: prepend a flag that is `true` iff this is the first element
+
+struct FlagFirst{I}
+    iter::I
+end
+
+"""
+    flagfirst(iter)
+
+An iterator that yields `(isfirst, x)` where `isfirst::Bool` is `true` for the first
+element, and `false` after that, while the `x`s are elements from `iter`.
+"""
+flagfirst(iter) = FlagFirst(iter)
+
+eltype(::Type{FlagFirst{I}}) where I = Tuple{Bool, eltype(I)}
+length(ff::FlagFirst) = length(ff.iter)
+size(ff::FlagFirst) = size(ff.iter)
+IteratorSize(::Type{FlagFirst{I}}) where {I} = IteratorSize(I)
+IteratorEltype(::Type{FlagFirst{I}}) where {I} = IteratorEltype(I)
+
+function iterate(ff::FlagFirst, state = (true, ))
+    isfirst, rest = first(state), tail(state)
+    elt, nextstate = @ifsomething iterate(ff.iter, rest...)
+    (isfirst, elt), (isfirst & false, nextstate)
+end
 
 end # module IterTools
