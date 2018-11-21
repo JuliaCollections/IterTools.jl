@@ -1,5 +1,3 @@
-__precompile__()
-
 module IterTools
 
 import Base.Iterators: drop, take
@@ -779,7 +777,7 @@ i = 3
 """
 ncycle(iter, n::Int) = NCycle(iter, n)
 
-eltype(nc::NCycle{I}) where {I} = eltype(I)
+eltype(::Type{NCycle{I}}) where {I} = eltype(I)
 length(nc::NCycle) = nc.n*length(nc.iter)
 IteratorSize(::Type{NCycle{I}}) where {I} = longest(HasLength(), IteratorSize(I))
 IteratorEltype(::Type{NCycle{I}}) where {I} = IteratorEltype(I)
@@ -834,7 +832,7 @@ julia> collect(ivec(m))
 """
 ivec(iter) = IVec(iter)
 
-eltype(iv::IVec) = eltype(iv.iter)
+eltype(::Type{IVec{I}}) where {I} = eltype(I)
 length(iv::IVec) = length(iv.iter)
 IteratorSize(::Type{IVec{I}}) where {I} = longest(HasLength(), IteratorSize(I))
 IteratorEltype(::Type{IVec{I}}) where {I} = IteratorEltype(I)
