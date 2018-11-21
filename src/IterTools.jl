@@ -853,6 +853,13 @@ end
 
 An iterator that yields `(isfirst, x)` where `isfirst::Bool` is `true` for the first
 element, and `false` after that, while the `x`s are elements from `iter`.
+
+```jldoctest
+julia> collect(flagfirst(1:3))
+3-element Array{Tuple{Bool,Int64},1}:
+ (true, 1)
+ (false, 2)
+ (false, 3)
 """
 flagfirst(iter) = FlagFirst(iter)
 
