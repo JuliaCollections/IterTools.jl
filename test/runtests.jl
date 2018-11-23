@@ -394,5 +394,18 @@ include("testing_macros.jl")
         ndarray = reshape(vector, 2, 2, 3)
         @test collect(ivec(ndarray)) == vector
     end
+
+    @testset "flagfirst" begin
+        v = rand(1:10, 20)
+        Tv = typeof(v)
+        ff = flagfirst(v)
+        Tff = typeof(ff)
+        @test IteratorEltype(Tff) ≡ IteratorEltype(v)
+        @test eltype(Tff) ≡ Tuple{Bool, eltype(v)}
+        @test collect(flagfirst(v)) ==
+            collect(zip(vcat([true], fill(false, length(v) - 1)), v))
+
+        @test collect(flagfirst(Int[])) == Tuple{Bool,Int}[]
+    end
 end
 end

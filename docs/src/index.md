@@ -117,6 +117,14 @@ Equivalent to `take`, but will throw an exception if fewer than `n` items are en
 takestrict
 ```
 
+## flagfirst(xs)
+
+Provide a flag to check if this is the first element.
+
+```@docs
+flagfirst
+```
+
 ## IterTools.@ifsomething
 
 Helper macro for returning from the enclosing block when there are no more elements.
