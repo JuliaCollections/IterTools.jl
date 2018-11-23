@@ -241,6 +241,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#IterTools.flagfirst",
+    "page": "Introduction",
+    "title": "IterTools.flagfirst",
+    "category": "function",
+    "text": "flagfirst(iter)\n\nAn iterator that yields (isfirst, x) where isfirst::Bool is true for the first element, and false after that, while the xs are elements from iter.\n\n```jldoctest julia> collect(flagfirst(1:3)) 3-element Array{Tuple{Bool,Int64},1}:  (true, 1)  (false, 2)  (false, 3)\n\n\n\n\n\n"
+},
+
+{
+    "location": "index.html#flagfirst(xs)-1",
+    "page": "Introduction",
+    "title": "flagfirst(xs)",
+    "category": "section",
+    "text": "Provide a flag to check if this is the first element.flagfirst"
+},
+
+{
     "location": "index.html#IterTools.@ifsomething",
     "page": "Introduction",
     "title": "IterTools.@ifsomething",
