@@ -905,5 +905,3 @@ end
 Base.IteratorSize(it::TakeWhile) = Base.SizeUnknown()
 
 end # module IterTools
-
-end # module IterTools
