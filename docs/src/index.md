@@ -117,6 +117,14 @@ Equivalent to `take`, but will throw an exception if fewer than `n` items are en
 takestrict
 ```
 
+## takewhile(cond, xs)
+
+Iterates through values from the iterable `xs` as long as a given predicate `cond` is true.
+
+```@docs
+takewhile
+```
+
 ## flagfirst(xs)
 
 Provide a flag to check if this is the first element.
