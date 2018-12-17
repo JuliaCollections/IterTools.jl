@@ -873,4 +873,37 @@ function iterate(ff::FlagFirst, state = (true, ))
     (isfirst, elt), (isfirst & false, nextstate)
 end
 
+# TakeWhile iterates through values from an iterable as long as a given predicate is true.
+
+struct TakeWhile{I}
+    cond::Function
+    xs::I
+end
+
+"""
+    takewhile(cond, xs)
+
+An iterator that yields values from the iterator `xs` as long as the
+predicate `cond` is true.
+
+```jldoctest
+julia> collect(takewhile(x-> x^2 < 10, 1:100)
+3-element Array{Any,1}:
+ 1
+ 2
+ 3
+"""
+
+takewhile(cond, xs) = TakeWhile(cond, xs)
+
+function Base.iterate(it::TakeWhile, state=nothing)
+    (val, state) = state == nothing ? iterate(it.xs) : iterate(it.xs, state)
+    it.cond(val) || return nothing
+    val, state
+end
+
+Base.IteratorSize(it::TakeWhile) = Base.SizeUnknown()
+
+end # module IterTools
+
 end # module IterTools
