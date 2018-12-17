@@ -25,7 +25,8 @@ export
     peek,
     ncycle,
     ivec,
-    flagfirst
+    flagfirst,
+    takewhile
 
 function has_length(it)
     it_size = IteratorSize(it)
