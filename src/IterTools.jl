@@ -893,7 +893,6 @@ julia> collect(takewhile(x-> x^2 < 10, 1:100)
  2
  3
 """
-
 takewhile(cond, xs) = TakeWhile(cond, xs)
 
 function Base.iterate(it::TakeWhile, state=nothing)
