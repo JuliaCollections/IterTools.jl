@@ -412,6 +412,7 @@ include("testing_macros.jl")
         @test collect(takewhile(x -> x^2 < 10, 1:10)) == Any[1, 2, 3]
         @test collect(takewhile(x -> x^2 < 10, Iterators.countfrom(1))) == Any[1, 2, 3]
         @test collect(takewhile(x -> x^2 < 10, 5:10)) == Any[]
+        @test collect(takewhile(x -> true, 5:10)) == collect(5:10)
     end
 end
 end
