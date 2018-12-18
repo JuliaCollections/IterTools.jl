@@ -897,7 +897,7 @@ julia> collect(takewhile(x-> x^2 < 10, 1:100)
 takewhile(cond, xs) = TakeWhile(cond, xs)
 
 function Base.iterate(it::TakeWhile, state=nothing)
-    (val, state) = state == nothing ? iterate(it.xs) : iterate(it.xs, state)
+    (val, state) = state === nothing ? iterate(it.xs) : iterate(it.xs, state)
     it.cond(val) || return nothing
     val, state
 end
