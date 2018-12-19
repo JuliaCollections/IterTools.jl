@@ -241,6 +241,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#IterTools.takewhile",
+    "page": "Introduction",
+    "title": "IterTools.takewhile",
+    "category": "function",
+    "text": "takewhile(cond, xs)\n\nAn iterator that yields values from the iterator xs as long as the predicate cond is true.\n\n```jldoctest julia> collect(takewhile(x-> x^2 < 10, 1:100) 3-element Array{Any,1}:  1  2  3\n\n\n\n\n\n"
+},
+
+{
+    "location": "index.html#takewhile(cond,-xs)-1",
+    "page": "Introduction",
+    "title": "takewhile(cond, xs)",
+    "category": "section",
+    "text": "Iterates through values from the iterable xs as long as a given predicate cond is true.takewhile"
+},
+
+{
     "location": "index.html#IterTools.flagfirst",
     "page": "Introduction",
     "title": "IterTools.flagfirst",
