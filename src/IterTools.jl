@@ -906,4 +906,112 @@ Base.IteratorSize(it::TakeWhile) = Base.SizeUnknown()
 eltype(::Type{TakeWhile{I}}) where {I} = eltype(I)
 IteratorEltype(::Type{TakeWhile{I}}) where {I} = IteratorEltype(I)
 
+downsize(::HasShape) = HasLength()
+downsize(it) = it
+
+"""
+	Couples(it)
+
+```jldoctest
+julia> using IterTools
+
+julia> Couples([1, 2, 3]) |> collect
+2-element Array{Tuple{Int64,Int64},1}:
+ (1, 2)
+ (2, 3)
+"""
+struct Couples{It} it::It end
+
+IteratorSize(c::Couples) = downsize(IteratorSize(c.it))
+length(c) = length(c.it) - 1
+
+IteratorEltype(c::Couples) = IteratorEltype(c.it)
+eltype(c::Couples) = Tuple{eltype(c.it), eltype(c.it)}
+
+iterate(c::Couples) = iterate(c, @ifsomething iterate(c.it))
+function iterate(c::Couples, (last_item, state))
+	item, state = @ifsomething iterate(c.it, state)
+	(last_item, item), (item, state)
+end
+
+"""
+	Cap(it, c)
+
+```jldoctest
+julia> using IterTools
+
+julia> Cap([1, 2], 3) |> collect
+3-element Array{Int64,1}:
+ 1
+ 2
+ 3
+```
+"""
+struct Cap{It, C}
+	it::It
+	cap::C
+end
+function iterate(it::Cap)
+	result = iterate(it.it)
+	if result == nothing
+		it.cap, nothing
+	else
+		result
+	end
+end
+function iterate(it::Cap, state)
+	result = iterate(it.it, state)
+	if result == nothing
+		it.cap, nothing
+	else
+		result
+	end
+end
+iterate(::Cap, ::Nothing) = nothing
+IteratorSize(c::Cap) = downsize(IteratorSize(c.it))
+length(c) = length(c.it)
+IteratorEltype(c::Cap) = IteratorEltype(c.it)
+length(c::Cap) = length(c.it) + 1
+eltype(c::Cap{It, C}) where {It, C} = Union{eltype(c.it), C}
+
+"""
+	FindRepeats(it)
+
+Skip all consecutive repeats in `it`, and as a bonus, return the state of the
+left-overs.
+
+```jldoctest
+julia> using IterTools
+
+julia> FindRepeats([1, 1, 2, 2, 2, 1]) |> collect
+3-element Array{Tuple{Int64,Int64},1}:
+ (1, 1)
+ (2, 3)
+ (1, 6)
+```
+"""
+struct FindRepeats{It}
+	it::It
+end
+
+IteratorSize(f::FindRepeats) = SizeUnknown()
+IteratorEltype(f::FindRepeats) = HasEltype()
+eltype(f::FindRepeats) = Tuple{eltype(f.it), Int}
+eltype(g::Generator) = promote_op(g.f, eltype(g.iter))
+
+to_index(v::Vector, state) = state
+to_index(g::Generator, state) = to_index(g.iter, state)
+
+function iterate(f::FindRepeats)
+	item, next_state = @ifsomething iterate(f.it)
+	(item, 1), (item, 1, next_state)
+end
+
+function iterate(f::FindRepeats, (last_item, last_index, state))
+	item, next_state = @ifsomething iterate(f.it, state)
+	last_item == item && return iterate(f, (last_item, last_index, next_state))
+	index = to_index(f.it, state)
+	(item, index), (item, index, next_state)
+end
+
 end # module IterTools
