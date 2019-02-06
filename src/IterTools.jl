@@ -383,7 +383,7 @@ function iterate(it::GroupBy{I, F}, state=nothing) where {I, F<:Base.Callable}
         val, xs_state = xs_iter
         key = it.keyfunc(val)
 
-        if key == prev_key
+        if isequal(key, prev_key)
             push!(values, val)
         else
             prev_key = key
