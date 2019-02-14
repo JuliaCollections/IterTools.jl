@@ -890,7 +890,7 @@ predicate `cond` is true.
 
 ```jldoctest
 julia> collect(takewhile(x-> x^2 < 10, 1:100))
-3-element Array{Any,1}:
+3-element Array{Int64,1}:
  1
  2
  3
