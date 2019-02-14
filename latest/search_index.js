@@ -245,7 +245,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "IterTools.takewhile",
     "category": "function",
-    "text": "takewhile(cond, xs)\n\nAn iterator that yields values from the iterator xs as long as the predicate cond is true.\n\n```jldoctest julia> collect(takewhile(x-> x^2 < 10, 1:100) 3-element Array{Any,1}:  1  2  3\n\n\n\n\n\n"
+    "text": "takewhile(cond, xs)\n\nAn iterator that yields values from the iterator xs as long as the predicate cond is true.\n\njulia> collect(takewhile(x-> x^2 < 10, 1:100)\n3-element Array{Any,1}:\n 1\n 2\n 3\n\n\n\n\n\n"
 },
 
 {
@@ -261,7 +261,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "IterTools.flagfirst",
     "category": "function",
-    "text": "flagfirst(iter)\n\nAn iterator that yields (isfirst, x) where isfirst::Bool is true for the first element, and false after that, while the xs are elements from iter.\n\n```jldoctest julia> collect(flagfirst(1:3)) 3-element Array{Tuple{Bool,Int64},1}:  (true, 1)  (false, 2)  (false, 3)\n\n\n\n\n\n"
+    "text": "flagfirst(iter)\n\nAn iterator that yields (isfirst, x) where isfirst::Bool is true for the first element, and false after that, while the xs are elements from iter.\n\njulia> collect(flagfirst(1:3))\n3-element Array{Tuple{Bool,Int64},1}:\n (true, 1)\n (false, 2)\n (false, 3)\n\n\n\n\n\n"
 },
 
 {
