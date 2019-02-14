@@ -859,6 +859,7 @@ julia> collect(flagfirst(1:3))
  (true, 1)
  (false, 2)
  (false, 3)
+```
 """
 flagfirst(iter) = FlagFirst(iter)
 
@@ -893,6 +894,7 @@ julia> collect(takewhile(x-> x^2 < 10, 1:100)
  1
  2
  3
+```
 """
 takewhile(cond, xs) = TakeWhile(cond, xs)
 
