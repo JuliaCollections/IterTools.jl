@@ -245,7 +245,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "IterTools.takewhile",
     "category": "function",
-    "text": "takewhile(cond, xs)\n\nAn iterator that yields values from the iterator xs as long as the predicate cond is true.\n\njulia> collect(takewhile(x-> x^2 < 10, 1:100)\n3-element Array{Any,1}:\n 1\n 2\n 3\n\n\n\n\n\n"
+    "text": "takewhile(cond, xs)\n\nAn iterator that yields values from the iterator xs as long as the predicate cond is true.\n\njulia> collect(takewhile(x-> x^2 < 10, 1:100))\n3-element Array{Int64,1}:\n 1\n 2\n 3\n\n\n\n\n\n"
 },
 
 {
