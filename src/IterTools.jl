@@ -26,7 +26,9 @@ export
     ncycle,
     ivec,
     flagfirst,
-    takewhile
+    takewhile,
+    properties,
+    propertyvalues
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -907,5 +909,36 @@ end
 Base.IteratorSize(it::TakeWhile) = Base.SizeUnknown()
 eltype(::Type{TakeWhile{I}}) where {I} = eltype(I)
 IteratorEltype(::Type{TakeWhile{I}}) where {I} = IteratorEltype(I)
+
+struct Properties{T}
+    names
+    x::T
+end
+
+struct PropertyValues{T}
+    names
+    x::T
+end
+
+length(p::Union{Properties, PropertyValues}) = length(p.names)
+IteratorSize(::Type{<:Union{Properties, PropertyValues}}) = HasLength()
+
+properties(x::T) where {T} = Properties{T}(propertynames(x), x)
+
+function iterate(p::Properties, state=1)
+    state > length(p) && return nothing
+
+    name = p.names[state]
+    return ((name, getproperty(p.x, name)), state + 1)
+end
+
+propertyvalues(x::T) where {T} = PropertyValues{T}(propertynames(x), x)
+
+function iterate(p::PropertyValues, state=1)
+    state > length(p) && return nothing
+
+    name = p.names[state]
+    return (getproperty(p.x, name), state + 1)
+end
 
 end # module IterTools
