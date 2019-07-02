@@ -451,7 +451,7 @@ include("testing_macros.jl")
             @test collect(pv2) == collect(tp)
         end
 
-         # HasLength used as an example no-field struct
+        # HasLength used as an example no-field struct
         pv3 = propertyvalues(HasLength())
         @test collect(pv3) == Any[]
     end

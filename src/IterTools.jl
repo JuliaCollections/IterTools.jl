@@ -911,19 +911,27 @@ eltype(::Type{TakeWhile{I}}) where {I} = eltype(I)
 IteratorEltype(::Type{TakeWhile{I}}) where {I} = IteratorEltype(I)
 
 struct Properties{T}
-    names
     x::T
+    n::Int
+    names
 end
 
-struct PropertyValues{T}
-    names
-    x::T
+"""
+    properties(x)
+
+Iterate through the names and value of the properties of `x`.
+
+```jldoctest
+julia> collect(properties(1 + 2im))
+2-element Array{Any,1}:
+ (:re, 1)
+ (:im, 2)
+```
+"""
+function properties(x::T) where T
+    names = propertynames(x)
+    return Properties{T}(x, length(names), names)
 end
-
-length(p::Union{Properties, PropertyValues}) = length(p.names)
-IteratorSize(::Type{<:Union{Properties, PropertyValues}}) = HasLength()
-
-properties(x::T) where {T} = Properties{T}(propertynames(x), x)
 
 function iterate(p::Properties, state=1)
     state > length(p) && return nothing
@@ -932,7 +940,28 @@ function iterate(p::Properties, state=1)
     return ((name, getproperty(p.x, name)), state + 1)
 end
 
-propertyvalues(x::T) where {T} = PropertyValues{T}(propertynames(x), x)
+struct PropertyValues{T}
+    x::T
+    n::Int
+    names
+end
+
+"""
+    propertyvalues(x)
+
+Iterate through the values of the properties of `x`.
+
+```jldoctest
+julia> collect(propertyvalues(1 + 2im))
+2-element Array{Any,1}:
+ 1
+ 2
+```
+"""
+function propertyvalues(x::T) where T
+    names = propertynames(x)
+    return PropertyValues{T}(x, length(names), names)
+end
 
 function iterate(p::PropertyValues, state=1)
     state > length(p) && return nothing
@@ -940,5 +969,8 @@ function iterate(p::PropertyValues, state=1)
     name = p.names[state]
     return (getproperty(p.x, name), state + 1)
 end
+
+length(p::Union{Properties, PropertyValues}) = p.n
+IteratorSize(::Type{<:Union{Properties, PropertyValues}}) = HasLength()
 
 end # module IterTools
