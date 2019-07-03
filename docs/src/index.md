@@ -140,3 +140,19 @@ Helper macro for returning from the enclosing block when there are no more eleme
 ```@docs
 IterTools.@ifsomething
 ```
+
+## properties(x)
+
+Iterate over struct or named tuple properties.
+
+```@docs
+properties
+```
+
+## propertyvalues(x)
+
+Iterate over struct or named tuple property values.
+
+```@docs
+propertyvalues
+```

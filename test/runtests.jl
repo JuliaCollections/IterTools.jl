@@ -407,12 +407,53 @@ include("testing_macros.jl")
 
         @test collect(flagfirst(Int[])) == Tuple{Bool,Int}[]
     end
-        
+
     @testset "takewhile" begin
         @test collect(takewhile(x -> x^2 < 10, 1:10)) == Any[1, 2, 3]
         @test collect(takewhile(x -> x^2 < 10, Iterators.countfrom(1))) == Any[1, 2, 3]
         @test collect(takewhile(x -> x^2 < 10, 5:10)) == Any[]
         @test collect(takewhile(x -> true, 5:10)) == collect(5:10)
+    end
+
+    @testset "properties" begin
+        p1 = properties(1 + 2im)
+        @test IteratorEltype(p1) isa HasEltype
+        @test eltype(p1) == Any
+        @test IteratorSize(p1) isa HasLength
+        @test length(p1) == 2
+        @test collect(p1) == Any[(:re, 1), (:im, 2)]
+
+        ntp = (a = "", b = 1, c = 2.0)
+        p2 = properties(ntp)
+        @test collect(p2) == Tuple.(collect(pairs(ntp)))
+
+         # HasLength used as an example no-field struct
+        p3 = properties(HasLength())
+        @test collect(p3) == Any[]
+    end
+
+    @testset "propertyvalues" begin
+        pv1 = propertyvalues(1 + 2im)
+        @test IteratorEltype(pv1) isa HasEltype
+        @test eltype(pv1) == Any
+        @test IteratorSize(pv1) isa HasLength
+        @test length(pv1) == 2
+        @test collect(pv1) == Any[1, 2]
+
+        tp = ("", 1, 2.0)
+        pv2 = propertyvalues(tp)
+
+        # getproperty for tuples wasn't introduced until 1.2
+        # https://github.com/JuliaLang/julia/pull/31324
+        @static if VERSION < v"1.2.0-DEV.460"
+            @test_broken collect(pv2) == collect(tp)
+        else
+            @test collect(pv2) == collect(tp)
+        end
+
+        # HasLength used as an example no-field struct
+        pv3 = propertyvalues(HasLength())
+        @test collect(pv3) == Any[]
     end
 end
 end
