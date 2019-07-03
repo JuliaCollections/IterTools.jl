@@ -289,6 +289,38 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#IterTools.properties",
+    "page": "Introduction",
+    "title": "IterTools.properties",
+    "category": "function",
+    "text": "properties(x)\n\nIterate through the names and value of the properties of x.\n\njulia> collect(properties(1 + 2im))\n2-element Array{Any,1}:\n (:re, 1)\n (:im, 2)\n\n\n\n\n\n"
+},
+
+{
+    "location": "index.html#properties(x)-1",
+    "page": "Introduction",
+    "title": "properties(x)",
+    "category": "section",
+    "text": "Iterate over struct or named tuple properties.properties"
+},
+
+{
+    "location": "index.html#IterTools.propertyvalues",
+    "page": "Introduction",
+    "title": "IterTools.propertyvalues",
+    "category": "function",
+    "text": "propertyvalues(x)\n\nIterate through the values of the properties of x.\n\njulia> collect(propertyvalues(1 + 2im))\n2-element Array{Any,1}:\n 1\n 2\n\n\n\n\n\n"
+},
+
+{
+    "location": "index.html#propertyvalues(x)-1",
+    "page": "Introduction",
+    "title": "propertyvalues(x)",
+    "category": "section",
+    "text": "Iterate over struct or named tuple property values.propertyvalues"
+},
+
+{
     "location": "functionindex.html#",
     "page": "Function index",
     "title": "Function index",
