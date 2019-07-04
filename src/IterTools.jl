@@ -28,7 +28,8 @@ export
     flagfirst,
     takewhile,
     properties,
-    propertyvalues
+    propertyvalues,
+    fieldvalues
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -910,6 +911,8 @@ Base.IteratorSize(it::TakeWhile) = Base.SizeUnknown()
 eltype(::Type{TakeWhile{I}}) where {I} = eltype(I)
 IteratorEltype(::Type{TakeWhile{I}}) where {I} = IteratorEltype(I)
 
+# Properties
+
 struct Properties{T}
     x::T
     n::Int
@@ -940,6 +943,8 @@ function iterate(p::Properties, state=1)
     return ((name, getproperty(p.x, name)), state + 1)
 end
 
+# PropertyValues
+
 struct PropertyValues{T}
     x::T
     n::Int
@@ -958,6 +963,7 @@ julia> collect(propertyvalues(1 + 2im))
  2
 ```
 """
+
 function propertyvalues(x::T) where T
     names = propertynames(x)
     return PropertyValues{T}(x, length(names), names)
@@ -972,5 +978,33 @@ end
 
 length(p::Union{Properties, PropertyValues}) = p.n
 IteratorSize(::Type{<:Union{Properties, PropertyValues}}) = HasLength()
+
+# FieldValues
+
+struct FieldValues{T}
+    x::T
+end
+
+"""
+    fieldvalues(x)
+
+Iterate through the values of the fields of `x`.
+
+```jldoctest
+julia> collect(fieldvalues(1 + 2im))
+2-element Array{Any,1}:
+ 1
+ 2
+```
+"""
+fieldvalues(x::T) where {T} = FieldValues{T}(x)
+length(fs::FieldValues{T}) where {T} = fieldcount(T)
+IteratorSize(::Type{<:FieldValues}) = HasLength()
+
+function iterate(fs::FieldValues, state=1)
+    state > length(fs) && return nothing
+
+    return (getfield(fs.x, state), state + 1)
+end
 
 end # module IterTools

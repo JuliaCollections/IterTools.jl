@@ -156,3 +156,11 @@ Iterate over struct or named tuple property values.
 ```@docs
 propertyvalues
 ```
+
+## fieldvalues(x)
+
+Like `(getfield(x, i) for i in 1:nfields(x))` but faster.
+
+```@docs
+fieldvalues
+```

@@ -455,5 +455,22 @@ include("testing_macros.jl")
         pv3 = propertyvalues(HasLength())
         @test collect(pv3) == Any[]
     end
+
+    @testset "fieldvalues" begin
+        fv1 = fieldvalues(1 + 2im)
+        @test IteratorEltype(fv1) isa HasEltype
+        @test eltype(fv1) == Any
+        @test IteratorSize(fv1) isa HasLength
+        @test length(fv1) == 2
+        @test collect(fv1) == Any[1, 2]
+
+        tp = ("", 1, 2.0)
+        fv2 = fieldvalues(tp)
+        @test collect(fv2) == collect(tp)
+
+        # HasLength used as an example no-field struct
+        fv3 = fieldvalues(HasLength())
+        @test collect(fv3) == Any[]
+    end
 end
 end
