@@ -997,7 +997,6 @@ julia> collect(fieldvalues(1 + 2im))
  2
 ```
 """
-
 fieldvalues(x::T) where {T} = FieldValues{T}(x)
 length(fs::FieldValues{T}) where {T} = fieldcount(T)
 IteratorSize(::Type{<:FieldValues}) = HasLength()
