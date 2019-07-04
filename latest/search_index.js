@@ -305,19 +305,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#IterTools.propertyvalues",
-    "page": "Introduction",
-    "title": "IterTools.propertyvalues",
-    "category": "function",
-    "text": "propertyvalues(x)\n\nIterate through the values of the properties of x.\n\njulia> collect(propertyvalues(1 + 2im))\n2-element Array{Any,1}:\n 1\n 2\n\n\n\n\n\n"
-},
-
-{
     "location": "index.html#propertyvalues(x)-1",
     "page": "Introduction",
     "title": "propertyvalues(x)",
     "category": "section",
     "text": "Iterate over struct or named tuple property values.propertyvalues"
+},
+
+{
+    "location": "index.html#IterTools.fieldvalues",
+    "page": "Introduction",
+    "title": "IterTools.fieldvalues",
+    "category": "function",
+    "text": "fieldvalues(x)\n\nIterate through the values of the fields of x.\n\njulia> collect(fieldvalues(1 + 2im))\n2-element Array{Any,1}:\n 1\n 2\n\n\n\n\n\n"
+},
+
+{
+    "location": "index.html#fieldvalues(x)-1",
+    "page": "Introduction",
+    "title": "fieldvalues(x)",
+    "category": "section",
+    "text": "Like (getfield(x, i) for i in 1:nfields(x)) but faster.fieldvalues"
 },
 
 {
