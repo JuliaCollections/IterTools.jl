@@ -382,6 +382,80 @@ include("testing_macros.jl")
         @test iterate(it, s) === nothing
     end
 
+    @testset "ivec" begin
+        irange = 1:12
+        vector = collect(irange)
+        @test collect(ivec(irange)) == vector
+        @test collect(ivec(vector)) == vector
+
+        matrix = reshape(vector, 3, 4)
+        @test collect(ivec(matrix)) == vector
+
+        ndarray = reshape(vector, 2, 2, 3)
+        @test collect(ivec(ndarray)) == vector
+    end
+
+    @testset "flagfirst" begin
+        v = rand(1:10, 20)
+        Tv = typeof(v)
+        ff = flagfirst(v)
+        Tff = typeof(ff)
+        @test IteratorEltype(Tff) ≡ IteratorEltype(v)
+        @test eltype(Tff) ≡ Tuple{Bool, eltype(v)}
+        @test collect(flagfirst(v)) ==
+            collect(zip(vcat([true], fill(false, length(v) - 1)), v))
+
+        @test collect(flagfirst(Int[])) == Tuple{Bool,Int}[]
+    end
+
+    @testset "takewhile" begin
+        @test collect(takewhile(x -> x^2 < 10, 1:10)) == Any[1, 2, 3]
+        @test collect(takewhile(x -> x^2 < 10, Iterators.countfrom(1))) == Any[1, 2, 3]
+        @test collect(takewhile(x -> x^2 < 10, 5:10)) == Any[]
+        @test collect(takewhile(x -> true, 5:10)) == collect(5:10)
+    end
+
+    @testset "properties" begin
+        p1 = properties(1 + 2im)
+        @test IteratorEltype(p1) isa HasEltype
+        @test eltype(p1) == Any
+        @test IteratorSize(p1) isa HasLength
+        @test length(p1) == 2
+        @test collect(p1) == Any[(:re, 1), (:im, 2)]
+
+        ntp = (a = "", b = 1, c = 2.0)
+        p2 = properties(ntp)
+        @test collect(p2) == Tuple.(collect(pairs(ntp)))
+
+         # HasLength used as an example no-field struct
+        p3 = properties(HasLength())
+        @test collect(p3) == Any[]
+    end
+
+    @testset "propertyvalues" begin
+        pv1 = propertyvalues(1 + 2im)
+        @test IteratorEltype(pv1) isa HasEltype
+        @test eltype(pv1) == Any
+        @test IteratorSize(pv1) isa HasLength
+        @test length(pv1) == 2
+        @test collect(pv1) == Any[1, 2]
+
+        tp = ("", 1, 2.0)
+        pv2 = propertyvalues(tp)
+
+        # getproperty for tuples wasn't introduced until 1.2
+        # https://github.com/JuliaLang/julia/pull/31324
+        @static if VERSION < v"1.2.0-DEV.460"
+            @test_broken collect(pv2) == collect(tp)
+        else
+            @test collect(pv2) == collect(tp)
+        end
+
+        # HasLength used as an example no-field struct
+        pv3 = propertyvalues(HasLength())
+        @test collect(pv3) == Any[]
+    end
+
     @testset "fieldvalues" begin
         fv1 = fieldvalues(1 + 2im)
         @test IteratorEltype(fv1) isa HasEltype

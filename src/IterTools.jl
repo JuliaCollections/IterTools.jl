@@ -1,5 +1,3 @@
-__precompile__()
-
 module IterTools
 
 import Base.Iterators: drop, take
@@ -26,6 +24,11 @@ export
     peekiter,
     peek,
     ncycle,
+    ivec,
+    flagfirst,
+    takewhile,
+    properties,
+    propertyvalues,
     fieldvalues
 
 function has_length(it)
@@ -779,7 +782,7 @@ i = 3
 """
 ncycle(iter, n::Int) = NCycle(iter, n)
 
-eltype(nc::NCycle{I}) where {I} = eltype(I)
+eltype(::Type{NCycle{I}}) where {I} = eltype(I)
 length(nc::NCycle) = nc.n*length(nc.iter)
 IteratorSize(::Type{NCycle{I}}) where {I} = longest(HasLength(), IteratorSize(I))
 IteratorEltype(::Type{NCycle{I}}) where {I} = IteratorEltype(I)
@@ -804,6 +807,180 @@ function iterate(nc::NCycle, state=(nc.n,))
     return v, (n, inner_state)
 end
 
+# IVec - lazy `vec`-like iterator that drops shape
+
+struct IVec{I}
+    iter::I
+end
+
+"""
+    ivec(iter)
+
+Drops all shape from `iter` while iterating.
+Like a non-materializing version of [`vec`](https://docs.julialang.org/en/stable/base/arrays/#Base.vec).
+
+```jldoctest
+julia> m = collect(reshape(1:6, 2, 3))
+2×3 Array{Int64,2}:
+ 1  3  5
+ 2  4  6
+
+julia> collect(ivec(m))
+6-element Array{Int64,1}:
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+```
+"""
+ivec(iter) = IVec(iter)
+
+eltype(::Type{IVec{I}}) where {I} = eltype(I)
+length(iv::IVec) = length(iv.iter)
+IteratorSize(::Type{IVec{I}}) where {I} = longest(HasLength(), IteratorSize(I))
+IteratorEltype(::Type{IVec{I}}) where {I} = IteratorEltype(I)
+
+iterate(iv::IVec, state...) = iterate(iv.iter, state...)
+
+# FlagFirst: prepend a flag that is `true` iff this is the first element
+
+struct FlagFirst{I}
+    iter::I
+end
+
+"""
+    flagfirst(iter)
+
+An iterator that yields `(isfirst, x)` where `isfirst::Bool` is `true` for the first
+element, and `false` after that, while the `x`s are elements from `iter`.
+
+```jldoctest
+julia> collect(flagfirst(1:3))
+3-element Array{Tuple{Bool,Int64},1}:
+ (true, 1)
+ (false, 2)
+ (false, 3)
+```
+"""
+flagfirst(iter) = FlagFirst(iter)
+
+eltype(::Type{FlagFirst{I}}) where I = Tuple{Bool, eltype(I)}
+length(ff::FlagFirst) = length(ff.iter)
+size(ff::FlagFirst) = size(ff.iter)
+IteratorSize(::Type{FlagFirst{I}}) where {I} = IteratorSize(I)
+IteratorEltype(::Type{FlagFirst{I}}) where {I} = IteratorEltype(I)
+
+function iterate(ff::FlagFirst, state = (true, ))
+    isfirst, rest = first(state), tail(state)
+    elt, nextstate = @ifsomething iterate(ff.iter, rest...)
+    (isfirst, elt), (isfirst & false, nextstate)
+end
+
+# TakeWhile iterates through values from an iterable as long as a given predicate is true.
+
+struct TakeWhile{I}
+    cond::Function
+    xs::I
+end
+
+"""
+    takewhile(cond, xs)
+
+An iterator that yields values from the iterator `xs` as long as the
+predicate `cond` is true.
+
+```jldoctest
+julia> collect(takewhile(x-> x^2 < 10, 1:100))
+3-element Array{Int64,1}:
+ 1
+ 2
+ 3
+```
+"""
+takewhile(cond, xs) = TakeWhile(cond, xs)
+
+function Base.iterate(it::TakeWhile, state=nothing)
+    (val, state) = @ifsomething (state === nothing ? iterate(it.xs) : iterate(it.xs, state))
+    it.cond(val) || return nothing
+    val, state
+end
+
+Base.IteratorSize(it::TakeWhile) = Base.SizeUnknown()
+eltype(::Type{TakeWhile{I}}) where {I} = eltype(I)
+IteratorEltype(::Type{TakeWhile{I}}) where {I} = IteratorEltype(I)
+
+# Properties
+
+struct Properties{T}
+    x::T
+    n::Int
+    names
+end
+
+"""
+    properties(x)
+
+Iterate through the names and value of the properties of `x`.
+
+```jldoctest
+julia> collect(properties(1 + 2im))
+2-element Array{Any,1}:
+ (:re, 1)
+ (:im, 2)
+```
+"""
+function properties(x::T) where T
+    names = propertynames(x)
+    return Properties{T}(x, length(names), names)
+end
+
+function iterate(p::Properties, state=1)
+    state > length(p) && return nothing
+
+    name = p.names[state]
+    return ((name, getproperty(p.x, name)), state + 1)
+end
+
+# PropertyValues
+
+struct PropertyValues{T}
+    x::T
+    n::Int
+    names
+end
+
+"""
+    propertyvalues(x)
+
+Iterate through the values of the properties of `x`.
+
+```jldoctest
+julia> collect(propertyvalues(1 + 2im))
+2-element Array{Any,1}:
+ 1
+ 2
+```
+"""
+
+function propertyvalues(x::T) where T
+    names = propertynames(x)
+    return PropertyValues{T}(x, length(names), names)
+end
+
+function iterate(p::PropertyValues, state=1)
+    state > length(p) && return nothing
+
+    name = p.names[state]
+    return (getproperty(p.x, name), state + 1)
+end
+
+length(p::Union{Properties, PropertyValues}) = p.n
+IteratorSize(::Type{<:Union{Properties, PropertyValues}}) = HasLength()
+
+# FieldValues
+
 struct FieldValues{T}
     x::T
 end
@@ -820,6 +997,7 @@ julia> collect(fieldvalues(1 + 2im))
  2
 ```
 """
+
 fieldvalues(x::T) where {T} = FieldValues{T}(x)
 length(fs::FieldValues{T}) where {T} = fieldcount(T)
 IteratorSize(::Type{<:FieldValues}) = HasLength()

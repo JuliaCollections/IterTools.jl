@@ -68,6 +68,14 @@ Group values into `n`-tuples.
 partition
 ```
 
+## ivec(xs)
+
+Iterate over `xs` but do not preserve shape information.
+
+```@docs
+ivec
+```
+
 ## peekiter(xs)
 
 Peek at the head element of an iterator without updating the state.
@@ -109,12 +117,20 @@ Equivalent to `take`, but will throw an exception if fewer than `n` items are en
 takestrict
 ```
 
-## fieldvalues(x)
+## takewhile(cond, xs)
 
-Like `(getfield(x, i) for i in 1:nfields(x))` but faster.
+Iterates through values from the iterable `xs` as long as a given predicate `cond` is true.
 
 ```@docs
-fieldvalues
+takewhile
+```
+
+## flagfirst(xs)
+
+Provide a flag to check if this is the first element.
+
+```@docs
+flagfirst
 ```
 
 ## IterTools.@ifsomething
@@ -123,4 +139,28 @@ Helper macro for returning from the enclosing block when there are no more eleme
 
 ```@docs
 IterTools.@ifsomething
+```
+
+## properties(x)
+
+Iterate over struct or named tuple properties.
+
+```@docs
+properties
+```
+
+## propertyvalues(x)
+
+Iterate over struct or named tuple property values.
+
+```@docs
+propertyvalues
+```
+
+## fieldvalues(x)
+
+Like `(getfield(x, i) for i in 1:nfields(x))` but faster.
+
+```@docs
+fieldvalues
 ```
