@@ -223,7 +223,7 @@ include("testing_macros.jl")
             @test eltype(eltype(sk4)) == Symbol
             @test collect(sk4) == Vector{Symbol}[]
 
-            @testset for i in 1:5
+            @testset for i in -1:5
                 sk5 = subsets(collect(1:4), i)
                 @test eltype(eltype(sk5)) == Int
                 @test length(collect(sk5)) == binomial(4, i)

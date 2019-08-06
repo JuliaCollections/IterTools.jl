@@ -521,7 +521,7 @@ mutable struct BinomialIterState
     done::Bool
 end
 
-function iterate(it::Binomial, state=BinomialIterState(collect(Int64, 1:it.k), it.k > it.n))
+function iterate(it::Binomial, state=BinomialIterState(collect(Int64, 1:it.k), it.k > it.n || it.k < 0))
     state.done && return nothing
 
     idx = state.idx
