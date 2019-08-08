@@ -267,6 +267,8 @@ include("testing_macros.jl")
             @testset for i in -1:6
                 sk5 = subsets(collect(1:4), Val{i}())
                 # there is no sensible element type information for i < 1
+                i < 0 && @test eltype(sk5) == Union{}
+                i == 0 && @test eltype(sk5) == Tuple{}
                 i >= 1 && @test eltype(eltype(sk5)) == Int
                 @test length(collect(sk5)) == binomial(4, i)
             end
