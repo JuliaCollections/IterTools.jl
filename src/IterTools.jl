@@ -9,6 +9,7 @@ import Base: SizeUnknown, IsInfinite, HasLength, HasShape
 import Base: HasEltype, EltypeUnknown
 
 export
+    firstrest,
     takestrict,
     repeatedly,
     chain,
@@ -82,6 +83,29 @@ macro ifsomething(ex)
         result === nothing && return nothing
         result
     end
+end
+
+"""
+    firstrest(xs) -> (f, r)
+
+Return the first element and an iterator of the rest as a tuple.
+
+```jldoctest
+julia> f, r = firstrest(1:3)
+(1, Base.Iterators.Rest{UnitRange{Int64},Int64}(1:3, 1))
+
+julia> collect(r)
+2-element Array{Int64,1}:
+ 2
+ 3
+```
+"""
+function firstrest(xs)
+    t = iterate(xs)
+    t === nothing && throw(ArgumentError("collection must be non-empty"))
+    f, s = t
+    r = Iterators.rest(xs, s)
+    return f, r
 end
 
 # Iterate through the first n elements, throwing an exception if

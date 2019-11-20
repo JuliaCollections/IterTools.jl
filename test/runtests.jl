@@ -10,6 +10,36 @@ include("testing_macros.jl")
 
 @testset "IterTools" begin
 @testset "iterators" begin
+    @testset "firstrest" begin
+        # Ranges/generators have different rest states vs array/tuples
+        test_base_cases = [
+            (1:1, 1),
+            (1:3, 1),
+            ([1], 2),
+            ([1, 2, 3], 2),
+            ((1,), 2),
+            ((1, 2, 3), 2),
+            ((i for i in 1:1), 1),
+            ((i for i in 1:3), 1),
+        ]
+        @testset "$xs" for (xs, s) in test_base_cases
+            f, r = firstrest(xs)
+            @test f == first(xs)
+            @test collect(r) == collect(Iterators.rest(xs, s))
+        end
+
+        test_empty_cases = [
+            (1:0, 1),
+            (Int[], 2),
+            ((), 2),
+            ((i for i in 1:0), 1),
+        ]
+
+        @testset "$xs" for (xs, s) in test_empty_cases
+            @test_throws ArgumentError firstrest(xs)
+        end
+    end
+
     @testset "takestrict" begin
         itr = 1:10
         take_itr = takestrict(itr, 5)

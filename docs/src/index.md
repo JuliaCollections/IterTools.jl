@@ -20,6 +20,13 @@ Iterate through values skipping over those already encountered.
 distinct
 ```
 
+## firstrest(xs)
+
+Return first element and `Iterators.rest` iterator as a tuple.
+```@docs
+firstrest
+```
+
 ## groupby(f, xs)
 
 Group consecutive values that share the same result of applying `f`.
