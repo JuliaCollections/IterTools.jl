@@ -101,7 +101,9 @@ julia> collect(r)
 ```
 """
 function firstrest(xs)
-    f, s = iterate(xs)
+    t = iterate(xs)
+    t === nothing && throw(ArgumentError("collection must be non-empty"))
+    f, s = t
     r = Iterators.rest(xs, s)
     return f, r
 end
