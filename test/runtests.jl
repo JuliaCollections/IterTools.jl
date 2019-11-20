@@ -11,7 +11,7 @@ include("testing_macros.jl")
 @testset "IterTools" begin
 @testset "iterators" begin
     @testset "firstrest" begin
-        # We ranges/generators have different rest states vs array/tuples
+        # Ranges/generators have different rest states vs array/tuples
         test_base_cases = [
             (1:1, 1),
             (1:3, 1),
