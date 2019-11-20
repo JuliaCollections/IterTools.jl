@@ -10,6 +10,13 @@ include("testing_macros.jl")
 
 @testset "IterTools" begin
 @testset "iterators" begin
+    @testset "firstrest" begin
+        iter = 1:10
+        f, r = firstrest(iter)
+        @test f == 1
+        @test collect(r) == collect(2:10)
+    end
+
     @testset "takestrict" begin
         itr = 1:10
         take_itr = takestrict(itr, 5)
