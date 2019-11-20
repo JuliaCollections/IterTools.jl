@@ -49,6 +49,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#IterTools.firstrest",
+    "page": "Introduction",
+    "title": "IterTools.firstrest",
+    "category": "function",
+    "text": "firstrest(xs) -> (f, r)\n\nReturn the first element and an iterator of the rest as a tuple.\n\njulia> f, r = firstrest(1:3)\n(1, Base.Iterators.Rest{UnitRange{Int64},Int64}(1:3, 1))\n\njulia> collect(r)\n2-element Array{Int64,1}:\n 2\n 3\n\n\n\n\n\n"
+},
+
+{
+    "location": "index.html#firstrest(xs)-1",
+    "page": "Introduction",
+    "title": "firstrest(xs)",
+    "category": "section",
+    "text": "Return first element and Iterators.rest iterator as a tuple.firstrest"
+},
+
+{
     "location": "index.html#IterTools.groupby",
     "page": "Introduction",
     "title": "IterTools.groupby",
