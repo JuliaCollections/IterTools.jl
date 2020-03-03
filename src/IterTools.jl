@@ -931,7 +931,7 @@ function Base.iterate(it::TakeWhile, state=nothing)
     val, state
 end
 
-Base.IteratorSize(it::TakeWhile) = Base.SizeUnknown()
+Base.IteratorSize(::Type{<:TakeWhile}) = Base.SizeUnknown()
 eltype(::Type{TakeWhile{I}}) where {I} = eltype(I)
 IteratorEltype(::Type{TakeWhile{I}}) where {I} = IteratorEltype(I)
 
