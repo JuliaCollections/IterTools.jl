@@ -502,5 +502,36 @@ include("testing_macros.jl")
         fv3 = fieldvalues(HasLength())
         @test collect(fv3) == Any[]
     end
+
+    @testset "traits overriding defaults" begin
+        iters = [
+            firstrest(1:10),
+            takestrict(1:10, 5),
+            repeatedly(() -> 1, 10),
+            distinct([5, 2, 2, 1, 2, 1, 1, 2, 4, 2]),
+            partition(take(countfrom(1), 6), 2),
+            groupby(x -> x[1], [(1,2),(3,4),(1,4)]),
+            imap(+, [1,2,3], [3, 2, 1]),
+            subsets([:a, :b, :c]),
+            iterated(sin, 3),
+            nth(1:3, 2),
+            takenth(1:10, 2),
+            peekiter(1:10),
+            ncycle(0:3,3),
+            ivec(ones(3,3)),
+            flagfirst(1:10),
+            takewhile(x -> x^2 < 10, 1:10),
+            properties(1 + 2im),
+            propertyvalues(1 + 2im),
+            fieldvalues(1 + 2im)
+        ]
+        for iter in iters
+            @test IteratorSize(iter) == IteratorSize(typeof(iter))
+            # indirect way to test the same thing, through generators
+            g = (x for x in iter)
+            @test IteratorSize(g) == IteratorSize(iter)
+            @test IteratorSize(typeof(g)) == IteratorSize(typeof(iter))
+        end
+    end
 end
 end
