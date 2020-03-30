@@ -253,7 +253,7 @@ include("testing_macros.jl")
             @test eltype(eltype(sk4)) == Symbol
             @test collect(sk4) == Vector{Symbol}[]
 
-            @testset for i in 1:5
+            @testset for i in -1:5
                 sk5 = subsets(collect(1:4), i)
                 @test eltype(eltype(sk5)) == Int
                 @test length(collect(sk5)) == binomial(4, i)
@@ -294,9 +294,12 @@ include("testing_macros.jl")
             @test eltype(eltype(sk5)) == Symbol
             @test collect(sk5) == []
 
-            @testset for i in 1:6
+            @testset for i in -1:6
                 sk5 = subsets(collect(1:4), Val{i}())
-                @test eltype(eltype(sk5)) == Int
+                # there is no sensible element type information for i < 1
+                i < 0 && @test eltype(sk5) == Union{}
+                i == 0 && @test eltype(sk5) == Tuple{}
+                i >= 1 && @test eltype(eltype(sk5)) == Int
                 @test length(collect(sk5)) == binomial(4, i)
             end
 

@@ -545,7 +545,7 @@ mutable struct BinomialIterState
     done::Bool
 end
 
-function iterate(it::Binomial, state=BinomialIterState(collect(Int64, 1:it.k), it.k > it.n))
+function iterate(it::Binomial, state=BinomialIterState(collect(Int64, 1:it.k), it.k > it.n || it.k < 0))
     state.done && return nothing
 
     idx = state.idx
@@ -580,11 +580,14 @@ end
 IteratorSize(::Type{StaticSizeBinomial{K, C}}) where {K, C} = HasLength()
 IteratorEltype(::Type{StaticSizeBinomial{K, C}}) where {K, C} = IteratorEltype(C)
 
-eltype(::Type{StaticSizeBinomial{K, C}}) where {K, C} = NTuple{K, eltype(C)}
+eltype(::Type{StaticSizeBinomial{K, C}}) where {K, C} = K < 0 ? Union{} : NTuple{K, eltype(C)}
 length(it::StaticSizeBinomial{K}) where {K} = binomial(length(it.xs), K)
 
 subsets(xs::C, ::Val{K}) where {K, C} = StaticSizeBinomial{K, C}(xs)
 
+# Special case for K < 0
+iterate(it::StaticSizeBinomial{k}) where k = k < 0 ? nothing : _iterate(it)
+iterate(it::StaticSizeBinomial{k}, state) where k = k < 0 ? nothing : _iterate(it, state)
 # Special case for K == 0
 iterate(it::StaticSizeBinomial{0}, state=false) = state ? nothing : ((), true)
 
@@ -603,7 +606,7 @@ function advance(it::StaticSizeBinomial{K}, idx) where {K}
 end
 advance(it::StaticSizeBinomial, idx::NTuple{1}) = (idx[end]+1,)
 
-function iterate(it::StaticSizeBinomial{K}, idx=ntuple(identity, Val{K}())) where K
+function _iterate(it::StaticSizeBinomial{K}, idx=ntuple(identity, Val{K}())) where K
     idx[end] > length(it.xs) && return nothing
     return (map(i -> it.xs[i], idx), advance(it, idx))
 end
