@@ -899,7 +899,7 @@ IteratorEltype(::Type{FlagFirst{I}}) where {I} = IteratorEltype(I)
 function iterate(ff::FlagFirst, state = (true, ))
     isfirst, rest = first(state), tail(state)
     elt, nextstate = @ifsomething iterate(ff.iter, rest...)
-    (isfirst, elt), (isfirst & false, nextstate)
+    (isfirst, elt), (false, nextstate)
 end
 
 # TakeWhile iterates through values from an iterable as long as a given predicate is true.
