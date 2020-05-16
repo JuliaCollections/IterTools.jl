@@ -90,6 +90,8 @@ end
 
 Return the first element and an iterator of the rest as a tuple.
 
+See also: `Base.Iterators.peel`.
+
 ```jldoctest
 julia> f, r = firstrest(1:3)
 (1, Base.Iterators.Rest{UnitRange{Int64},Int64}(1:3, 1))
