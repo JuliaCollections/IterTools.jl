@@ -259,8 +259,10 @@ struct Partition{I, N}
     xs::I
     step::Int
 end
+_length_partition(l, n, s) = ifelse(l - n ≥ 0, ((l - n) ÷ s) + 1, 0)
 eltype(::Type{Partition{I, N}}) where {I, N} = NTuple{N, eltype(I)}
-IteratorSize(::Type{<:Partition}) = SizeUnknown()
+length(it::Partition{I, N}) where {I, N} = _length_partition(length(it.xs), N, it.step)
+IteratorSize(::Type{Partition{I, N}}) where {I, N} = longest(HasLength(), IteratorSize(I))
 
 """
     partition(xs, n, [step])
