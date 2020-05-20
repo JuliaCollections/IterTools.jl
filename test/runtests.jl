@@ -123,7 +123,7 @@ include("testing_macros.jl")
         @test_throws ArgumentError partition(take(countfrom(1), 8), 2, 0)
 
         # test with a SizeUnknown iterator
-        pa5 = partition(takewhile(≤(10), countfrom(1)), 1, 1)
+        pa5 = partition(takewhile(x -> x ≤ 10, countfrom(1)), 1, 1)
         @test_throws MethodError length(pa5)
         @test IteratorSize(pa5) isa SizeUnknown
         @test length(collect(pa5)) == 10
