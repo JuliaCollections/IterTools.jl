@@ -96,25 +96,42 @@ include("testing_macros.jl")
     @testset "partition" begin
         pa0 = partition(take(countfrom(1), 6), 2)
         @test eltype(pa0) == Tuple{Int, Int}
+        @test length(pa0) == 3
+        @test IteratorSize(pa0) isa HasLength
         @test collect(pa0) == [(1,2), (3,4), (5,6)]
 
         pa1 = partition(take(countfrom(1), 4), 2, 1)
         @test eltype(pa1) == Tuple{Int, Int}
+        @test length(pa1) == 3
         @test collect(pa1) == [(1,2), (2,3), (3,4)]
 
         pa2 = partition(take(countfrom(1), 8), 2, 3)
         @test eltype(pa2) == Tuple{Int, Int}
+        @test length(pa2) == 3
         @test collect(pa2) == [(1,2), (4,5), (7,8)]
 
         pa3 = partition(take(countfrom(1), 0), 2, 1)
         @test eltype(pa3) == Tuple{Int, Int}
+        @test length(pa3) == 0
         @test collect(pa3) == []
 
         pa4 = partition(1:8, 1)
         @test eltype(pa4) == Tuple{Int}
+        @test length(pa4) == 8
         @test collect(pa4) == [(1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,)]
 
         @test_throws ArgumentError partition(take(countfrom(1), 8), 2, 0)
+
+        # test with a SizeUnknown iterator
+        pa5 = partition(takewhile(x -> x ≤ 10, countfrom(1)), 1, 1)
+        @test_throws MethodError length(pa5)
+        @test IteratorSize(pa5) isa SizeUnknown
+        @test length(collect(pa5)) == 10
+
+        # test with a IsInfinite iterator
+        pa5 = partition(countfrom(1), 1, 1)
+        @test_throws MethodError length(pa5)
+        @test IteratorSize(pa5) isa IsInfinite
     end
 
     @testset "imap" begin
