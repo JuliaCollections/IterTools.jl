@@ -132,6 +132,10 @@ include("testing_macros.jl")
         pa5 = partition(countfrom(1), 1, 1)
         @test_throws MethodError length(pa5)
         @test IteratorSize(pa5) isa IsInfinite
+
+        # Test https://github.com/JuliaCollections/IterTools.jl/issues/39
+        _sliding_pairs_type(a) = eltype(IterTools.partition(a, 2, 1))
+        @inferred _sliding_pairs_type([1,2,3])
     end
 
     @testset "imap" begin
