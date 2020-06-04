@@ -306,7 +306,7 @@ i = (7, 8)
 """
 @inline partition(xs, n::Int) = partition(xs, n, n)
 
-function partition(xs::I, n::Int, step::Int) where I
+@inline function partition(xs::I, n::Int, step::Int) where I
     if step < 1
         throw(ArgumentError("Partition step must be at least 1."))
     end
