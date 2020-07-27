@@ -558,7 +558,8 @@ include("testing_macros.jl")
     @testset "each" begin
         @test each(Tuple,[(1,2),(1,2)]) == [(1,2),(1,2)]
         @test each(Tuple,(1,2)) == ((1,2),)
-        @test_throws ArgumentError each(Tuple,["something"])
+        @test_throws MethodError each(Tuple,["something"])
+        @test eltype(each(Int32,(1,2))) == Int32
     end
 end
 end

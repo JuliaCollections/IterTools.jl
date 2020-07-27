@@ -1050,13 +1050,17 @@ julia> println.(each(Tuple, (1, 2)));
 (1, 2)
 
 julia> println.(each(String, (1, 2)));
-ERROR: ArgumentError
+ERROR: MethodError: Cannot `convert` an object of type Array{Int64,1} to an object of type String
+[...]
 ```
 """
-function each(::Type{T}, collection) where T
-    eltype(collection) <:T && return collection
-    throw(ArgumentError("$(typeof(collection)) does not contain elements of type $T"))
+function each(::Type{T},collection) where T
+    try 
+        out = convert(T,collection)
+        return (out,)
+    catch MethodError
+        out = convert.(T,collection)
+    end
 end
-each(::Type{T}, element::T) where T = (element,)
 
 end # module IterTools
