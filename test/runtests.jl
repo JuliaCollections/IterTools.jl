@@ -554,5 +554,11 @@ include("testing_macros.jl")
             @test IteratorSize(typeof(g)) == IteratorSize(typeof(iter))
         end
     end
+
+    @testset "each" begin
+        @test each(Tuple,[(1,2),(1,2)]) == [(1,2),(1,2)]
+        @test each(Tuple,(1,2)) == ((1,2),)
+        @test_throws ArgumentError each(Tuple,["something"])
+    end
 end
 end
