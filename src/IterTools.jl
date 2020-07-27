@@ -30,7 +30,8 @@ export
     takewhile,
     properties,
     propertyvalues,
-    fieldvalues
+    fieldvalues,
+    each
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -1030,5 +1031,32 @@ function iterate(fs::FieldValues, state=1)
 
     return (getfield(fs.x, state), state + 1)
 end
+
+"""
+    each(ElementType::Type, element::ElementType)
+    each(ElementType::Type, collection)
+
+Return `element` wrapped in a `Tuple` or the `collection` if it has `eltype<:ElementType`. 
+Otherwise throw an error. 
+`eltype(each(T,collection)) <: T`, even if `eltype(collection)` is not.
+
+# Examples
+```jldoctest
+julia> println.(each(Tuple, [(1, 2), (3, 4)]));
+(1, 2)
+(3, 4)
+
+julia> println.(each(Tuple, (1, 2)));
+(1, 2)
+
+julia> println.(each(String, (1, 2)));
+ERROR: ArgumentError
+```
+"""
+function each(::Type{T}, collection) where T
+    eltype(collection) <:T && return collection
+    throw(ArgumentError("$(typeof(collection)) does not contain elements of type $T"))
+end
+each(::Type{T}, element::T) where T = (element,)
 
 end # module IterTools
