@@ -1056,10 +1056,9 @@ ERROR: MethodError: Cannot `convert` an object of type Array{Int64,1} to an obje
 """
 function each(::Type{T},collection) where T
     try 
-        out = convert(T,collection)
-        return (out,)
+        return (convert(T,collection),)
     catch MethodError
-        out = convert.(T,collection)
+        return convert.(T,collection)
     end
 end
 
