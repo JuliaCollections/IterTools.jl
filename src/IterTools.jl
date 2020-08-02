@@ -9,29 +9,29 @@ import Base: SizeUnknown, IsInfinite, HasLength, HasShape
 import Base: HasEltype, EltypeUnknown
 
 export
-firstrest,
-takestrict,
-repeatedly,
-chain,
-product,
-distinct,
-partition,
-groupby,
-imap,
-subsets,
-iterated,
-nth,
-takenth,
-peekiter,
-peek,
-ncycle,
-ivec,
-flagfirst,
-takewhile,
-properties,
-propertyvalues,
-fieldvalues,
-each
+    firstrest,
+    takestrict,
+    repeatedly,
+    chain,
+    product,
+    distinct,
+    partition,
+    groupby,
+    imap,
+    subsets,
+    iterated,
+    nth,
+    takenth,
+    peekiter,
+    peek,
+    ncycle,
+    ivec,
+    flagfirst,
+    takewhile,
+    properties,
+    propertyvalues,
+    fieldvalues,
+    each
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -224,7 +224,7 @@ Iterate through values skipping over those already encountered.
 
 ```jldoctest
 julia> for i in distinct([1,1,2,1,2,4,1,2,3,4])
-       @show i
+           @show i
        end
 i = 1
 i = 2
@@ -272,7 +272,7 @@ Group values into `n`-tuples.
 
 ```jldoctest
 julia> for i in partition(1:9, 3)
-       @show i
+           @show i
        end
 i = (1, 2, 3)
 i = (4, 5, 6)
@@ -283,7 +283,7 @@ If the `step` parameter is set, each tuple is separated by `step` values.
 
 ```jldoctest
 julia> for i in partition(1:9, 3, 2)
-       @show i
+           @show i
        end
 i = (1, 2, 3)
 i = (3, 4, 5)
@@ -291,14 +291,14 @@ i = (5, 6, 7)
 i = (7, 8, 9)
 
 julia> for i in partition(1:9, 3, 3)
-       @show i
+           @show i
        end
 i = (1, 2, 3)
 i = (4, 5, 6)
 i = (7, 8, 9)
 
 julia> for i in partition(1:9, 2, 3)
-       @show i
+           @show i
        end
 i = (1, 2)
 i = (4, 5)
@@ -379,7 +379,7 @@ Group consecutive values that share the same result of applying `f`.
 
 ```jldoctest
 julia> for i in groupby(x -> x[1], ["face", "foo", "bar", "book", "baz", "zzz"])
-       @show i
+           @show i
        end
 i = ["face", "foo"]
 i = ["bar", "book", "baz"]
@@ -435,7 +435,7 @@ exhausted.
 
 ```jldoctest
 julia> for i in imap(+, [1,2,3], [4,5,6])
-        @show i
+            @show i
        end
 i = 5
 i = 7
@@ -469,7 +469,7 @@ otherwise.
 
 ```jldoctest
 julia> for i in subsets([1, 2, 3])
-      @show i
+          @show i
        end
 i = Int64[]
 i = [1]
@@ -481,7 +481,7 @@ i = [2, 3]
 i = [1, 2, 3]
 
 julia> for i in subsets(1:4, 2)
-      @show i
+          @show i
        end
 i = [1, 2]
 i = [1, 3]
@@ -491,7 +491,7 @@ i = [2, 4]
 i = [3, 4]
 
 julia> for i in subsets(1:4, Val{2}())
-       @show i
+           @show i
        end
 i = (1, 2)
 i = (1, 3)
@@ -707,7 +707,7 @@ Use `Base.Iterators.take()` to obtain the required number of elements.
 
 ```jldoctest
 julia> for i in Iterators.take(iterated(x -> 2x, 1), 5)
-       @show i
+           @show i
        end
 i = 1
 i = 2
@@ -716,7 +716,7 @@ i = 8
 i = 16
 
 julia> for i in Iterators.take(iterated(sqrt, 100), 6)
-       @show i
+           @show i
        end
 i = 100
 i = 10.0
@@ -794,7 +794,7 @@ Cycle through `iter` `n` times.
 
 ```jldoctest
 julia> for i in ncycle(1:3, 2)
-       @show i
+           @show i
        end
 i = 1
 i = 2
