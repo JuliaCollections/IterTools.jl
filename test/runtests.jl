@@ -320,6 +320,7 @@ include("testing_macros.jl")
                 @test eltype(eltype(sk5)) == Int
                 @test length(collect(sk5)) == binomial(4, i)
             end
+            @test iterate(subsets(collect(1:4),Val{2}()),(1,4)) == ((1,4), (2,3))
 
             function collect_pairs(x)
                 p = Vector{NTuple{2, eltype(x)}}(undef, binomial(length(x), 2))
