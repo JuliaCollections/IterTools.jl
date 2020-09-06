@@ -596,5 +596,11 @@ include("testing_macros.jl")
             @test IteratorSize(typeof(g)) == IteratorSize(typeof(iter))
         end
     end
+
+    @testset "zip_longest" begin
+        a = 1:5
+        b = 10:-1:8
+        @test collect(zip_longest(a,b,default=-1)) == [(1,10),(2,9),(3,8),(4,-1),(5,-1)]
+    end
 end
 end
