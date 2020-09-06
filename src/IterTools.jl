@@ -35,7 +35,8 @@ export
     propertyvalues,
     fieldvalues,
     interleaveby,
-    cache
+    cache,
+    zip_longest
 
 function has_length(it)
     it_size = IteratorSize(it)
