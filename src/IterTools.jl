@@ -9,7 +9,6 @@ import Base: SizeUnknown, IsInfinite, HasLength, HasShape
 import Base: HasEltype, EltypeUnknown
 
 import Base: OneTo
-import Base.Iterators: _zip_eltype, _zip_iterator_size, _zip_iterator_eltype
 
 export
     firstrest,
@@ -1171,9 +1170,9 @@ end
 struct Zip_longest{IS<:Tuple}
     is::IS
 end
-IteratorSize(::Type{Zip_longest{IS}}) where {IS<:Tuple} = _zip_iterator_size(IS)
-IteratorEltype(::Type{Zip_longest{IS}}) where {IS<:Tuple} = _zip_iterator_eltype(IS)
-eltype(::Type{Zip_longest{IS}}) where {IS<:Tuple} = _zip_eltype(IS)
+IteratorSize(::Type{Zip_longest{IS}}) where {IS<:Tuple} = Base.Iterators._zip_iterator_size(IS)
+IteratorEltype(::Type{Zip_longest{IS}}) where {IS<:Tuple} = Base.Iterators._zip_iterator_eltype(IS)
+eltype(::Type{Zip_longest{IS}}) where {IS<:Tuple} = Base.Iterators._zip_eltype(IS)
 length(it::Zip_longest) = maximum(length.(it.is))
 size(it::Zip_longest) = mapreduce(size, _zip_longest_promote_shape, it.is)
 axes(it::Zip_longest) = mapreduce(axes, _zip_longest_promote_shape, it.is)
