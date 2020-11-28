@@ -30,7 +30,9 @@ export
     takewhile,
     properties,
     propertyvalues,
-    fieldvalues
+    fieldvalues,
+    alternate
+
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -1029,6 +1031,69 @@ function iterate(fs::FieldValues, state=1)
     state > length(fs) && return nothing
 
     return (getfield(fs.x, state), state + 1)
+end
+
+# Alternate
+
+struct Alternate{Is<:Tuple}
+    xs::Is
+end
+"""
+    alternate(xs...)
+Alternates through each of the given iterators in order, shuffling their values
+until one of them runs out.
+
+```jldoctest
+julia> collect(alternate(1:5,10:-1:1))
+  1
+ 10
+  2
+  9
+  3
+  8
+  4
+  7
+  5
+  6
+```
+"""
+alternate(xs...) = length(xs) == 1 ? xs[1] : Alternate(xs)
+function Base.iterate(it::Alternate, state=1)
+    if state == 1
+        state=[Array{Any}(nothing,length(it.xs)),1]
+    end
+    if isnothing(state[1][state[2]])
+        itreturn = iterate(it.xs[state[2]])
+    else
+        itreturn = iterate(it.xs[state[2]],state[1][state[2]])
+    end
+    isnothing(itreturn) && return nothing
+    state[1][state[2]] = itreturn[2]
+    state[2] = (state[2] % length(it.xs)) + 1
+    return (itreturn[1],state)
+end
+function IteratorEltype(::Type{Alternate{Is}}) where Is
+    iteratoreltypes = IteratorEltype.(fieldtypes(Is))
+    any(iteratoreltypes .== Ref(EltypeUnknown())) && return EltypeUnknown()
+    return HasEltype()
+end
+eltype(::Type{Alternate{Is}}) where Is = Union{eltype.(fieldtypes(Is))...}
+function IteratorSize(::Type{Alternate{Is}}) where Is
+    iteratorsizes =  IteratorSize.(fieldtypes(Is))
+    any(iteratorsizes .== Ref(SizeUnknown())) && return SizeUnknown()
+    all(iteratorsizes .== Ref(IsInfinite())) && return IsInfinite()
+    return HasLength() # Never returns HasShape
+end
+function length(i::Alternate)
+    m = Int64(minimum(IteratorSize(x) isa IsInfinite ? Inf : length(x) for x in i.xs))
+    l = length(i.xs)*m
+    for x in i.xs
+        if IteratorSize(x) isa IsInfinite || length(x) > m
+            l = l+1
+        else
+            return l
+        end
+    end
 end
 
 end # module IterTools

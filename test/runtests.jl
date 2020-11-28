@@ -524,6 +524,24 @@ include("testing_macros.jl")
         @test collect(fv3) == Any[]
     end
 
+    @testset "alternate" begin
+        intlist1 = 1:5
+        intlist2 = 2:4:14
+        inflist = countfrom(1)
+        unklist = takewhile(x -> x ≤ 10, countfrom(1))
+        shapedlist = [1 2 3;2 4 6]
+        str = "String"
+        @test eltype(alternate(intlist1,intlist2)) == Int64
+        @test eltype(alternate(intlist1,str)) == Union{Int64,Char}
+        @test length(alternate(intlist1,intlist2)) == 9
+        @test length(alternate(intlist2,intlist1)) == 8
+        @test IteratorSize(alternate(inflist,inflist)) isa IsInfinite
+        @test IteratorSize(alternate(intlist1,unklist)) isa SizeUnknown
+        @test IteratorSize(alternate(shapedlist,shapedlist)) isa HasLength
+        @test alternate(intlist1) == intlist1
+        @test collect(alternate(intlist1,intlist2,inflist)) == [1,2,1,2,6,2,3,10,3,4,14,4,5]
+    end
+
     @testset "traits overriding defaults" begin
         iters = [
             firstrest(1:10),
