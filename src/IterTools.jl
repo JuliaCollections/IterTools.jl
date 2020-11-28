@@ -590,14 +590,14 @@ iterate(it::StaticSizeBinomial{0}, state=false) = state ? nothing : ((), true)
 pop(t::NTuple) = reverse(tail(reverse(t))), t[end]
 
 function advance(it::StaticSizeBinomial{K}, idx) where {K}
-	xs = it.xs
-	lidx, i = pop(idx)
+    xs = it.xs
+    lidx, i = pop(idx)
     i += 1
-	if i > length(xs) - K + length(idx)
-		lidx = advance(it, lidx)
-		i = lidx[end] + 1
-	end
-	return (lidx..., i)
+    if i > length(xs) - K + length(idx)
+        lidx = advance(it, lidx)
+        i = lidx[end] + 1
+    end
+    return (lidx..., i)
 end
 advance(it::StaticSizeBinomial, idx::NTuple{1}) = (idx[end]+1,)
 
