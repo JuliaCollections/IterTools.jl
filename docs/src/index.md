@@ -171,3 +171,11 @@ Like `(getfield(x, i) for i in 1:nfields(x))` but faster.
 ```@docs
 fieldvalues
 ```
+
+## imerge(a,b, predicate = <=, fa = identity, fb = identity)
+
+Iterate over the union of `a` and `b`, merge-sort style.
+
+```@docs
+imerge
+```

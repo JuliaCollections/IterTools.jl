@@ -30,7 +30,8 @@ export
     takewhile,
     properties,
     propertyvalues,
-    fieldvalues
+    fieldvalues,
+    imerge
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -1025,6 +1026,60 @@ function iterate(fs::FieldValues, state=1)
     state > length(fs) && return nothing
 
     return (getfield(fs.x, state), state + 1)
+end
+
+# IMerge
+
+"""
+    imerge(a,b, predicate = <=, fa = identity, fb = identity)
+
+Iterate over the union of `a` and `b`, merge-sort style.
+
+Input:
+ - `predicate(ak,bk) -> Bool`:
+    Whether to pick the next element of `a` (true) or `b` (false).
+ - `fa(ak)`, `fb(bk)`: Functions to apply to the picked elements
+
+```jldoctest
+julia> collect(imerge(1:2:5, 2:2:6, <=, identity, x->-x))
+6-element Vector{Int64}:
+  1
+ -2
+  3
+ -4
+  5
+ -6
+```
+"""
+imerge(a,b, p = <=, fa = identity, fb = identity) = IMerge(a,b,p,fa,fb)
+
+struct IMerge{A,B,P,FA,FB}
+    a::A
+    b::B
+    predicate::P
+    fa::FA
+    fb::FB
+end
+
+Base.IteratorSize(::Type{<:IMerge{A,B}}) where {A,B} = longest(Base.IteratorSize.((A,B))...)
+Base.length(m::IMerge) = length(m.a) + length(m.b)
+Base.IteratorEltype(::Type{<:IMerge}) = Base.EltypeUnknown()
+
+function Base.iterate(m::IMerge, (vsa,vsb) = (iterate(m.a),iterate(m.b)))
+    if isnothing(vsa) && isnothing(vsb)
+        return nothing
+    end
+    if isnothing(vsb)
+        return m.fa(vsa[1]), (iterate(m.a,vsa[2]),vsb)
+    end
+    if isnothing(vsa)
+        return m.fb(vsb[1]), (vsa,iterate(m.b,vsb[2]))
+    end
+    if m.predicate(vsa[1],vsb[1])
+        return m.fa(vsa[1]), (iterate(m.a,vsa[2]),vsb)
+    else
+        return m.fb(vsb[1]), (vsa,iterate(m.b,vsb[2]))
+    end
 end
 
 end # module IterTools

@@ -524,6 +524,13 @@ include("testing_macros.jl")
         @test collect(fv3) == Any[]
     end
 
+    @testset "merge" begin
+        itr = imerge(1:2:5,2:2:6, <=, identity, x->-x)
+        @test IteratorSize(itr) isa HasLength
+        @test length(itr) == 6
+        @test collect(itr) == [1,-2,3,-4,5,-6]
+    end
+
     @testset "traits overriding defaults" begin
         iters = [
             firstrest(1:10),
