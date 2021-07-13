@@ -93,11 +93,13 @@ Return the first element and an iterator of the rest as a tuple.
 See also: `Base.Iterators.peel`.
 
 ```jldoctest
-julia> f, r = firstrest(1:3)
-(1, Base.Iterators.Rest{UnitRange{Int64},Int64}(1:3, 1))
+julia> f, r = firstrest(1:3);
+
+julia> f
+1
 
 julia> collect(r)
-2-element Array{Int64,1}:
+2-element Vector{Int64}:
  2
  3
 ```
@@ -129,11 +131,8 @@ Like `take()`, an iterator that generates at most the first `n` elements of `xs`
 an exception if fewer than `n` items are encountered in `xs`.
 
 ```jldoctest
-julia> a = :1:2:11
-1:2:11
-
-julia> collect(takestrict(a, 3))
-3-element Array{Int64,1}:
+julia> collect(takestrict(1:2:11, 3))
+3-element Vector{Int64}:
  1
  3
  5
@@ -178,7 +177,7 @@ julia> t() = (sleep(0.1); Dates.millisecond(now()))
 t (generic function with 1 method)
 
 julia> collect(repeatedly(t, 5))
-5-element Array{Any,1}:
+5-element Vector{Any}:
  993
   97
  200
@@ -615,11 +614,10 @@ end
 Return the `n`th element of `xs`. This is mostly useful for non-indexable collections.
 
 ```jldoctest
-julia> mersenne = Set([3, 7, 31, 127])
-Set([7, 31, 3, 127])
+julia> powers_of_two = iterated(x->2x,1);
 
-julia> nth(mersenne, 3)
-3
+julia> nth(powers_of_two, 4)
+8
 ```
 """
 function nth(xs, n::Integer)
@@ -662,7 +660,7 @@ Iterate through every `n`th element of `xs`.
 
 ```jldoctest
 julia> collect(takenth(5:15,3))
-3-element Array{Int64,1}:
+3-element Vector{Int64}:
   7
  10
  13
@@ -745,23 +743,22 @@ end
 Lets you peek at the head element of an iterator without updating the state.
 
 ```jldoctest
-julia> it = peekiter(["face", "foo", "bar", "book", "baz", "zzz"])
-IterTools.PeekIter{Array{String,1}}(["face", "foo", "bar", "book", "baz", "zzz"])
+julia> it = peekiter(["face", "foo", "bar", "book", "baz", "zzz"]);
 
-julia> @show peek(it);
-peek(it) = Some("face")
+julia> peek(it)
+Some("face")
 
-julia> @show peek(it);
-peek(it) = Some("face")
+julia> peek(it)
+Some("face")
 
 julia> x, s = iterate(it)
 ("face", ("foo", 3))
 
-julia> @show x;
-x = "face"
+julia> x
+"face"
 
-julia> @show peek(it, s);
-peek(it, s) = Some("foo")
+julia> peek(it, s)
+Some("foo")
 ```
 """
 peekiter(itr) = PeekIter(itr)
@@ -844,12 +841,12 @@ Like a non-materializing version of [`vec`](https://docs.julialang.org/en/stable
 
 ```jldoctest
 julia> m = collect(reshape(1:6, 2, 3))
-2×3 Array{Int64,2}:
+2×3 Matrix{Int64}:
  1  3  5
  2  4  6
 
 julia> collect(ivec(m))
-6-element Array{Int64,1}:
+6-element Vector{Int64}:
  1
  2
  3
@@ -881,10 +878,10 @@ element, and `false` after that, while the `x`s are elements from `iter`.
 
 ```jldoctest
 julia> collect(flagfirst(1:3))
-3-element Array{Tuple{Bool,Int64},1}:
- (true, 1)
- (false, 2)
- (false, 3)
+3-element Vector{Tuple{Bool, Int64}}:
+ (1, 1)
+ (0, 2)
+ (0, 3)
 ```
 """
 flagfirst(iter) = FlagFirst(iter)
@@ -917,7 +914,7 @@ predicate `cond` is true.
 
 ```jldoctest
 julia> collect(takewhile(x-> x^2 < 10, 1:100))
-3-element Array{Int64,1}:
+3-element Vector{Int64}:
  1
  2
  3
@@ -950,7 +947,7 @@ Iterate through the names and value of the properties of `x`.
 
 ```jldoctest
 julia> collect(properties(1 + 2im))
-2-element Array{Any,1}:
+2-element Vector{Any}:
  (:re, 1)
  (:im, 2)
 ```
@@ -982,12 +979,11 @@ Iterate through the values of the properties of `x`.
 
 ```jldoctest
 julia> collect(propertyvalues(1 + 2im))
-2-element Array{Any,1}:
+2-element Vector{Any}:
  1
  2
 ```
 """
-
 function propertyvalues(x::T) where T
     names = propertynames(x)
     return PropertyValues{T}(x, length(names), names)
@@ -1016,7 +1012,7 @@ Iterate through the values of the fields of `x`.
 
 ```jldoctest
 julia> collect(fieldvalues(1 + 2im))
-2-element Array{Any,1}:
+2-element Vector{Any}:
  1
  2
 ```
