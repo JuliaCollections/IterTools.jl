@@ -30,7 +30,8 @@ export
     takewhile,
     properties,
     propertyvalues,
-    fieldvalues
+    fieldvalues,
+    each
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -589,14 +590,14 @@ iterate(it::StaticSizeBinomial{0}, state=false) = state ? nothing : ((), true)
 pop(t::NTuple) = reverse(tail(reverse(t))), t[end]
 
 function advance(it::StaticSizeBinomial{K}, idx) where {K}
-	xs = it.xs
-	lidx, i = pop(idx)
+    xs = it.xs
+    lidx, i = pop(idx)
     i += 1
-	if i > length(xs) - K + length(idx)
-		lidx = advance(it, lidx)
-		i = lidx[end] + 1
-	end
-	return (lidx..., i)
+    if i > length(xs) - K + length(idx)
+        lidx = advance(it, lidx)
+        i = lidx[end] + 1
+    end
+    return (lidx..., i)
 end
 advance(it::StaticSizeBinomial, idx::NTuple{1}) = (idx[end]+1,)
 
@@ -1025,6 +1026,35 @@ function iterate(fs::FieldValues, state=1)
     state > length(fs) && return nothing
 
     return (getfield(fs.x, state), state + 1)
+end
+
+"""
+    each(ElementType::Type, collection)
+
+If `collection` can be `convert`ed into `ElementType`, it is converted and wrapped in a
+`Tuple{ElementType}`. Otherwise, the *elements* of `collection` are converted into
+`ElementType`.
+
+# Examples
+```jldoctest
+julia> println.(each(Tuple, [(1, 2), (3, 4)]));
+(1, 2)
+(3, 4)
+
+julia> println.(each(Tuple, (1, 2)));
+(1, 2)
+
+julia> println.(each(String, (1, 2)));
+ERROR: MethodError: Cannot `convert` an object of type Int64 to an object of type String
+[...]
+```
+"""
+function each(::Type{T},collection) where T
+    try
+        return (convert(T,collection),)
+    catch
+        return convert.(T,collection)
+    end
 end
 
 end # module IterTools
