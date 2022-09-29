@@ -551,7 +551,7 @@ include("testing_macros.jl")
             # test :scatter chunks
             @test test_chunks(; array_length=1, nchunks=1, chunk_type=:scatter, result=[1:1])
             @test test_chunks(; array_length=2, nchunks=1, chunk_type=:scatter, result=[1:2])
-            @test test_chunks(; array_length=2, nchunks=2, chunk_type=:scatter, result=[1:1, 2:2])
+            @test test_chunks(; array_length=2, nchunks=2, chunk_type=:scatter, result=[1:2:1, 2:2:2])
             @test test_chunks(; array_length=3, nchunks=2, chunk_type=:scatter, result=[1:2:3, 2:2:2])
             @test test_chunks(; array_length=7, nchunks=3, chunk_type=:scatter, result=[1:3:7, 2:3:5, 3:3:6])
             @test test_chunks(; array_length=12, nchunks=4, chunk_type=:scatter, result=[1:4:9, 2:4:10, 3:4:11, 4:4:12])
