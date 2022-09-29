@@ -8,7 +8,12 @@ end
 
 ## Installation
 
-Install this package with `Pkg.add("IterTools")`
+Install this package with 
+```julia-repl
+julia> import Pkg
+
+julia> Pkg.add("IterTools")
+```
 
 # Usage
 
