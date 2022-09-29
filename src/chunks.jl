@@ -58,11 +58,11 @@ The fine control of chunk size can provide important performance benefits:
 julia> Threads.nthreads()
 12
 
-julia> @btime sum_parallel(x -> log(x)^7, $x; nchunks=12)
+julia> @btime sum_parallel(x -> log(x)^7, \$x; nchunks=12)
   34.274 ms (77 allocations: 6.61 KiB)
 -4.981040495460925e10
 
-julia> @btime sum_parallel(x -> log(x)^7, $x; nchunks=128)
+julia> @btime sum_parallel(x -> log(x)^7, \$x; nchunks=128)
   21.568 ms (77 allocations: 7.52 KiB)
 -4.981040495462144e10
 ```
