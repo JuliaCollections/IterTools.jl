@@ -1,9 +1,9 @@
 """
 
-    chunks(array::AbstractArray, nchunks::Int, type::Symbol=:batch)
+    chunks(array::AbstractArray, nchunks::Int, chunk_type::Symbol=:batch)
 
 This function returns an iterable object that will split the *indices* of `array` into
-to `nchunks` chunks. `type` can be `:batch` or `:scatter`. It can be used to directly iterate
+to `nchunks` chunks. `chunk_type` can be `:batch` or `:scatter`. It can be used to directly iterate
 over the chunks of a collection in a multi-threaded manner.
 
 ## Eamples
@@ -80,10 +80,10 @@ struct Chunk{I,N,T}
 end
 
 # Constructor for the chunks
-function chunks(x::AbstractArray, nchunks::Int, type=:batch)
+function chunks(x::AbstractArray, nchunks::Int, chunk_type=:batch)
     nchunks >= 1 || throw(ArgumentError("nchunks must be >= 1"))
-    (type in chunks_types) || throw(ArgumentError("type must be one of $chunks_types"))
-    Chunk{typeof(x),nchunks,type}(x, nchunks)
+    (chunk_type in chunks_types) || throw(ArgumentError("chunk_type must be one of $chunks_types"))
+    Chunk{typeof(x),nchunks,chunk_type}(x, nchunks)
 end
 
 import Base: length, eltype
@@ -113,20 +113,20 @@ end
 # This is the lower level function that receives `ichunk` as a parameter
 #
 """
-    chunks(array::AbstractArray, ichunk::Int, nchunks::Int, type::Symbol=:batch)
+    chunks(array::AbstractArray, ichunk::Int, nchunks::Int, chunk_type::Symbol=:batch)
 
 Lower level function that returns a range of indexes of `array`, given the number of chunks in
 which the array is to be split, `nchunks`, and the current chunk number `ichunk`. 
 
 # Extended help
 
-If `type == :batch`, the ranges are consecutive. If `type == :scatter`, the range
+If `chunk_type == :batch`, the ranges are consecutive. If `chunk_type == :scatter`, the range
 is scattered over the array. 
 
 ## Example
 
 For example, if we have an array of 7 elements, and the work on the elements is divided
-into 3 chunks, we have (using the default `type = :batch` option):
+into 3 chunks, we have (using the default `chunk_type = :batch` option):
 
 ```julia-repl
 julia> using ChunkSplitters
@@ -143,7 +143,7 @@ julia> chunks(x, 3, 3)
 6:7
 ```
 
-And using `type = :scatter`, we have:
+And using `chunk_type = :scatter`, we have:
 
 ```julia-repl
 julia> chunks(x, 1, 3, :scatter)
@@ -156,9 +156,9 @@ julia> chunks(x, 3, 3, :scatter)
 3:3:6
 ```
 """
-function chunks(array::AbstractArray, ichunk::Int, nchunks::Int, type::Symbol=:batch)
+function chunks(array::AbstractArray, ichunk::Int, nchunks::Int, chunk_type::Symbol=:batch)
     ichunk <= nchunks || throw(ArgumentError("ichunk must be less or equal to nchunks"))
-    return _chunks(array, ichunk, nchunks, Val(type))
+    return _chunks(array, ichunk, nchunks, Val(chunk_type))
 end
 
 #

@@ -525,59 +525,59 @@ include("testing_macros.jl")
         end
 
         @testset "chunks" begin
-            function test_chunks(; array_length, nchunks, type, result, return_ranges=false)
-                ranges = collect(chunks(rand(Int, array_length), i, nchunks, type) for i in 1:nchunks)
+            function test_chunks(; array_length, nchunks, chunk_type, result, return_ranges=false)
+                ranges = collect(chunks(rand(Int, array_length), i, nchunks, chunk_type) for i in 1:nchunks)
                 if return_ranges
                     return ranges
                 else
                     all(ranges .== result)
                 end
             end
-            function sum_parallel(x, nchunks, type)
+            function sum_parallel(x, nchunks, chunk_type)
                 s = fill(zero(eltype(x)), nchunks)
-                Threads.@threads for (range, ichunk) in chunks(x, nchunks, type)
+                Threads.@threads for (range, ichunk) in chunks(x, nchunks, chunk_type)
                     for i in range
                         s[ichunk] += x[i]
                     end
                 end
                 return sum(s)
             end
-            function test_sum(; array_length, nchunks, type)
+            function test_sum(; array_length, nchunks, chunk_type)
                 x = rand(array_length)
-                return sum_parallel(x, nchunks, type) ≈ sum(x)
+                return sum_parallel(x, nchunks, chunk_type) ≈ sum(x)
             end
             # test :scatter chunks
-            @test test_chunks(; array_length=1, nchunks=1, type=:scatter, result=[1:1])
-            @test test_chunks(; array_length=2, nchunks=1, type=:scatter, result=[1:2])
-            @test test_chunks(; array_length=2, nchunks=2, type=:scatter, result=[1:1, 2:2])
-            @test test_chunks(; array_length=3, nchunks=2, type=:scatter, result=[1:2:3, 2:2:2])
-            @test test_chunks(; array_length=7, nchunks=3, type=:scatter, result=[1:3:7, 2:3:5, 3:3:6])
-            @test test_chunks(; array_length=12, nchunks=4, type=:scatter, result=[1:4:9, 2:4:10, 3:4:11, 4:4:12])
-            @test test_chunks(; array_length=15, nchunks=4, type=:scatter, result=[1:4:13, 2:4:14, 3:4:15, 4:4:12])
-            @test test_sum(; array_length=1, nchunks=1, type=:scatter)
-            @test test_sum(; array_length=2, nchunks=1, type=:scatter)
-            @test test_sum(; array_length=2, nchunks=2, type=:scatter)
-            @test test_sum(; array_length=3, nchunks=2, type=:scatter)
-            @test test_sum(; array_length=7, nchunks=3, type=:scatter)
-            @test test_sum(; array_length=12, nchunks=4, type=:scatter)
-            @test test_sum(; array_length=15, nchunks=4, type=:scatter)
-            @test test_sum(; array_length=117, nchunks=4, type=:scatter)
+            @test test_chunks(; array_length=1, nchunks=1, chunk_type=:scatter, result=[1:1])
+            @test test_chunks(; array_length=2, nchunks=1, chunk_type=:scatter, result=[1:2])
+            @test test_chunks(; array_length=2, nchunks=2, chunk_type=:scatter, result=[1:1, 2:2])
+            @test test_chunks(; array_length=3, nchunks=2, chunk_type=:scatter, result=[1:2:3, 2:2:2])
+            @test test_chunks(; array_length=7, nchunks=3, chunk_type=:scatter, result=[1:3:7, 2:3:5, 3:3:6])
+            @test test_chunks(; array_length=12, nchunks=4, chunk_type=:scatter, result=[1:4:9, 2:4:10, 3:4:11, 4:4:12])
+            @test test_chunks(; array_length=15, nchunks=4, chunk_type=:scatter, result=[1:4:13, 2:4:14, 3:4:15, 4:4:12])
+            @test test_sum(; array_length=1, nchunks=1, chunk_type=:scatter)
+            @test test_sum(; array_length=2, nchunks=1, chunk_type=:scatter)
+            @test test_sum(; array_length=2, nchunks=2, chunk_type=:scatter)
+            @test test_sum(; array_length=3, nchunks=2, chunk_type=:scatter)
+            @test test_sum(; array_length=7, nchunks=3, chunk_type=:scatter)
+            @test test_sum(; array_length=12, nchunks=4, chunk_type=:scatter)
+            @test test_sum(; array_length=15, nchunks=4, chunk_type=:scatter)
+            @test test_sum(; array_length=117, nchunks=4, chunk_type=:scatter)
             # test :batch chunks
-            @test test_chunks(; array_length=1, nchunks=1, type=:batch, result=[1:1])
-            @test test_chunks(; array_length=2, nchunks=1, type=:batch, result=[1:2])
-            @test test_chunks(; array_length=2, nchunks=2, type=:batch, result=[1:1, 2:2])
-            @test test_chunks(; array_length=3, nchunks=2, type=:batch, result=[1:2, 3:3])
-            @test test_chunks(; array_length=7, nchunks=3, type=:batch, result=[1:3, 4:5, 6:7])
-            @test test_chunks(; array_length=12, nchunks=4, type=:batch, result=[1:3, 4:6, 7:9, 10:12])
-            @test test_chunks(; array_length=15, nchunks=4, type=:batch, result=[1:4, 5:8, 9:12, 13:15])
-            @test test_sum(; array_length=1, nchunks=1, type=:batch)
-            @test test_sum(; array_length=2, nchunks=1, type=:batch)
-            @test test_sum(; array_length=2, nchunks=2, type=:batch)
-            @test test_sum(; array_length=3, nchunks=2, type=:batch)
-            @test test_sum(; array_length=7, nchunks=3, type=:batch)
-            @test test_sum(; array_length=12, nchunks=4, type=:batch)
-            @test test_sum(; array_length=15, nchunks=4, type=:batch)
-            @test test_sum(; array_length=117, nchunks=4, type=:batch)
+            @test test_chunks(; array_length=1, nchunks=1, chunk_type=:batch, result=[1:1])
+            @test test_chunks(; array_length=2, nchunks=1, chunk_type=:batch, result=[1:2])
+            @test test_chunks(; array_length=2, nchunks=2, chunk_type=:batch, result=[1:1, 2:2])
+            @test test_chunks(; array_length=3, nchunks=2, chunk_type=:batch, result=[1:2, 3:3])
+            @test test_chunks(; array_length=7, nchunks=3, chunk_type=:batch, result=[1:3, 4:5, 6:7])
+            @test test_chunks(; array_length=12, nchunks=4, chunk_type=:batch, result=[1:3, 4:6, 7:9, 10:12])
+            @test test_chunks(; array_length=15, nchunks=4, chunk_type=:batch, result=[1:4, 5:8, 9:12, 13:15])
+            @test test_sum(; array_length=1, nchunks=1, chunk_type=:batch)
+            @test test_sum(; array_length=2, nchunks=1, chunk_type=:batch)
+            @test test_sum(; array_length=2, nchunks=2, chunk_type=:batch)
+            @test test_sum(; array_length=3, nchunks=2, chunk_type=:batch)
+            @test test_sum(; array_length=7, nchunks=3, chunk_type=:batch)
+            @test test_sum(; array_length=12, nchunks=4, chunk_type=:batch)
+            @test test_sum(; array_length=15, nchunks=4, chunk_type=:batch)
+            @test test_sum(; array_length=117, nchunks=4, chunk_type=:batch)
         end
 
         @testset "traits overriding defaults" begin
