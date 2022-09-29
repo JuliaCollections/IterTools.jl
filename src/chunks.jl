@@ -88,7 +88,6 @@ end
 
 import Base: length, eltype
 length(::Chunk{I,N}) where {I,N} = N
-eltype(::Chunk) = UnitRange{Int}
 
 import Base: firstindex, lastindex, getindex
 firstindex(::Chunk) = 1

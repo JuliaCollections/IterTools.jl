@@ -580,6 +580,13 @@ include("testing_macros.jl")
             @test test_sum(; array_length=12, nchunks=4, chunk_type=:batch)
             @test test_sum(; array_length=15, nchunks=4, chunk_type=:batch)
             @test test_sum(; array_length=117, nchunks=4, chunk_type=:batch)
+            # collect
+            @test collect(chunks(1:7, 3, :batch)) == [(1:3,1), (4:5,2), (6:7,3)]
+            @test collect(chunks(1:7, 3, :scatter)) == [(1:3:7, 1), (2:3:5, 2), (3:3:6, 3)]
+            @test length(chunks(1:7,3)) == 3
+            @test firstindex(chunks(1:7,3)) == 1
+            @test lastindex(chunks(1:7,3)) == 3
+            @test getindex(chunks(1:7,3),2) == (4:5, 2)
         end
 
         @testset "traits overriding defaults" begin
