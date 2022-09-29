@@ -100,7 +100,7 @@ getindex(it::Chunk{I,N,T}, i::Int) where {I,N,T} = (chunks(it.x, i, it.nchunks, 
 #
 import Base: iterate
 function iterate(it::Chunk{I,N,T}, state=nothing) where {I,N,T}
-    if isnothing(state)
+    if state === nothing
         return ((chunks(it.x, 1, it.nchunks, T), 1), 1)
     elseif state < it.nchunks
         return ((chunks(it.x, state + 1, it.nchunks, T), state + 1), state + 1)
