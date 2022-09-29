@@ -109,6 +109,9 @@ function iterate(it::Chunk{I,N,T}, state=nothing) where {I,N,T}
     end
 end
 
+import Base: collect
+collect(it::Chunk{I,N,T}) where {I,N,T} = [ (chunks(it.x, i, it.nchunks, T), i) for i in 1:N ]
+
 #
 # This is the lower level function that receives `ichunk` as a parameter
 #
