@@ -30,7 +30,8 @@ export
     takewhile,
     properties,
     propertyvalues,
-    fieldvalues
+    fieldvalues,
+    chunks
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -1026,5 +1027,14 @@ function iterate(fs::FieldValues, state=1)
 
     return (getfield(fs.x, state), state + 1)
 end
+
+#
+# Chunk splitter. 
+#
+# The following iterator splits the indices of AbstractArrays such that ranges can
+# be iterated in chunks, in batchs or scattered along the indices. This function 
+# can be useful for distributing jobs in parallel threaded loops.
+#
+include("./chunks.jl")
 
 end # module IterTools
