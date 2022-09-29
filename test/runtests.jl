@@ -535,7 +535,9 @@ include("testing_macros.jl")
             end
             function sum_parallel(x, nchunks, chunk_type)
                 s = fill(zero(eltype(x)), nchunks)
-                Threads.@threads for (range, ichunk) in chunks(x, nchunks, chunk_type)
+                # Threading over the iterator fails in Julia 1.0
+                #Threads.@threads for (range, ichunk) in chunks(x, nchunks, chunk_type)
+                for (range, ichunk) in chunks(x, nchunks, chunk_type)
                     for i in range
                         s[ichunk] += x[i]
                     end
