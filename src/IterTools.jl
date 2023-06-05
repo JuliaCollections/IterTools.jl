@@ -1033,6 +1033,38 @@ function iterate(fs::FieldValues, state=1)
 
     return (getfield(fs.x, state), state + 1)
 end
+										
+mutable struct CachedIterator{IT, EL}
+    const it::IT
+    const cache::Vector{EL}
+    state
+    function CachedIterator(it::IT) where IT
+        EL = eltype(IT)
+        new{IT, EL}(it, Vector{EL}(), nothing)
+    end
+end
+Base.IteratorSize(::Type{CachedIterator{IT, EL}}) where {IT, EL} = Base.IteratorSize(IT)
+Base.IteratorEltype(::Type{CachedIterator{IT, EL}}) where {IT, EL} = Base.IteratorEltype(IT)
+Base.length(itr::CachedIterator) = length(itr.it)
+Base.size(itr::CachedIterator) = size(itr.it)
+Base.eltype(itr::CachedIterator{IT, EL}) where {IT, EL} = EL
+
+function Base.iterate(itr::CachedIterator, state=1)
+    if state > length(itr.cache)
+        if itr.state === nothing
+            x = iterate(itr.it)
+        else
+            x = iterate(itr.it, itr.state)
+        end
+        x === nothing && return nothing
+        v, s = x
+        push!(itr.cache, v)
+        itr.state = s
+        return v, state+1
+    else
+        return itr.cache[state], state+1
+    end
+end
 
 # InterleaveBy
 
