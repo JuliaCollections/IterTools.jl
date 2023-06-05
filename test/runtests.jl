@@ -536,6 +536,26 @@ include("testing_macros.jl")
         @test collect(itr_mixed) == [1, 2, 'a', 'b', 'c', 'd']
     end
 
+    @testset "CachedIterator" begin
+        invocations = 0
+        function f(x)
+            invocations += 1
+            return x
+        end
+        it = cache(1:10)
+        @test IteratorEltype(it) isa HasEltype
+        @test eltype(it) == Int
+        @test IteratorSize(it) isa HasShape
+        @test length(it) == 10
+        it = cache(Iterators.map(f, 1:10))
+        @test isempty(it.cache)
+        @test collect(it) == collect(1:10)
+        @test it.cache == collect(1:10)
+        @test invocations == 10
+        @test collect(it) == collect(1:10)
+        @test invocations == 10
+    end
+
     @testset "traits overriding defaults" begin
         iters = [
             firstrest(1:10),
