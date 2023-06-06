@@ -31,7 +31,7 @@ export
     properties,
     propertyvalues,
     fieldvalues,
-    interleaveby
+    interleaveby,
     cache
 
 function has_length(it)
