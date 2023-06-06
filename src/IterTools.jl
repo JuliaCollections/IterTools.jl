@@ -1170,9 +1170,9 @@ end
 struct ZipLongest{IS<:Tuple}
     is::IS
 end
-IteratorSize(::Type{ZipLongest{IS}}) where {IS<:Tuple} = Base.Iterators._zip_iterator_size(IS)
-IteratorEltype(::Type{ZipLongest{IS}}) where {IS<:Tuple} = Base.Iterators._zip_iterator_eltype(IS)
-eltype(::Type{ZipLongest{IS}}) where {IS<:Tuple} = Base.Iterators._zip_eltype(IS)
+IteratorSize(::Type{ZipLongest{Is}}) where {Is<:Tuple} = Base.Iterators.zip_iteratorsize(ntuple(n -> IteratorSize(fieldtype(Is, n)), Base.Iterators._counttuple(Is)::Int)...)
+IteratorEltype(::Type{ZipLongest{Is}}) where {Is<:Tuple} = Base.Iterators.zip_iteratoreltype(ntuple(n -> IteratorEltype(fieldtype(Is, n)), Base.Iterators._counttuple(Is)::Int)...)
+eltype(::Type{ZipLongest{Is}}) where {Is<:Tuple} = TupleOrBottom(map(eltype, fieldtypes(Is))...)
 length(it::ZipLongest) = maximum(length.(it.is))
 size(it::ZipLongest) = mapreduce(size, _zip_longest_promote_shape, it.is)
 axes(it::ZipLongest) = mapreduce(axes, _zip_longest_promote_shape, it.is)
@@ -1195,6 +1195,11 @@ function iterate(it::ZipLongest,state...)
     return (Tuple(outval), Tuple(outstate))
 end
 
+# Copied from julia 1.10
+function TupleOrBottom(tt...)
+    any(p -> p === Union{}, tt) && return Union{}
+    return Tuple{tt...}
+end
 
 _zip_longest_promote_shape((a,)::Tuple{OneTo}, (b,)::Tuple{OneTo}) = (union(a, b),)
 _zip_longest_promote_shape((m,)::Tuple{Integer},(n,)::Tuple{Integer}) = (max(m,n),)
