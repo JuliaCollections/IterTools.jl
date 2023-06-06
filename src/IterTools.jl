@@ -1151,13 +1151,13 @@ function Base.iterate(m::InterleaveBy, (vsa,vsb) = (iterate(m.a),iterate(m.b)))
     end
 end
 
-struct Padded{I}
+struct Padded{I, D}
     it::I
-    default
+    default::D
 end
-IteratorSize(::Type{Padded{I}}) where I = IteratorSize(I)
-IteratorEltype(::Type{Padded{I}}) where I = IteratorEltype(I)
-eltype(::Type{Padded{I}}) where I = eltype(I)
+IteratorSize(::Type{<:Padded{I}}) where I = IteratorSize(I)
+IteratorEltype(::Type{<:Padded{I}}) where I = IteratorEltype(I)
+eltype(::Type{Padded{I, D}}) where {I,D} = Union{eltype(I), D}
 length(i::Padded) = length(i.it)
 size(i::Padded,dim...) = size(i.it,dim...)
 axes(i::Padded,dim...) = axes(i.it,dim...)
