@@ -31,7 +31,8 @@ export
     properties,
     propertyvalues,
     fieldvalues,
-    interleaveby
+    interleaveby,
+    cache
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -1032,6 +1033,61 @@ function iterate(fs::FieldValues, state=1)
     state > length(fs) && return nothing
 
     return (getfield(fs.x, state), state + 1)
+end
+
+# CachedIterator
+
+mutable struct CachedIterator{IT, EL}
+    const it::IT
+    const cache::Vector{EL}
+    state
+end
+
+"""
+    cache(it)
+
+Cache the elements of an iterator so that subsequent iterations are served from the cache.
+
+```jldoctest
+julia> c = cache(Iterators.map(println, 1:3));
+
+julia> collect(c);
+1
+2
+3
+
+julia> collect(c);
+
+```
+Be aware that if iterating the original  has a side-effect it will not be repeated when iterating again,  -- indeed that is a key feature of the `CachedIterator`.
+Be aware also that if the original iterator is nondeterminatistic in its order, when iterating again from the cache it will infact be determinatistic and will be the same order as before -- this also is a feature.
+"""
+function cache(it::IT) where IT
+    EL = eltype(IT)
+    CachedIterator{IT, EL}(it, Vector{EL}(), nothing)
+end
+
+IteratorSize(::Type{CachedIterator{IT, EL}}) where {IT, EL} = IteratorSize(IT)
+IteratorEltype(::Type{CachedIterator{IT, EL}}) where {IT, EL} = IteratorEltype(IT)
+length(itr::CachedIterator) = length(itr.it)
+size(itr::CachedIterator) = size(itr.it)
+eltype(::Type{CachedIterator{IT, EL}}) where {IT, EL} = EL
+
+function iterate(itr::CachedIterator, state=1)
+    if state > length(itr.cache)
+        if itr.state === nothing
+            x = iterate(itr.it)
+        else
+            x = iterate(itr.it, itr.state)
+        end
+        x === nothing && return nothing
+        v, s = x
+        push!(itr.cache, v)
+        itr.state = s
+        return v, state+1
+    else
+        return itr.cache[state], state+1
+    end
 end
 
 # InterleaveBy
