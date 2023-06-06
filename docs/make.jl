@@ -4,8 +4,7 @@ makedocs(
     modules = [IterTools],
     sitename = "IterTools",
     pages = [
-        "Introduction" => "index.md",
-        "Function index" => "functionindex.md"
+        "Docs" => "index.md",
         ],
     doctest=false,
    )
