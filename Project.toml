@@ -3,10 +3,10 @@ uuid = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
 keywords = ["iterators", "itertools", "iteration"]
 license = "MIT"
 desc = "Common functional iterator patterns"
-version = "1.4.0"
+version = "1.5.0"
 
 [compat]
-julia = "0.7, 1.0"
+julia = "1.8"
 
 [extras]
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
