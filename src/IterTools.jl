@@ -1167,16 +1167,16 @@ function iterate(it::Padded_it,state...)
     return iterate(it.it,state...)
 end
 
-struct Zip_longest{IS<:Tuple}
+struct ZipLongest{IS<:Tuple}
     is::IS
 end
-IteratorSize(::Type{Zip_longest{IS}}) where {IS<:Tuple} = Base.Iterators._zip_iterator_size(IS)
-IteratorEltype(::Type{Zip_longest{IS}}) where {IS<:Tuple} = Base.Iterators._zip_iterator_eltype(IS)
-eltype(::Type{Zip_longest{IS}}) where {IS<:Tuple} = Base.Iterators._zip_eltype(IS)
-length(it::Zip_longest) = maximum(length.(it.is))
-size(it::Zip_longest) = mapreduce(size, _zip_longest_promote_shape, it.is)
-axes(it::Zip_longest) = mapreduce(axes, _zip_longest_promote_shape, it.is)
-function iterate(it::Zip_longest,state...)
+IteratorSize(::Type{ZipLongest{IS}}) where {IS<:Tuple} = Base.Iterators._zip_iterator_size(IS)
+IteratorEltype(::Type{ZipLongest{IS}}) where {IS<:Tuple} = Base.Iterators._zip_iterator_eltype(IS)
+eltype(::Type{ZipLongest{IS}}) where {IS<:Tuple} = Base.Iterators._zip_eltype(IS)
+length(it::ZipLongest) = maximum(length.(it.is))
+size(it::ZipLongest) = mapreduce(size, _zip_longest_promote_shape, it.is)
+axes(it::ZipLongest) = mapreduce(axes, _zip_longest_promote_shape, it.is)
+function iterate(it::ZipLongest,state...)
     cur = iterate.(it.is,state...)
     if all(isnothing.(cur))
         return nothing
@@ -1207,7 +1207,7 @@ contains the `i`th component of each input iterable if it is not finished, and `
 otherwise. `default` can be a scalar, or a tuple with one default per iterable.
 """
 function zip_longest(its...;default=nothing)
-    return Zip_longest(Tuple(Padded_it.(its,default)))
+    return ZipLongest(Tuple(Padded_it.(its,default)))
 end
 
 end # module IterTools
