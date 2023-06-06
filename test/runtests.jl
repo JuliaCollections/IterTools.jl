@@ -596,5 +596,21 @@ include("testing_macros.jl")
             @test IteratorSize(typeof(g)) == IteratorSize(typeof(iter))
         end
     end
+
+    @testset "zip_longest" begin
+        a = 1:5
+        b = 10:-1:8
+        it = zip_longest(a,b,default=-1)
+        @test collect(it) == [(1,10),(2,9),(3,8),(4,-1),(5,-1)]
+        @test eltype(it) == Tuple{Int, Int}
+
+        it_nothing = zip_longest(a,b)  # default is nothing
+        @test collect(it_nothing) == [(1,10),(2,9),(3,8),(4,nothing),(5,nothing)]
+        @test eltype(it_nothing) == Tuple{Union{Nothing, Int}, Union{Nothing, Int}}
+
+        it_mixed = zip_longest(a,b,default=(missing, ' '))
+        @test collect(it_mixed) == [(1,10),(2,9),(3,8),(4,' '),(5, ' ')]
+        @test eltype(it_mixed) == Tuple{Union{Missing, Int}, Union{Char, Int}}
+    end
 end
 end

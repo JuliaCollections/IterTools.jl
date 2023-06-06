@@ -8,6 +8,8 @@ import Base: IteratorSize, IteratorEltype
 import Base: SizeUnknown, IsInfinite, HasLength, HasShape
 import Base: HasEltype, EltypeUnknown
 
+import Base: OneTo
+
 export
     firstrest,
     takestrict,
@@ -32,7 +34,8 @@ export
     propertyvalues,
     fieldvalues,
     interleaveby,
-    cache
+    cache,
+    zip_longest
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -597,14 +600,14 @@ iterate(it::StaticSizeBinomial{0}, state=false) = state ? nothing : ((), true)
 pop(t::NTuple) = reverse(tail(reverse(t))), t[end]
 
 function advance(it::StaticSizeBinomial{K}, idx) where {K}
-	xs = it.xs
-	lidx, i = pop(idx)
+    xs = it.xs
+    lidx, i = pop(idx)
     i += 1
-	if i > length(xs) - K + length(idx)
-		lidx = advance(it, lidx)
-		i = lidx[end] + 1
-	end
-	return (lidx..., i)
+    if i > length(xs) - K + length(idx)
+        lidx = advance(it, lidx)
+        i = lidx[end] + 1
+    end
+    return (lidx..., i)
 end
 advance(it::StaticSizeBinomial, idx::NTuple{1}) = (idx[end]+1,)
 
@@ -1147,5 +1150,74 @@ function Base.iterate(m::InterleaveBy, (vsa,vsb) = (iterate(m.a),iterate(m.b)))
         return vsb[1], (vsa,iterate(m.b,vsb[2]))
     end
 end
+
+# Implementation detail of zip_longest
+# A bit of a hack to simplify reusing code from Base.
+# This always actually returns the same as `I` but holds on the default
+# and according to `eltype` might return it, but actually doesn't
+# the decision to return it is done in the code for ZipLongest
+struct _Padded{I, D}
+    it::I
+    default::D
+end
+IteratorSize(::Type{<:_Padded{I}}) where I = IteratorSize(I)
+IteratorEltype(::Type{<:_Padded{I}}) where I = IteratorEltype(I)
+eltype(::Type{_Padded{I, D}}) where {I,D} = Union{eltype(I), D}
+length(i::_Padded) = length(i.it)
+size(i::_Padded,dim...) = size(i.it,dim...)
+axes(i::_Padded,dim...) = axes(i.it,dim...)
+
+function iterate(it::_Padded,state...)
+    isnothing(state) && return nothing
+    ~isempty(state) && isnothing(last(state)) && return nothing
+    return iterate(it.it,state...)
+end
+
+struct ZipLongest{IS<:Tuple}
+    is::IS
+end
+IteratorSize(::Type{ZipLongest{Is}}) where {Is<:Tuple} = Base.Iterators.zip_iteratorsize(ntuple(n -> IteratorSize(fieldtype(Is, n)), Base.Iterators._counttuple(Is)::Int)...)
+IteratorEltype(::Type{ZipLongest{Is}}) where {Is<:Tuple} = Base.Iterators.zip_iteratoreltype(ntuple(n -> IteratorEltype(fieldtype(Is, n)), Base.Iterators._counttuple(Is)::Int)...)
+eltype(::Type{ZipLongest{Is}}) where {Is<:Tuple} = TupleOrBottom(map(eltype, fieldtypes(Is))...)
+length(it::ZipLongest) = maximum(length.(it.is))
+size(it::ZipLongest) = mapreduce(size, _zip_longest_promote_shape, it.is)
+axes(it::ZipLongest) = mapreduce(axes, _zip_longest_promote_shape, it.is)
+function iterate(it::ZipLongest,state...)
+    cur = iterate.(it.is,state...)
+    if all(isnothing.(cur))
+        return nothing
+    end
+    outval = Vector{Any}(nothing,length(cur))
+    outstate = Vector{Any}(nothing,length(cur))
+    for (i,c) in enumerate(cur)
+        if isnothing(c)
+            outval[i] = it.is[i].default
+            outstate[i] = nothing
+            continue
+        end
+        outval[i] = c[1]
+        outstate[i] = c[2]
+    end
+    return (Tuple(outval), Tuple(outstate))
+end
+
+# Copied from julia 1.10
+function TupleOrBottom(tt...)
+    any(p -> p === Union{}, tt) && return Union{}
+    return Tuple{tt...}
+end
+
+_zip_longest_promote_shape((a,)::Tuple{OneTo}, (b,)::Tuple{OneTo}) = (union(a, b),)
+_zip_longest_promote_shape((m,)::Tuple{Integer},(n,)::Tuple{Integer}) = (max(m,n),)
+_zip_longest_promote_shape(a, b) = promote_shape(a, b)
+
+"""
+    zip_longest(iters...; default=nothing)
+
+For one or more iterable objects, return an iterable of tuples, where the `i`th tuple
+contains the `i`th component of each input iterable if it is not finished, and `default`
+otherwise. `default` can be a scalar, or a tuple with one default per iterable.
+"""
+zip_longest(its...; default=nothing) = ZipLongest(Tuple(_Padded.(its, default)))
 
 end # module IterTools
