@@ -1151,17 +1151,23 @@ function Base.iterate(m::InterleaveBy, (vsa,vsb) = (iterate(m.a),iterate(m.b)))
     end
 end
 
-struct Padded{I, D}
+# Implementation detail of zip_longest
+# A bit of a hack to simplify reusing code from Base.
+# This always actually returns the same as `I` but holds on the default
+# and according to `eltype` might return it, but actually doesn't
+# the decision to return it is done in the code for ZipLongest
+struct _Padded{I, D}
     it::I
     default::D
 end
-IteratorSize(::Type{<:Padded{I}}) where I = IteratorSize(I)
-IteratorEltype(::Type{<:Padded{I}}) where I = IteratorEltype(I)
-eltype(::Type{Padded{I, D}}) where {I,D} = Union{eltype(I), D}
-length(i::Padded) = length(i.it)
-size(i::Padded,dim...) = size(i.it,dim...)
-axes(i::Padded,dim...) = axes(i.it,dim...)
-function iterate(it::Padded,state...)
+IteratorSize(::Type{<:_Padded{I}}) where I = IteratorSize(I)
+IteratorEltype(::Type{<:_Padded{I}}) where I = IteratorEltype(I)
+eltype(::Type{_Padded{I, D}}) where {I,D} = Union{eltype(I), D}
+length(i::_Padded) = length(i.it)
+size(i::_Padded,dim...) = size(i.it,dim...)
+axes(i::_Padded,dim...) = axes(i.it,dim...)
+
+function iterate(it::_Padded,state...)
     isnothing(state) && return nothing
     ~isempty(state) && isnothing(last(state)) && return nothing
     return iterate(it.it,state...)
@@ -1212,6 +1218,6 @@ For one or more iterable objects, return an iterable of tuples, where the `i`th 
 contains the `i`th component of each input iterable if it is not finished, and `default`
 otherwise. `default` can be a scalar, or a tuple with one default per iterable.
 """
-zip_longest(its...; default=nothing) = ZipLongest(Tuple(Padded.(its, default)))
+zip_longest(its...; default=nothing) = ZipLongest(Tuple(_Padded.(its, default)))
 
 end # module IterTools
