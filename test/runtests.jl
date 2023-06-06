@@ -524,11 +524,16 @@ include("testing_macros.jl")
         @test collect(fv3) == Any[]
     end
 
-    @testset "merge" begin
-        itr = interleaveby(1:2:5,2:2:6, <=, identity, x->-x)
+    @testset "interleaveby" begin
+        itr = interleaveby(1:2:5,2:2:6)
         @test IteratorSize(itr) isa HasLength
         @test length(itr) == 6
-        @test collect(itr) == [1,-2,3,-4,5,-6]
+        @test collect(itr) == [1,2,3,4,5,6]
+        @test eltype(itr) == Int
+
+        itr_mixed = interleaveby(Returns(true), [1, 2], ['a', 'b', 'c', 'd'])
+        @test eltype(itr_mixed) == Union{Int, Char}
+        @test collect(itr_mixed) == [1, 2, 'a', 'b', 'c', 'd']
     end
 
     @testset "traits overriding defaults" begin
