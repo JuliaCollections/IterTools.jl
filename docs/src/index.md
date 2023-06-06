@@ -172,10 +172,10 @@ Like `(getfield(x, i) for i in 1:nfields(x))` but faster.
 fieldvalues
 ```
 
-## imerge(a,b, predicate = <=, fa = identity, fb = identity)
+## interleaveby(a,b, predicate = <=, fa = identity, fb = identity)
 
 Iterate over the union of `a` and `b`, merge-sort style.
 
 ```@docs
-imerge
+interleaveby
 ```

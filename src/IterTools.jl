@@ -31,7 +31,7 @@ export
     properties,
     propertyvalues,
     fieldvalues,
-    imerge
+    interleaveby
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -1028,10 +1028,10 @@ function iterate(fs::FieldValues, state=1)
     return (getfield(fs.x, state), state + 1)
 end
 
-# IMerge
+# InterleaveBy
 
 """
-    imerge(a,b, predicate = <=, fa = identity, fb = identity)
+    interleaveby(a,b, predicate = <=, fa = identity, fb = identity)
 
 Iterate over the union of `a` and `b`, merge-sort style.
 
@@ -1041,7 +1041,7 @@ Input:
  - `fa(ak)`, `fb(bk)`: Functions to apply to the picked elements
 
 ```jldoctest
-julia> collect(imerge(1:2:5, 2:2:6, <=, identity, x->-x))
+julia> collect(interleaveby(1:2:5, 2:2:6, <=, identity, x->-x))
 6-element Vector{Int64}:
   1
  -2
@@ -1051,9 +1051,9 @@ julia> collect(imerge(1:2:5, 2:2:6, <=, identity, x->-x))
  -6
 ```
 """
-imerge(a,b, p = <=, fa = identity, fb = identity) = IMerge(a,b,p,fa,fb)
+interleaveby(a,b, p = <=, fa = identity, fb = identity) = InterleaveBy(a,b,p,fa,fb)
 
-struct IMerge{A,B,P,FA,FB}
+struct InterleaveBy{A,B,P,FA,FB}
     a::A
     b::B
     predicate::P
@@ -1061,11 +1061,11 @@ struct IMerge{A,B,P,FA,FB}
     fb::FB
 end
 
-Base.IteratorSize(::Type{<:IMerge{A,B}}) where {A,B} = longest(Base.IteratorSize.((A,B))...)
-Base.length(m::IMerge) = length(m.a) + length(m.b)
-Base.IteratorEltype(::Type{<:IMerge}) = Base.EltypeUnknown()
+Base.IteratorSize(::Type{<:InterleaveBy{A,B}}) where {A,B} = longest(Base.IteratorSize.((A,B))...)
+Base.length(m::InterleaveBy) = length(m.a) + length(m.b)
+Base.IteratorEltype(::Type{<:InterleaveBy}) = Base.EltypeUnknown()
 
-function Base.iterate(m::IMerge, (vsa,vsb) = (iterate(m.a),iterate(m.b)))
+function Base.iterate(m::InterleaveBy, (vsa,vsb) = (iterate(m.a),iterate(m.b)))
     if isnothing(vsa) && isnothing(vsb)
         return nothing
     end
