@@ -537,16 +537,21 @@ include("testing_macros.jl")
     end
 
     @testset "CachedIterator" begin
-        invocations = 0
-        function f(x)
-            invocations += 1
-            return x
-        end
+        # Check basic behavour
         it = cache(1:10)
         @test IteratorEltype(it) isa HasEltype
         @test eltype(it) == Int
         @test IteratorSize(it) isa HasShape
         @test length(it) == 10
+        @test collect(it) == 1:10
+        @test collect(it) == 1:10
+
+        # Check actually not invoking multiple times
+        invocations = 0
+        function f(x)
+            invocations += 1
+            return x
+        end
         it = cache(Iterators.map(f, 1:10))
         @test isempty(it.cache)
         @test collect(it) == collect(1:10)
@@ -554,6 +559,11 @@ include("testing_macros.jl")
         @test invocations == 10
         @test collect(it) == collect(1:10)
         @test invocations == 10
+
+        # Check works with more complex iterators
+        it = cache(Iterators.zip(1:4, "abcd"))
+        @test collect(it) == [(1, 'a'), (2, 'b'), (3, 'c'), (4, 'd')]
+        @test collect(it) == [(1, 'a'), (2, 'b'), (3, 'c'), (4, 'd')]
     end
 
     @testset "traits overriding defaults" begin
