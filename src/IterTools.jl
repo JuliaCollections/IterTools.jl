@@ -30,7 +30,8 @@ export
     takewhile,
     properties,
     propertyvalues,
-    fieldvalues
+    fieldvalues,
+    interleaveby
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -63,6 +64,12 @@ shortest(::IsInfinite, ::HasLength) = HasLength()
 shortest(::SizeUnknown, ::HasShape) = SizeUnknown()
 shortest(::SizeUnknown, ::HasLength) = SizeUnknown()
 shortest(::SizeUnknown, ::IsInfinite) = SizeUnknown()
+
+# returns the least-known eltype
+least_known(::HasEltype, ::HasEltype) = HasEltype()
+least_known(::EltypeUnknown, ::HasEltype) = EltypeUnknown()
+least_known(::HasEltype, ::EltypeUnknown) = EltypeUnknown()
+least_known(::EltypeUnknown, ::EltypeUnknown) = EltypeUnknown()
 
 """
     IterTools.@ifsomething expr
@@ -1025,6 +1032,64 @@ function iterate(fs::FieldValues, state=1)
     state > length(fs) && return nothing
 
     return (getfield(fs.x, state), state + 1)
+end
+
+# InterleaveBy
+
+"""
+    interleaveby(predicate=Base.isless, a, b)
+
+Iterate over the an interleaving of `a` and `b` selected by the predicate (default less-than).
+
+Input:
+ - `predicate(ak,bk) -> Bool`:
+    Whether to pick the next element of `a` (true) or `b` (false).
+ - `fa(ak)`, `fb(bk)`: Functions to apply to the picked elements
+
+```jldoctest
+julia> collect(interleaveby(1:2:5, 2:2:6))
+6-element Vector{Int64}:
+  1
+  2
+  3
+  4
+  5
+  6
+```
+
+If the predicate is `Base.isless` (the default) and both inputs are sorted, this produces the sorted output.
+If the predicate is a stateful functor that alternates true-false-true-false... then this produces the classic interleave operation as described e.g. in the definition of microkanren.
+"""
+function interleaveby end
+interleaveby(a, b) = interleaveby(Base.isless, a, b)
+interleaveby(p, a, b) = InterleaveBy(p, a, b)
+
+struct InterleaveBy{A,B,P}
+    predicate::P
+    a::A
+    b::B
+end
+
+Base.IteratorSize(::Type{<:InterleaveBy{A,B}}) where {A,B} = longest(IteratorSize(A), IteratorSize(B))
+Base.length(m::InterleaveBy) = length(m.a) + length(m.b)
+Base.IteratorEltype(::Type{<:InterleaveBy{A,B}}) where {A,B} = least_known(IteratorEltype(A), IteratorEltype(B))
+Base.eltype(::Type{<:InterleaveBy{A,B}}) where {A,B} = Union{eltype(A), eltype(B)}
+
+function Base.iterate(m::InterleaveBy, (vsa,vsb) = (iterate(m.a),iterate(m.b)))
+    if isnothing(vsa) && isnothing(vsb)
+        return nothing
+    end
+    if isnothing(vsb)
+        return vsa[1], (iterate(m.a,vsa[2]),vsb)
+    end
+    if isnothing(vsa)
+        return vsb[1], (vsa,iterate(m.b,vsb[2]))
+    end
+    if m.predicate(vsa[1],vsb[1])
+        return vsa[1], (iterate(m.a,vsa[2]),vsb)
+    else
+        return vsb[1], (vsa,iterate(m.b,vsb[2]))
+    end
 end
 
 end # module IterTools
