@@ -1201,13 +1201,12 @@ _zip_longest_promote_shape((m,)::Tuple{Integer},(n,)::Tuple{Integer}) = (max(m,n
 _zip_longest_promote_shape(a, b) = promote_shape(a, b)
 
 """
-`zip_longest(iters...; default=nothing)`
+    zip_longest(iters...; default=nothing)
+
 For one or more iterable objects, return an iterable of tuples, where the `i`th tuple
 contains the `i`th component of each input iterable if it is not finished, and `default`
 otherwise. `default` can be a scalar, or a tuple with one default per iterable.
 """
-function zip_longest(its...;default=nothing)
-    return ZipLongest(Tuple(Padded.(its,default)))
-end
+zip_longest(its...; default=nothing) = ZipLongest(Tuple(Padded.(its, default)))
 
 end # module IterTools
