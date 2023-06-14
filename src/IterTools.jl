@@ -265,14 +265,13 @@ end
 #   partition(count(1), 2, 1) = (1,2), (2,3), (3,4) ...
 #   partition(count(1), 2, 3) = (1,2), (4,5), (7,8) ...
 
-struct Partition{I, N}
+struct Partition{I, N, K}
     xs::I
-    step::Int
 end
 _length_partition(l, n, s) = ifelse(l - n ≥ 0, ((l - n) ÷ s) + 1, 0)
-eltype(::Type{Partition{I, N}}) where {I, N} = NTuple{N, eltype(I)}
-length(it::Partition{I, N}) where {I, N} = _length_partition(length(it.xs), N, it.step)
-IteratorSize(::Type{Partition{I, N}}) where {I, N} = longest(HasLength(), IteratorSize(I))
+eltype(::Type{Partition{I, N, K}}) where {I, N, K} = NTuple{N, eltype(I)}
+length(it::Partition{I, N, K}) where {I, N, K} = _length_partition(length(it.xs), N, K)
+IteratorSize(::Type{Partition{I, N, K}}) where {I, N, K} = longest(HasLength(), IteratorSize(I))
 
 """
     partition(xs, n, [step])
@@ -320,47 +319,40 @@ i = (7, 8)
     if step < 1
         throw(ArgumentError("Partition step must be at least 1."))
     end
-
     if n < 1
-        throw(ArgumentError("Partition size n must be at least 1"))
+        throw(ArgumentError("Partition size n must be at least 1."))
     end
 
-    Partition{I, n}(xs, step)
+    Partition{I, n, step}(xs)
 end
 
-function iterate(it::Partition{I, N}, state=nothing) where {I, N}
-    if state === nothing
-        result = Vector{eltype(I)}(undef, N)
+function iterate(it::Partition{I, N, K}) where {I, N, K}
+    result = Vector{eltype(I)}(undef, N)
 
-        result[1], xs_state = @ifsomething iterate(it.xs)
+    result[1], xs_state = @ifsomething iterate(it.xs)
 
-        for i in 2:N
-            result[i], xs_state = @ifsomething iterate(it.xs, xs_state)
+    for i in 2:N
+        result[i], xs_state = @ifsomething iterate(it.xs, xs_state)
+    end
+    els = NTuple{N}(result)
+    els, (els[K+1:end], xs_state)
+end
+
+@generated function iterate(it::Partition{I, N, K}, (els, xs_state)) where {I, N, K}
+    res = Expr(:block)
+    tup = Expr(:tuple, :(els...))
+    for i in 1:K
+        var = gensym()
+        push!(res.args, :(($var, xs_state) = @ifsomething iterate(it.xs, xs_state)))
+        if i > K-N
+            push!(tup.args, var)
         end
-    else
-        (xs_state, result) = state
-        result[end], xs_state = @ifsomething iterate(it.xs, xs_state)
     end
-
-    p = similar(result)
-    overlap = max(0, N - it.step)
-    p[1:overlap] .= result[it.step .+ (1:overlap)]
-
-    # when step > n, skip over some elements
-    for i in 1:max(0, it.step - N)
-        xs_iter = iterate(it.xs, xs_state)
-        xs_iter === nothing && break
-        _, xs_state = xs_iter
+    quote
+        $res
+        newels = $tup
+        (newels, (newels[$K+1:end], xs_state))
     end
-
-    for i in (overlap + 1):(N - 1)
-        xs_iter = iterate(it.xs, xs_state)
-        xs_iter === nothing && break
-
-        p[i], xs_state = xs_iter
-    end
-
-    return (tuple(result...)::eltype(Partition{I, N}), (xs_state, p))
 end
 
 
