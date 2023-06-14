@@ -326,16 +326,22 @@ i = (7, 8)
     Partition{I, n, step}(xs)
 end
 
-function iterate(it::Partition{I, N, K}) where {I, N, K}
-    result = Vector{eltype(I)}(undef, N)
-
-    result[1], xs_state = @ifsomething iterate(it.xs)
-
+@generated function iterate(it::Partition{I, N, K}) where {I, N, K}
+    res = Expr(:block)
+    tup = Expr(:tuple)
+    var = gensym()
+    push!(res.args, :(($var, xs_state) = @ifsomething iterate(it.xs)))
+    push!(tup.args, var)
     for i in 2:N
-        result[i], xs_state = @ifsomething iterate(it.xs, xs_state)
+        var = gensym()
+        push!(res.args, :(($var, xs_state) = @ifsomething iterate(it.xs, xs_state)))
+        push!(tup.args, var)
     end
-    els = NTuple{N}(result)
-    els, (els[K+1:end], xs_state)
+    quote
+        $res
+        newels = $tup
+        (newels, (newels[$K+1:end], xs_state))
+    end
 end
 
 @generated function iterate(it::Partition{I, N, K}, (els, xs_state)) where {I, N, K}
