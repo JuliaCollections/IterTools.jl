@@ -10,7 +10,7 @@ end
 
 Install this package with `Pkg.add("IterTools")`
 
-# Usage
-```@autodocs
+## Index
+```@index
 Modules = [IterTools]
 ```
