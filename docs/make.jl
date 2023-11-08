@@ -1,12 +1,13 @@
 using Documenter, IterTools
 
+DocMeta.setdocmeta!(IterTools, :DocTestSetup, :(using IterTools))
 makedocs(
     modules = [IterTools],
     sitename = "IterTools",
     pages = [
         "Docs" => "index.md",
         ],
-    doctest=false,
+    doctest=true,
    )
 
 deploydocs(
