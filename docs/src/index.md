@@ -1,9 +1,3 @@
-```@meta
-DocTestSetup = quote
-    using IterTools
-end
-```
-
 # IterTools
 
 ## Installation
