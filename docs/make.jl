@@ -5,7 +5,8 @@ makedocs(
     modules = [IterTools],
     sitename = "IterTools",
     pages = [
-        "Docs" => "index.md",
+        "Home" => "index.md",
+        "API Reference" => "reference.md"
         ],
     doctest=true,
    )
