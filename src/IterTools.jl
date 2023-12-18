@@ -548,7 +548,7 @@ IteratorEltype(::Type{Binomial{C}}) where {C} = IteratorEltype(C)
 
 subsets(xs, k) = Binomial(xs, length(xs), k)
 
-mutable struct BinomialIterState
+struct BinomialIterState
     idx::Vector{Int64}
     done::Bool
 end
@@ -573,9 +573,7 @@ function iterate(it::Binomial, state=BinomialIterState(collect(Int64, 1:it.k), i
         end
     end
 
-    state.done = i == 0
-
-    return set, state
+    return set, BinomialIterState(idx, i == 0)
 end
 
 
