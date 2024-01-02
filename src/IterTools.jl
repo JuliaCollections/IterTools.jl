@@ -593,7 +593,7 @@ subsets(xs::C, ::Val{K}) where {K, C} = StaticSizeBinomial{K, C}(xs)
 iterate(it::StaticSizeBinomial{0}, state=false) = state ? nothing : ((), true)
 
 # Generic case K >= 1
-pop(t::NTuple) = reverse(tail(reverse(t))), t[end]
+pop(t::NTuple) = Base.front(t), last(t)
 
 function advance(it::StaticSizeBinomial{K}, idx) where {K}
     xs = it.xs
