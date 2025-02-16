@@ -1058,8 +1058,13 @@ julia> collect(c);
 julia> collect(c);
 
 ```
-Be aware that if iterating the original  has a side-effect it will not be repeated when iterating again,  -- indeed that is a key feature of the `CachedIterator`.
-Be aware also that if the original iterator is nondeterminatistic in its order, when iterating again from the cache it will infact be determinatistic and will be the same order as before -- this also is a feature.
+If the original iterator has side effects, these side effects will not occur
+again when you iterate over the cached version. This is a key feature of the
+`CachedIterator.`
+
+If the original iterator produces elements in a nondeterministic order, the
+cached version will produce elements in a deterministic order, matching the
+order of the first iteration. This is also a feature of the `CachedIterator`.
 """
 function cache(it::IT) where IT
     EL = eltype(IT)
