@@ -259,7 +259,7 @@ function iterate(it::Distinct, state=(1,))
 end
 
 
-# Group output from at iterator into tuples.
+# Group output from an iterator into tuples.
 # E.g.,
 #   partition(count(1), 2) = (1,2), (3,4), (5,6) ...
 #   partition(count(1), 2, 1) = (1,2), (2,3), (3,4) ...
