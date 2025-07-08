@@ -35,7 +35,8 @@ export
     fieldvalues,
     interleaveby,
     cache,
-    zip_longest
+    zip_longest,
+    sliding_window_maxima
 
 function has_length(it)
     it_size = IteratorSize(it)
@@ -1234,5 +1235,146 @@ t = ('e', 'x')
 ```
 """
 zip_longest(its...; default=nothing) = ZipLongest(Tuple(_Padded.(its, default)))
+
+module ValidatedPositiveInt
+    export validated_positive_int
+    @noinline function throw_err_not_positive()
+        throw(ArgumentError("not positive"))
+    end
+    Base.@constprop :aggressive function validated_positive_int(m::Int)
+        if m < 1
+            @noinline throw_err_not_positive()
+        end
+        m
+    end
+end
+
+module SlidingWindowMaximumIterators
+    export SlidingWindowMaximumIterator
+    using ..ValidatedPositiveInt
+    struct SlidingWindowMaximumIterator{WindowSize, Iterator, Ord <: Base.Order.Ordering}
+        iterator::Iterator
+        order::Ord
+        Base.@constprop :aggressive function SlidingWindowMaximumIterator{WindowSize}(iterator, order::Base.Order.Ordering) where {WindowSize}
+            s = validated_positive_int(WindowSize)
+            new{s, typeof(iterator), typeof(order)}(iterator, order)
+        end
+    end
+    function Base.IteratorSize(::Type{<:SlidingWindowMaximumIterator})
+        Base.SizeUnknown()
+    end
+    function Base.IteratorEltype(::Type{<:SlidingWindowMaximumIterator{<:Any, Iterator}}) where {Iterator}
+        Base.IteratorEltype(Iterator)
+    end
+    function Base.eltype(::Type{<:SlidingWindowMaximumIterator{<:Any, Iterator}}) where {Iterator}
+        eltype(Iterator)
+    end
+    Base.@constprop :aggressive function get_window_size(::SlidingWindowMaximumIterator{WindowSize}) where {WindowSize}
+        validated_positive_int(WindowSize)
+    end
+    # `window_queue` is logically a double-ended queue data structure: only mutating it
+    # with `pop!`, `popfirst` and `push!`.
+    Base.@assume_effects :terminates_locally function _iterate(iterator::SlidingWindowMaximumIterator, state::Tuple{Any})
+        (window_queue, counter, inner_iterator_state_initial) = state[1]
+        counter = counter::Int
+        iter = iterate(iterator.iterator, inner_iterator_state_initial)
+        if iter === nothing
+            return iter
+        end
+        (elem, inner_iterator_state) = iter
+        order = iterator.order
+        while (!isempty(window_queue)) && Base.Order.lt(order, window_queue[end][1], elem)
+            pop!(window_queue)
+        end
+        if (!isempty(window_queue)) && (get_window_size(iterator) ≤ counter - window_queue[1][2]::Int)
+            popfirst!(window_queue)
+        end
+        push!(window_queue, (elem, counter))
+        next_state = (window_queue, counter + 1, inner_iterator_state)
+        (window_queue[1][1], (next_state,))
+    end
+    Base.@assume_effects :terminates_locally function _iterate(iterator::SlidingWindowMaximumIterator, ::Tuple{})
+        inner_iterator = iterator.iterator
+        iter_initial = iterate(inner_iterator)
+        if iter_initial === nothing
+            return iter_initial
+        end
+        (elem_initial, inner_iterator_state) = iter_initial
+        window_size = get_window_size(iterator)
+        counter = 0
+        window_queue = [(elem_initial, counter)]
+        order = iterator.order
+        for _ ∈ 2:window_size
+            iter = iterate(inner_iterator, inner_iterator_state)
+            if iter === nothing
+                return iter
+            end
+            (elem, inner_iterator_state) = iter
+            while (!isempty(window_queue)) && Base.Order.lt(order, window_queue[end][1], elem)
+                pop!(window_queue)
+            end
+            counter = counter + 1
+            push!(window_queue, (elem, counter))
+        end
+        state = (window_queue, counter + 1, inner_iterator_state)
+        (window_queue[1][1], (state,))
+    end
+    function Base.iterate(iterator::SlidingWindowMaximumIterator, state = ())
+        _iterate(iterator, state)
+    end
+end
+
+"""
+    sliding_window_maxima(window_size, iterator, [order::Base.Order.Ordering])
+
+An iterator. Each element is the maximum of a sliding window of size `window_size`, with
+the original elements being taken from the other iterator, `iterator`.
+
+```jldoctest
+julia> v = rand(Float32, 5)
+5-element Vector{Float32}:
+ 0.17564094
+ 0.73419166
+ 0.7873744
+ 0.4568473
+ 0.9182026
+
+julia> collect(sliding_window_maxima(1, v)) == v
+true
+
+julia> collect(sliding_window_maxima(2, v))
+4-element Vector{Float32}:
+ 0.73419166
+ 0.7873744
+ 0.7873744
+ 0.9182026
+
+julia> collect(sliding_window_maxima(3, v))
+3-element Vector{Float32}:
+ 0.7873744
+ 0.7873744
+ 0.9182026
+```
+
+The optional argument `order` determines how the maximum is computed.
+
+```jldoctest
+julia> collect(sliding_window_maxima(3, 1:5))
+3-element Vector{Int64}:
+ 3
+ 4
+ 5
+
+julia> collect(sliding_window_maxima(3, 1:5, Base.Order.Reverse))
+3-element Vector{Int64}:
+ 1
+ 2
+ 3
+```
+"""
+Base.@constprop :aggressive function sliding_window_maxima(window_size::Integer, iterator, order::Base.Order.Ordering = Base.Order.Forward)
+    s = Int(window_size)
+    SlidingWindowMaximumIterators.SlidingWindowMaximumIterator{s}(iterator, order)
+end
 
 end # module IterTools

@@ -612,5 +612,17 @@ include("testing_macros.jl")
         @test collect(it_mixed) == [(1,10),(2,9),(3,8),(4,' '),(5, ' ')]
         @test eltype(it_mixed) == Tuple{Union{Missing, Int}, Union{Char, Int}}
     end
+
+    @testset "sliding_window_maxima" begin
+        function inferrable_due_to_constprop(iterator)
+            sliding_window_maxima(2, iterator)
+        end
+        vec = Float32[1, 2, 3, 3, 4, 5, 4]
+        iter = @inferred inferrable_due_to_constprop(vec)
+        @test (@inferred collect(iter)) isa Vector{Float32}
+        @test collect(sliding_window_maxima(1, vec))::Vector{Float32} == vec
+        @test collect(sliding_window_maxima(2, vec))::Vector{Float32} == [2, 3, 3, 4, 5, 5]
+        @test collect(sliding_window_maxima(3, vec))::Vector{Float32} == [3, 3, 4, 5, 5]
+    end
 end
 end
