@@ -1331,29 +1331,29 @@ An iterator. Each element is the maximum of a sliding window of size `window_siz
 the original elements being taken from the other iterator, `iterator`.
 
 ```jldoctest
-julia> v = rand(Float32, 5)
+julia> v = Float32[1, 7, 7, 4, 9]
 5-element Vector{Float32}:
- 0.17564094
- 0.73419166
- 0.7873744
- 0.4568473
- 0.9182026
+ 1.0
+ 7.0
+ 7.0
+ 4.0
+ 9.0
 
 julia> collect(sliding_window_maxima(1, v)) == v
 true
 
 julia> collect(sliding_window_maxima(2, v))
 4-element Vector{Float32}:
- 0.73419166
- 0.7873744
- 0.7873744
- 0.9182026
+ 7.0
+ 7.0
+ 7.0
+ 9.0
 
 julia> collect(sliding_window_maxima(3, v))
 3-element Vector{Float32}:
- 0.7873744
- 0.7873744
- 0.9182026
+ 7.0
+ 7.0
+ 9.0
 ```
 
 The optional argument `order` determines how the maximum is computed.
