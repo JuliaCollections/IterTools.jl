@@ -625,6 +625,7 @@ include("testing_macros.jl")
         @test collect(sliding_window_maxima(3, vec))::Vector{Float32} == [3, 3, 4, 5, 5]
         @test collect(sliding_window_maxima(3, vec, Base.Order.Reverse))::Vector{Float32} == [1, 2, 3, 3, 4]
         @test collect(sliding_window_maxima(100, vec))::Vector{Float32} == []
+        @test collect(sliding_window_maxima(1, Float32[]))::Vector{Float32} == []
         @test_throws ArgumentError sliding_window_maxima(-1, vec)
     end
 end
