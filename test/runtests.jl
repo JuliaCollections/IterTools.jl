@@ -623,7 +623,7 @@ include("testing_macros.jl")
         @test collect(sliding_window_maxima(1, vec))::Vector{Float32} == vec
         @test collect(sliding_window_maxima(2, vec))::Vector{Float32} == [2, 3, 3, 4, 5, 5]
         @test collect(sliding_window_maxima(3, vec))::Vector{Float32} == [3, 3, 4, 5, 5]
-        @test collect(sliding_window_maxima(3, vec, Base.Order.Reverse))::Vector{Float32} == [1, 2, 3, 3, 3]
+        @test collect(sliding_window_maxima(3, vec, Base.Order.Reverse))::Vector{Float32} == [1, 2, 3, 3, 4]
     end
 end
 end
