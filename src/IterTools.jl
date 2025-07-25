@@ -1325,7 +1325,7 @@ module SlidingWindowMaximumIterators
 end
 
 """
-    sliding_window_maxima(window_size, iterator, [order::Base.Order.Ordering])
+    sliding_window_maxima(window_size::Integer, iterator, [order::Base.Order.Ordering])
 
 An iterator. Each element is the maximum of a sliding window of size `window_size`, with
 the original elements being taken from the other iterator, `iterator`.
