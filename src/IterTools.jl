@@ -1274,7 +1274,7 @@ module SlidingWindowMaximumIterators
     end
     # `window_queue` is logically a double-ended queue data structure: only mutating it
     # with `pop!`, `popfirst` and `push!`.
-    Base.@assume_effects :terminates_locally function _iterate(iterator::SlidingWindowMaximumIterator, state::Tuple{Any})
+    Base.@assume_effects :terminates_locally function _iterate(iterator::SlidingWindowMaximumIterator, state::Tuple{Tuple{(Vector{Tuple{T, Int}} where {T}), Int, Any}})
         (window_queue, counter, inner_iterator_state_initial) = state[1]
         counter = counter::Int
         iter = iterate(iterator.iterator, inner_iterator_state_initial)
