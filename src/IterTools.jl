@@ -1252,25 +1252,26 @@ end
 module SlidingWindowMaximumIterators
     export SlidingWindowMaximumIterator
     using ..ValidatedPositiveInt
-    struct SlidingWindowMaximumIterator{WindowSize, Iterator, Ord <: Base.Order.Ordering}
+    struct SlidingWindowMaximumIterator{Iterator, Ord <: Base.Order.Ordering}
+        window_size::Int
         iterator::Iterator
         order::Ord
-        Base.@constprop :aggressive function SlidingWindowMaximumIterator{WindowSize}(iterator, order::Base.Order.Ordering) where {WindowSize}
-            s = validated_positive_int(WindowSize)
-            new{s, typeof(iterator), typeof(order)}(iterator, order)
+        Base.@constprop :aggressive function SlidingWindowMaximumIterator(window_size::Int, iterator, order::Base.Order.Ordering)
+            s = validated_positive_int(window_size)
+            new{typeof(iterator), typeof(order)}(s, iterator, order)
         end
     end
     function Base.IteratorSize(::Type{<:SlidingWindowMaximumIterator})
         Base.SizeUnknown()
     end
-    function Base.IteratorEltype(::Type{<:SlidingWindowMaximumIterator{<:Any, Iterator}}) where {Iterator}
+    function Base.IteratorEltype(::Type{<:SlidingWindowMaximumIterator{Iterator}}) where {Iterator}
         Base.IteratorEltype(Iterator)
     end
-    function Base.eltype(::Type{<:SlidingWindowMaximumIterator{<:Any, Iterator}}) where {Iterator}
+    function Base.eltype(::Type{<:SlidingWindowMaximumIterator{Iterator}}) where {Iterator}
         eltype(Iterator)
     end
-    Base.@constprop :aggressive function get_window_size(::SlidingWindowMaximumIterator{WindowSize}) where {WindowSize}
-        validated_positive_int(WindowSize)
+    Base.@constprop :aggressive function get_window_size(iterator::SlidingWindowMaximumIterator)
+        iterator.window_size
     end
     # `window_queue` is logically a double-ended queue data structure: only mutating it
     # with `pop!`, `popfirst` and `push!`.
@@ -1374,7 +1375,7 @@ julia> collect(sliding_window_maxima(3, 1:5, Base.Order.Reverse))
 """
 Base.@constprop :aggressive function sliding_window_maxima(window_size::Integer, iterator, order::Base.Order.Ordering = Base.Order.Forward)
     s = Int(window_size)
-    SlidingWindowMaximumIterators.SlidingWindowMaximumIterator{s}(iterator, order)
+    SlidingWindowMaximumIterators.SlidingWindowMaximumIterator(s, iterator, order)
 end
 
 end # module IterTools
