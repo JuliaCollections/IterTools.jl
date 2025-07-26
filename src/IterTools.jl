@@ -1249,9 +1249,26 @@ module ValidatedPositiveInt
     end
 end
 
+module DeleteFromEnd
+    export delete_from_end!
+    @noinline function cannot_delete_more_than_length()
+        throw(ArgumentError("the collection does not have that many elements"))
+    end
+    function delete_from_end!(c::Vector, n::Int)
+        l = length(c)
+        if l < n
+            @noinline cannot_delete_more_than_length()
+        end
+        for _ ∈ 1:n
+            pop!(c)
+        end
+        c
+    end
+end
+
 module SlidingWindowMaximumIterators
     export SlidingWindowMaximumIterator
-    using ..ValidatedPositiveInt
+    using ..ValidatedPositiveInt, ..DeleteFromEnd
     struct SlidingWindowMaximumIterator{Iterator, Ord <: Base.Order.Ordering}
         window_size::Int
         iterator::Iterator
@@ -1273,6 +1290,14 @@ module SlidingWindowMaximumIterators
     Base.@constprop :aggressive function get_window_size(iterator::SlidingWindowMaximumIterator)
         iterator.window_size
     end
+    function delete_all_lesser_from_end!(window_queue::Vector, order::Base.Order.Ordering, elem)
+        pop_count = 0
+        len = length(window_queue)
+        while (pop_count < len) && Base.Order.lt(order, window_queue[end - pop_count][1], elem)
+            pop_count = pop_count + 1
+        end
+        delete_from_end!(window_queue, pop_count)
+    end
     # `window_queue` is logically a double-ended queue data structure: only mutating it
     # with `pop!`, `popfirst` and `push!`.
     function _iterate(iterator::SlidingWindowMaximumIterator, state::Tuple{Tuple{(Vector{Tuple{T, Int}} where {T}), Int, Any}})
@@ -1284,9 +1309,7 @@ module SlidingWindowMaximumIterators
         end
         (elem, inner_iterator_state) = iter
         order = iterator.order
-        while (!isempty(window_queue)) && Base.Order.lt(order, window_queue[end][1], elem)
-            pop!(window_queue)
-        end
+        delete_all_lesser_from_end!(window_queue, order, elem)
         if (!isempty(window_queue)) && (get_window_size(iterator) ≤ counter - window_queue[1][2]::Int)
             popfirst!(window_queue)
         end
@@ -1311,9 +1334,7 @@ module SlidingWindowMaximumIterators
                 return iter
             end
             (elem, inner_iterator_state) = iter
-            while (!isempty(window_queue)) && Base.Order.lt(order, window_queue[end][1], elem)
-                pop!(window_queue)
-            end
+            delete_all_lesser_from_end!(window_queue, order, elem)
             counter = counter + 1
             push!(window_queue, (elem, counter))
         end
