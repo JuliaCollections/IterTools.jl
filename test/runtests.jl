@@ -614,11 +614,8 @@ include("testing_macros.jl")
     end
 
     @testset "sliding_window_maxima" begin
-        function inferrable_due_to_constprop(iterator)
-            sliding_window_maxima(2, iterator)
-        end
         vec = Float32[1, 2, 3, 3, 4, 5, 4]
-        iter = @inferred inferrable_due_to_constprop(vec)
+        iter = @inferred sliding_window_maxima(2, vec)
         @test (@inferred collect(iter)) isa Vector{Float32}
         @test collect(sliding_window_maxima(1, vec))::Vector{Float32} == vec
         @test collect(sliding_window_maxima(2, vec))::Vector{Float32} == [2, 3, 3, 4, 5, 5]
