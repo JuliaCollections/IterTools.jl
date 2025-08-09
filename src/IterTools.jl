@@ -1347,10 +1347,11 @@ module SlidingWindowMaximumIterators
 end
 
 """
-    sliding_window_maxima(window_size::Integer, iterator, [order::Base.Order.Ordering])
+    sliding_window_maxima(window_size::Number, iterator, [order::Base.Order.Ordering])
 
 An iterator. Each element is the maximum of a sliding window of size `window_size`, with
-the original elements being taken from the other iterator, `iterator`.
+the original elements being taken from the other iterator, `iterator`. `window_size`
+must be convertible to `Int`.
 
 ```jldoctest
 julia> v = Float32[1, 7, 7, 4, 9]
@@ -1394,7 +1395,7 @@ julia> collect(sliding_window_maxima(3, 1:5, Base.Order.Reverse))
  3
 ```
 """
-Base.@constprop :aggressive function sliding_window_maxima(window_size::Integer, iterator, order::Base.Order.Ordering = Base.Order.Forward)
+Base.@constprop :aggressive function sliding_window_maxima(window_size::Number, iterator, order::Base.Order.Ordering = Base.Order.Forward)
     s = Int(window_size)
     SlidingWindowMaximumIterators.SlidingWindowMaximumIterator(s, iterator, order)
 end
