@@ -1241,7 +1241,7 @@ module ValidatedPositiveInt
     @noinline function throw_err_not_positive()
         throw(ArgumentError("not positive"))
     end
-    Base.@constprop :aggressive function validated_positive_int(m::Int)
+    function validated_positive_int(m::Int)
         if m < 1
             @noinline throw_err_not_positive()
         end
@@ -1273,7 +1273,7 @@ module SlidingWindowMaximumIterators
         window_size::Int
         iterator::Iterator
         order::Ord
-        Base.@constprop :aggressive function SlidingWindowMaximumIterator(window_size::Int, iterator, order::Base.Order.Ordering)
+        function SlidingWindowMaximumIterator(window_size::Int, iterator, order::Base.Order.Ordering)
             s = validated_positive_int(window_size)
             new{typeof(iterator), typeof(order)}(s, iterator, order)
         end
@@ -1287,7 +1287,7 @@ module SlidingWindowMaximumIterators
     function Base.eltype(::Type{<:SlidingWindowMaximumIterator{Iterator}}) where {Iterator}
         eltype(Iterator)
     end
-    Base.@constprop :aggressive function get_window_size(iterator::SlidingWindowMaximumIterator)
+    function get_window_size(iterator::SlidingWindowMaximumIterator)
         iterator.window_size
     end
     function delete_all_lesser_from_end!(window_queue::Vector, order::Base.Order.Ordering, elem)
@@ -1395,7 +1395,7 @@ julia> collect(sliding_window_maxima(3, 1:5, Base.Order.Reverse))
  3
 ```
 """
-Base.@constprop :aggressive function sliding_window_maxima(window_size::Number, iterator, order::Base.Order.Ordering = Base.Order.Forward)
+function sliding_window_maxima(window_size::Number, iterator, order::Base.Order.Ordering = Base.Order.Forward)
     s = Int(window_size)
     SlidingWindowMaximumIterators.SlidingWindowMaximumIterator(s, iterator, order)
 end
