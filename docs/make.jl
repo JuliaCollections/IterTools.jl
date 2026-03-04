@@ -8,6 +8,10 @@ makedocs(
         "Home" => "index.md",
         "API Reference" => "reference.md"
         ],
+    format = Documenter.HTML(
+        ;
+        prettyurls = haskey(ENV, "CI"),
+    ),
     doctest=true,
    )
 
