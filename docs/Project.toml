@@ -6,4 +6,4 @@ IterTools = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
 IterTools = {path = ".."}
 
 [compat]
-Documenter = "1.0"
+Documenter = "1"
