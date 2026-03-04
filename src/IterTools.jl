@@ -128,11 +128,9 @@ julia> collect(r)
 ```
 """
 function firstrest(xs)
-    t = iterate(xs)
+    t = Iterators.peel(xs)
     t === nothing && throw(ArgumentError("collection must be non-empty"))
-    f, s = t
-    r = Iterators.rest(xs, s)
-    return f, r
+    return t
 end
 
 # Iterate through the first n elements, throwing an exception if
