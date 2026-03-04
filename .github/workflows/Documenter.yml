@@ -6,6 +6,7 @@ on:
     pull_request:
 
 permissions:
+  contents: write  # Required when authenticating with `GITHUB_TOKEN`, not needed when authenticating with SSH deploy keys
   pull-requests: read  # Required when using `push_preview=true`
   statuses: write  # Optional, used to report documentation build statuses
 jobs:
