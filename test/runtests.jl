@@ -136,6 +136,10 @@ include("testing_macros.jl")
         # Test https://github.com/JuliaCollections/IterTools.jl/issues/39
         _sliding_pairs_type(a) = eltype(IterTools.partition(a, 2, 1))
         @inferred _sliding_pairs_type([1,2,3])
+
+        for n in (-2):0
+            @test_throws ArgumentError partition(3:7, n)
+        end
     end
 
     @testset "imap" begin

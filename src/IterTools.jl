@@ -43,6 +43,18 @@ function has_length(it)
     return isa(it_size, HasLength) || isa(it_size, HasShape)
 end
 
+@noinline function throw_not_positive_int(n::Int, msg)
+    s = lazy"$msg $n must be a positive integer"
+    throw(ArgumentError(s))
+end
+
+function validated_positive_int(n::Int, msg)
+    if n < 1
+        throw_not_positive_int(n, msg)
+    end
+    n
+end
+
 # return the size for methods depending on the longest iterator
 longest(::T, ::T) where {T<:IteratorSize} = T()
 function longest(::S, ::T) where {T<:IteratorSize, S<:IteratorSize}
@@ -316,13 +328,8 @@ i = (7, 8)
 @inline partition(xs, n::Int) = partition(xs, n, n)
 
 @inline function partition(xs::I, n::Int, step::Int) where I
-    if step < 1
-        throw(ArgumentError("Partition step must be at least 1."))
-    end
-    if n < 1
-        throw(ArgumentError("Partition size n must be at least 1."))
-    end
-
+    step = validated_positive_int(step, "partition step")
+    n = validated_positive_int(n, "partition size")
     Partition{I, n, step}(xs)
 end
 
@@ -674,10 +681,8 @@ julia> collect(takenth(5:15,3))
 ```
 """
 function takenth(xs, interval::Integer)
-    if interval <= 0
-        throw(ArgumentError(string("expected interval to be 1 or more, ",
-                                   "got $interval")))
-    end
+    interval = Int(interval)::Int
+    interval = validated_positive_int(interval, "interval")
     TakeNth(xs, convert(UInt, interval))
 end
 
