@@ -5,6 +5,9 @@ on:
         tags: [v*]
     pull_request:
 
+permissions:
+  pull-requests: read  # Required when using `push_preview=true`
+  statuses: write  # Optional, used to report documentation build statuses
 jobs:
     Documenter:
         name: Documentation
