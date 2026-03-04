@@ -324,6 +324,14 @@ i = (1, 2)
 i = (4, 5)
 i = (7, 8)
 ```
+
+`partition(i, n)` is very similar to `Iterators.partition(i, n)`. Some differences:
+
+* `Iterators.partition` does not accept a "step" argument.
+
+* `Iterators.partition` is type-stable in more cases.
+
+* When `partition` is type stable, it might cause less heap allocation than `Iterators.partition`.
 """
 @inline partition(xs, n::Int) = partition(xs, n, n)
 
