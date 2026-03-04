@@ -182,14 +182,6 @@ length(it::TakeStrict) = it.n
 
 # Repeat a function application n (or infinitely many) times.
 
-struct RepeatCall{F<:Base.Callable}
-    f::F
-    n::Int
-end
-length(it::RepeatCall) = it.n
-IteratorEltype(::Type{<:RepeatCall}) = EltypeUnknown()
-IteratorSize(::Type{<:RepeatCall}) = HasLength()
-
 """
     repeatedly(f)
     repeatedly(f, n)
@@ -209,8 +201,7 @@ julia> collect(repeatedly(t, 5))
  408
 ```
 """
-repeatedly(f, n) = RepeatCall(f, n)
-iterate(it::RepeatCall, state=it.n) = state <= 0 ? nothing : (it.f(), state - 1)
+repeatedly(f, n) = take(repeatedly(f), n)
 
 struct RepeatCallForever{F<:Base.Callable}
     f::F
