@@ -18,6 +18,7 @@ export
     product,
     distinct,
     partition,
+    partition_typestable,
     groupby,
     imap,
     subsets,
@@ -373,6 +374,53 @@ end
         $res
         newels = $tup
         (newels, (newels[$K+1:end], xs_state))
+    end
+end
+
+
+function _partition_typestable_infinite(xs, n::Int)
+    f = Base.Fix2(take, n) ∘ Base.Fix1(drop, xs)
+    offsets = Iterators.countfrom(0, n)
+    Iterators.map(f, offsets)
+end
+
+"""
+    partition_typestable(xs, n::Int)
+
+Iterate over the iterator `xs` at most `n` elements at a time.
+
+Similar to [`partition`](@ref) and, especially, to `Iterators.partition`. Some
+differences:
+
+* Unlike `partition`, the elements of `partition_typestable(xs, n)` are of unspecified
+  iterator type, instead of tuples. Furthermore, the type of this iterator does not
+  depend on its length, unlike with tuples. This makes iteration type stable in more
+  cases, compared with `partition`.
+
+* Like `Iterators.partition`, and unlike `partition`, `partition_typestable(xs, n)`
+  contains all elements of `xs`.
+
+* Unlike `Iterators.partition`, iterating the iterator returned by a
+  `partition_typestable` call will not cause additional heap allocation for grouping the
+  elements.
+
+Not supported:
+
+* `SizeUnknown` iterators, the iterator has to be infinite or support `length`.
+
+* Stateful iterators.
+"""
+function partition_typestable(xs, n::Int)
+    n = validated_positive_int(n, "partition size")
+    iterator_size_class = IteratorSize(xs)
+    if iterator_size_class === SizeUnknown()
+        throw(ArgumentError("`SizeUnknown` iterators not supported"))
+    end
+    i = _partition_typestable_infinite(xs, n)
+    if iterator_size_class === IsInfinite()
+        i
+    else
+        take(i, cld(length(xs), n))
     end
 end
 
