@@ -1,7 +1,6 @@
 module IterTools
 
 import Base.Iterators: drop, take
-using Base.Iterators: takewhile
 
 import Base: iterate, eltype, length, size, peek
 import Base: tail
@@ -920,11 +919,14 @@ function iterate(ff::FlagFirst, state = (true, ))
     (isfirst, elt), (false, nextstate)
 end
 
+const takewhile = Iterators.takewhile
+
 """
     takewhile(cond, xs)
 
 An iterator that yields values from the iterator `xs` as long as the
 predicate `cond` is true.
+Alias for `Iterators.takewhile`.
 
 ```jldoctest
 julia> collect(takewhile(x-> x^2 < 10, 1:100))
