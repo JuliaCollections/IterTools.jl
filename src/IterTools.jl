@@ -1,6 +1,7 @@
 module IterTools
 
 import Base.Iterators: drop, take
+using Base.Iterators: takewhile
 
 import Base: iterate, eltype, length, size, peek
 import Base: tail
@@ -919,13 +920,6 @@ function iterate(ff::FlagFirst, state = (true, ))
     (isfirst, elt), (false, nextstate)
 end
 
-# TakeWhile iterates through values from an iterable as long as a given predicate is true.
-
-struct TakeWhile{I}
-    cond::Function
-    xs::I
-end
-
 """
     takewhile(cond, xs)
 
@@ -940,17 +934,7 @@ julia> collect(takewhile(x-> x^2 < 10, 1:100))
  3
 ```
 """
-takewhile(cond, xs) = TakeWhile(cond, xs)
-
-function Base.iterate(it::TakeWhile, state=nothing)
-    (val, state) = @ifsomething (state === nothing ? iterate(it.xs) : iterate(it.xs, state))
-    it.cond(val) || return nothing
-    val, state
-end
-
-eltype(::Type{TakeWhile{I}}) where {I} = eltype(I)
-IteratorEltype(::Type{TakeWhile{I}}) where {I} = IteratorEltype(I)
-IteratorSize(::Type{<:TakeWhile}) = Base.SizeUnknown()
+takewhile(cond, xs)
 
 # Properties
 
