@@ -128,6 +128,7 @@ julia> collect(r)
 ```
 """
 function firstrest(xs)
+    Base.depwarn("`firstrest` is deprecated in favor of `Iterators.peel`", :firstrest)
     t = Iterators.peel(xs)
     t === nothing && throw(ArgumentError("collection must be non-empty"))
     return t
