@@ -142,6 +142,16 @@ include("testing_macros.jl")
         end
     end
 
+    @testset "partition_typestable" begin
+        @test [1:2, 3:4, 5:5] == collect(Iterators.map(collect, partition_typestable(1:5, 2)))
+        for n in 1:10
+            @test 1:9 == collect(Iterators.flatten(partition_typestable(1:9, n)))
+            @test 1:9 == collect(Iterators.take(Iterators.flatten(partition_typestable(Iterators.countfrom(), n)), 9))
+        end
+        @test_throws ArgumentError partition_typestable(7:9, 0)
+        @test_throws ArgumentError partition_typestable(Iterators.filter(iseven, 7:9), 1)
+    end
+
     @testset "imap" begin
         function test_imap(expected, input...)
             result = collect(imap(+, input...))
