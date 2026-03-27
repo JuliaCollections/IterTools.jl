@@ -113,7 +113,7 @@ end
 
 Return the first element and an iterator of the rest as a tuple.
 
-See also: `Base.Iterators.peel`.
+Alias for `Base.Iterators.peel`.
 
 ```jldoctest
 julia> f, r = firstrest(1:3);
@@ -127,12 +127,7 @@ julia> collect(r)
  3
 ```
 """
-function firstrest(xs)
-    Base.depwarn("`firstrest` is deprecated in favor of `Iterators.peel`", :firstrest)
-    t = Iterators.peel(xs)
-    t === nothing && throw(ArgumentError("collection must be non-empty"))
-    return t
-end
+const firstrest = Iterators.peel
 
 # Iterate through the first n elements, throwing an exception if
 # fewer than n items ar encountered.
