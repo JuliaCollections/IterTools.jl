@@ -446,6 +446,8 @@ Iterate over values of a function applied to successive values from one or more 
 Like `Iterators.zip`, the iterator is done when any of the input iterators have been
 exhausted.
 
+Alias for `Iterators.map`.
+
 ```jldoctest
 julia> for i in imap(+, [1,2,3], [4,5,6])
             @show i
@@ -455,7 +457,7 @@ i = 7
 i = 9
 ```
 """
-imap(mapfunc, it1, its...) = (mapfunc(xs...) for xs in zip(it1, its...))
+const imap = Iterators.map
 
 
 # Iterate over all subsets of an indexable collection
