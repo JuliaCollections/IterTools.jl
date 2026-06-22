@@ -36,7 +36,7 @@ include("testing_macros.jl")
         ]
 
         @testset "$xs" for (xs, s) in test_empty_cases
-            @test_throws ArgumentError firstrest(xs)
+            @test nothing === firstrest(xs)
         end
     end
 
