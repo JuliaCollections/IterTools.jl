@@ -1164,8 +1164,8 @@ end
 struct ZipLongest{IS<:Tuple}
     is::IS
 end
-IteratorSize(::Type{ZipLongest{Is}}) where {Is<:Tuple} = Base.Iterators.zip_iteratorsize(ntuple(n -> IteratorSize(fieldtype(Is, n)), Base.Iterators._counttuple(Is)::Int)...)
-IteratorEltype(::Type{ZipLongest{Is}}) where {Is<:Tuple} = Base.Iterators.zip_iteratoreltype(ntuple(n -> IteratorEltype(fieldtype(Is, n)), Base.Iterators._counttuple(Is)::Int)...)
+IteratorSize(::Type{ZipLongest{Is}}) where {Is<:Tuple} = Base.Iterators.zip_iteratorsize(ntuple(n -> IteratorSize(fieldtype(Is, n)), fieldcount(Is))...)
+IteratorEltype(::Type{ZipLongest{Is}}) where {Is<:Tuple} = Base.Iterators.zip_iteratoreltype(ntuple(n -> IteratorEltype(fieldtype(Is, n)), fieldcount(Is))...)
 eltype(::Type{ZipLongest{Is}}) where {Is<:Tuple} = TupleOrBottom(map(eltype, fieldtypes(Is))...)
 length(it::ZipLongest) = maximum(length.(it.is))
 size(it::ZipLongest) = mapreduce(size, _zip_longest_promote_shape, it.is)
