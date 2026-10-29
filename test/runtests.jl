@@ -605,6 +605,8 @@ include("testing_macros.jl")
         a = 1:5
         b = 10:-1:8
         it = zip_longest(a,b,default=-1)
+        @test IteratorSize(typeof(it)) == Base.HasShape{1}()
+        @test IteratorEltype(typeof(it)) == Base.HasEltype()
         @test collect(it) == [(1,10),(2,9),(3,8),(4,-1),(5,-1)]
         @test eltype(it) == Tuple{Int, Int}
 
